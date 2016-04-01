@@ -1,0 +1,108 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:paddingBottom="0dp"
+    android:paddingLeft="0dp"
+    android:paddingRight="0dp"
+    android:paddingTop="0dp"
+    tools:context=".MainActivity">
+
+    <android.support.v4.widget.DrawerLayout
+        android:id="@+id/drawer_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:weightSum="1">
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="vertical">
+
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1">
+
+                            <fragment
+                                android:id="@+id/fragment_list"
+                                android:name="diy.uigeneric.GenericListFragment"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                tools:layout="@layout/generic_fragment_list"/>
+
+                            <TextView
+                                android:id="@+id/text_no_data"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:gravity="center"
+                                android:text="No Data"
+                                android:textAppearance="?android:attr/textAppearanceLarge"
+                                android:visibility="gone"/>
+
+                        </RelativeLayout>
+
+                        <TextView
+                            android:id="@+id/text_status"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="0"
+                            android:padding="16dp"/>
+
+                    </LinearLayout>
+
+                    <ImageButton
+                        android:id="@+id/fab"
+                        android:layout_width="56dp"
+                        android:layout_height="56dp"
+                        android:layout_alignParentBottom="true"
+                        android:layout_alignParentRight="true"
+                        android:layout_margin="16dp"
+                        android:background="@drawable/button_circular"
+                        android:elevation="4dp"
+                        android:gravity="center_vertical"
+                        android:src="@drawable/dic_action_new"/>
+
+                </RelativeLayout>
+
+                <fragment
+                    android:id="@+id/fragment_undo"
+                    android:name="diy.uigeneric.UndoFragment"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0"
+                    tools:layout="@layout/fragment_undo"/>
+
+            </LinearLayout>
+
+        </FrameLayout>
+
+        <ListView
+            android:id="@+id/drawer_list"
+            android:layout_width="280dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="start"
+            android:background="#EEEEEE"
+            android:choiceMode="singleChoice"
+            android:divider="@android:color/transparent"
+            android:dividerHeight="0dp"/>
+
+    </android.support.v4.widget.DrawerLayout>
+
+</LinearLayout>
