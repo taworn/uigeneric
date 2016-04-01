@@ -5,36 +5,36 @@
 
     <application
         android:allowBackup="true"
-        android:icon="@drawable/ic_launcher"
+        android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
+        android:supportsRtl="true"
         android:theme="@style/AppTheme">
-
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name"
-            android:launchMode="singleTop">
+            android:theme="@style/AppTheme.NoActionBar">
+        </activity>
+
+        <activity
+            android:name=".sample.SampleListActivity"
+            android:label="@string/title_activity_sample_list"
+            android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.SEARCH"/>
-            </intent-filter>
-
-            <meta-data
-                android:name="android.app.searchable"
-                android:resource="@xml/searchable"/>
         </activity>
 
         <activity
-            android:name=".GenericEditActivity"/>
-
-        <activity
-            android:name=".GenericViewActivity"/>
-
-        <activity
-            android:name=".GenericTrashViewActivity"/>
-
+            android:name=".sample.SampleEditActivity"
+            android:label="@string/title_activity_sample_edit"
+            android:parentActivityName=".sample.SampleListActivity"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:windowSoftInputMode="stateHidden">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="diy.uigeneric.sample.SampleListActivity"/>
+        </activity>
     </application>
 
 </manifest>
