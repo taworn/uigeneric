@@ -5,7 +5,10 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.PopupMenu;
@@ -21,17 +24,20 @@ import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
 import diy.uigeneric.R;
 import diy.uigeneric.data.Sample;
+import diy.uigeneric.data.SampleDataSource;
 
 public class SampleEditActivity extends AppCompatActivity {
 
     private static final String TAG = "SampleEditActivity";
 
-    private static final int PHOTO_REQUEST_CODE = 100;
+    private static final int REQUEST_CODE_TAKE_PHOTO = 100;
+    private static final int REQUEST_CODE_CHOOSE_PHOTO = 101;
 
     private ImageView imageIcon = null;
     private EditText editName = null;
@@ -43,6 +49,7 @@ public class SampleEditActivity extends AppCompatActivity {
 
     private Sample item = null;
     private boolean iconChanged = false;
+    private Uri tempUri = null;
     private int category = 0;
 
     @Override
@@ -74,7 +81,20 @@ public class SampleEditActivity extends AppCompatActivity {
             public boolean onMenuItemClick(MenuItem item) {
                 int id = item.getItemId();
                 if (id == R.id.action_icon_take_photo) {
-                    Toast.makeText(SampleEditActivity.this, item.getTitle(), Toast.LENGTH_SHORT).show();
+                    String external = Environment.getExternalStorageState();
+                    if (external.equals(Environment.MEDIA_MOUNTED)) {
+                        try {
+                            File path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+                            File temp = File.createTempFile("temp-", ".jpg", path);
+                            tempUri = Uri.fromFile(temp);
+                            Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                            intent.putExtra(MediaStore.EXTRA_OUTPUT, tempUri);
+                            startActivityForResult(intent, REQUEST_CODE_TAKE_PHOTO);
+                        }
+                        catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
                     return true;
                 }
                 else if (id == R.id.action_icon_choose_photo) {
@@ -82,7 +102,7 @@ public class SampleEditActivity extends AppCompatActivity {
                     intent.setType("image/*");
                     intent.setAction(Intent.ACTION_GET_CONTENT);
                     intent.addCategory(Intent.CATEGORY_OPENABLE);
-                    startActivityForResult(intent, PHOTO_REQUEST_CODE);
+                    startActivityForResult(intent, REQUEST_CODE_CHOOSE_PHOTO);
                     return true;
                 }
                 else if (id == R.id.action_icon_default_photo) {
@@ -111,6 +131,7 @@ public class SampleEditActivity extends AppCompatActivity {
 
         item = new Sample();
         iconChanged = false;
+        tempUri = null;
         category = 0;
 
         uiFromData();
@@ -135,7 +156,27 @@ public class SampleEditActivity extends AppCompatActivity {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent resultIntent) {
         super.onActivityResult(requestCode, resultCode, resultIntent);
-        if (requestCode == PHOTO_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
+        if (requestCode == REQUEST_CODE_TAKE_PHOTO) {
+            if (resultCode == RESULT_OK) {
+                try {
+                    InputStream stream = getContentResolver().openInputStream(tempUri);
+                    if (stream != null) {
+                        Bitmap bitmap = BitmapFactory.decodeStream(stream);
+                        stream.close();
+                        imageIcon.setImageBitmap(bitmap);
+                        iconChanged = true;
+                    }
+                }
+                catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            else {
+                File file = new File(tempUri.getPath());
+                file.delete();
+            }
+        }
+        else if (requestCode == REQUEST_CODE_CHOOSE_PHOTO && resultCode == Activity.RESULT_OK) {
             try {
                 InputStream stream = getContentResolver().openInputStream(resultIntent.getData());
                 if (stream != null) {
@@ -147,6 +188,34 @@ public class SampleEditActivity extends AppCompatActivity {
             }
             catch (IOException e) {
                 e.printStackTrace();
+            }
+        }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        super.onSaveInstanceState(savedInstanceState);
+        savedInstanceState.putLong("data.id", item.getId());
+        savedInstanceState.putBoolean("data.icon_changed", iconChanged);
+        if (imageIcon.getDrawable() != null && ((BitmapDrawable) imageIcon.getDrawable()).getBitmap() != null)
+            savedInstanceState.putParcelable("data.icon", ((BitmapDrawable) imageIcon.getDrawable()).getBitmap());
+    }
+
+    @Override
+    public void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        if (savedInstanceState != null) {
+            long id = savedInstanceState.getLong("data.id");
+            if (id > 0) {
+                SampleDataSource source = new SampleDataSource(this);
+                source.open();
+                item = source.get(id);
+                source.close();
+            }
+            iconChanged = savedInstanceState.getBoolean("data.icon_changed");
+            imageIcon.setImageBitmap(null);
+            if (savedInstanceState.containsKey("data.icon")) {
+                imageIcon.setImageBitmap((Bitmap) savedInstanceState.getParcelable("data.icon"));
             }
         }
     }
