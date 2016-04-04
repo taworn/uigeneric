@@ -129,38 +129,22 @@ public class SampleEditActivity extends AppCompatActivity {
             }
         });
 
-        if (savedInstanceState != null) {
-            long id = savedInstanceState.getLong("data.id");
-            if (id > 0) {
-                SampleDataSource source = new SampleDataSource(this);
-                source.open();
-                item = source.get(id);
-                source.close();
-            }
-            iconChanged = savedInstanceState.getBoolean("data.icon_changed");
-            imageIcon.setImageBitmap(null);
-            if (savedInstanceState.containsKey("data.icon")) {
-                imageIcon.setImageBitmap((Bitmap) savedInstanceState.getParcelable("data.icon"));
-            }
+        Bundle bundle = getIntent().getExtras();
+        if (bundle != null) {
+            SampleDataSource source = new SampleDataSource(this);
+            source.open();
+            long id = bundle.getLong("data.id");
+            item = source.get(id);
+            source.close();
         }
         else {
-            Bundle bundle = getIntent().getExtras();
-            if (bundle != null) {
-                SampleDataSource source = new SampleDataSource(this);
-                source.open();
-                long id = bundle.getLong("data.id");
-                item = source.get(id);
-                source.close();
-            }
-            else {
-                item = new Sample();
-            }
-            iconChanged = false;
-            tempUri = null;
-            category = 0;
+            item = new Sample();
         }
-
+        iconChanged = false;
+        tempUri = null;
+        category = 0;
         uiFromData();
+
         Log.d(TAG, "onCreate");
     }
 
@@ -232,6 +216,10 @@ public class SampleEditActivity extends AppCompatActivity {
     @Override
     public void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
+        iconChanged = savedInstanceState.getBoolean("data.icon_changed");
+        imageIcon.setImageBitmap(null);
+        if (savedInstanceState.containsKey("data.icon"))
+            imageIcon.setImageBitmap((Bitmap) savedInstanceState.getParcelable("data.icon"));
         Log.d(TAG, "onRestoreInstanceState");
     }
 
@@ -281,6 +269,7 @@ public class SampleEditActivity extends AppCompatActivity {
                 Intent resultIntent = new Intent();
                 resultIntent.putExtra("data.id", item.getId());
                 setResult(Activity.RESULT_OK, resultIntent);
+                finish();
             }
         }
     }
