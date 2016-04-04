@@ -107,7 +107,7 @@ public class SampleEditActivity extends AppCompatActivity {
                 }
                 else if (id == R.id.action_icon_default_photo) {
                     iconChanged = true;
-                    imageIcon.setImageBitmap(null);
+                    imageIcon.setImageResource(R.drawable.ic_face_black_48dp);
                     return true;
                 }
                 return false;
@@ -136,13 +136,14 @@ public class SampleEditActivity extends AppCompatActivity {
             long id = bundle.getLong("data.id");
             item = source.get(id);
             source.close();
+            category = item.getCategory();
         }
         else {
             item = new Sample();
+            category = 0;
         }
         iconChanged = false;
         tempUri = null;
-        category = 0;
         uiFromData();
 
         Log.d(TAG, "onCreate");
@@ -217,14 +218,18 @@ public class SampleEditActivity extends AppCompatActivity {
     public void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
         iconChanged = savedInstanceState.getBoolean("data.icon_changed");
-        imageIcon.setImageBitmap(null);
         if (savedInstanceState.containsKey("data.icon"))
             imageIcon.setImageBitmap((Bitmap) savedInstanceState.getParcelable("data.icon"));
+        else
+            imageIcon.setImageResource(R.drawable.ic_face_black_48dp);
         Log.d(TAG, "onRestoreInstanceState");
     }
 
     private void uiFromData() {
-        imageIcon.setImageDrawable(item.getIcon() != null ? new BitmapDrawable(getResources(), item.getIcon()) : null);
+        if (item.getIcon() != null)
+            imageIcon.setImageDrawable(new BitmapDrawable(getResources(), item.getIcon()));
+        else
+            imageIcon.setImageResource(R.drawable.ic_face_black_48dp);
         editName.setText(item.getName());
         spinCategory.setSelection(item.getCategory());
         editDetail.setText(item.getDetail());
