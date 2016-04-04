@@ -13,6 +13,7 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -22,7 +23,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
-import android.widget.Toast;
 
 import java.io.File;
 import java.io.IOException;
@@ -135,6 +135,8 @@ public class SampleEditActivity extends AppCompatActivity {
         category = 0;
 
         uiFromData();
+
+        Log.d(TAG, "onCreate");
     }
 
     @Override
@@ -147,7 +149,7 @@ public class SampleEditActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.action_save) {
-            Toast.makeText(this, "Not implement", Toast.LENGTH_SHORT).show();
+            save();
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -199,6 +201,7 @@ public class SampleEditActivity extends AppCompatActivity {
         savedInstanceState.putBoolean("data.icon_changed", iconChanged);
         if (imageIcon.getDrawable() != null && ((BitmapDrawable) imageIcon.getDrawable()).getBitmap() != null)
             savedInstanceState.putParcelable("data.icon", ((BitmapDrawable) imageIcon.getDrawable()).getBitmap());
+        Log.d(TAG, "onSaveInstanceState");
     }
 
     @Override
@@ -218,6 +221,7 @@ public class SampleEditActivity extends AppCompatActivity {
                 imageIcon.setImageBitmap((Bitmap) savedInstanceState.getParcelable("data.icon"));
             }
         }
+        Log.d(TAG, "onRestoreInstanceState");
     }
 
     private void uiFromData() {
@@ -232,6 +236,42 @@ public class SampleEditActivity extends AppCompatActivity {
         item.setName(editName.getText().toString().trim());
         item.setCategory(category);
         item.setDetail(editDetail.getText().toString());
+    }
+
+    private boolean empty() {
+        return editName.getText().toString().trim().length() <= 0;
+    }
+
+    private boolean changed() {
+        return iconChanged ||
+                category != item.getCategory() ||
+                !editName.getText().toString().trim().equals(item.getName()) ||
+                !editDetail.getText().toString().equals(item.getDetail());
+    }
+
+    private void save() {
+        if (!empty()) {
+            if (changed()) {
+                uiToData();
+
+                SampleDataSource source = new SampleDataSource(this);
+                source.open();
+                if (item.getId() > 0) {
+                    source.update(item);
+                    Log.d(TAG, "saved " + item.getId() + "/" + item.getName());
+                }
+                else {
+                    long id = source.insert(item);
+                    item = source.get(id);
+                    Log.d(TAG, "added " + item.getId() + "/" + item.getName());
+                }
+                source.close();
+
+                Intent resultIntent = new Intent();
+                resultIntent.putExtra("data.id", item.getId());
+                setResult(Activity.RESULT_OK, resultIntent);
+            }
+        }
     }
 
 }
