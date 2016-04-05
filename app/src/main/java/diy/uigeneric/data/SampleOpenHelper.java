@@ -3,6 +3,10 @@ package diy.uigeneric.data;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.os.Environment;
+
+import java.io.File;
+import java.io.IOException;
 
 /**
  * The helper class to creation of database and version management.
@@ -10,7 +14,8 @@ import android.database.sqlite.SQLiteOpenHelper;
 public class SampleOpenHelper extends SQLiteOpenHelper {
 
     public SampleOpenHelper(Context context) {
-        super(context, "data.db", null, 1);
+        //super(context, "uigeneric.db", null, 1);
+        super(context, Environment.getExternalStorageDirectory().getAbsolutePath() + "/uigeneric.db", null, 1);
     }
 
     @Override

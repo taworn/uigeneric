@@ -85,7 +85,7 @@ public class SampleEditActivity extends AppCompatActivity {
                     if (external.equals(Environment.MEDIA_MOUNTED)) {
                         try {
                             File path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
-                            File temp = File.createTempFile("temp-", ".jpg", path);
+                            File temp = File.createTempFile("uigeneric-", ".jpg", path);
                             tempUri = Uri.fromFile(temp);
                             Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                             intent.putExtra(MediaStore.EXTRA_OUTPUT, tempUri);
