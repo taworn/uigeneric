@@ -211,6 +211,7 @@ public class SampleEditActivity extends AppCompatActivity {
         savedInstanceState.putBoolean("data.icon_changed", iconChanged);
         if (imageIcon.getDrawable() != null && ((BitmapDrawable) imageIcon.getDrawable()).getBitmap() != null)
             savedInstanceState.putParcelable("data.icon", ((BitmapDrawable) imageIcon.getDrawable()).getBitmap());
+        savedInstanceState.putParcelable("tempUri", tempUri);
         Log.d(TAG, "onSaveInstanceState");
     }
 
@@ -222,6 +223,7 @@ public class SampleEditActivity extends AppCompatActivity {
             imageIcon.setImageBitmap((Bitmap) savedInstanceState.getParcelable("data.icon"));
         else
             imageIcon.setImageResource(R.drawable.ic_face_black_48dp);
+        tempUri = savedInstanceState.getParcelable("tempUri");
         Log.d(TAG, "onRestoreInstanceState");
     }
 
