@@ -32,6 +32,11 @@ import diy.uigeneric.R;
 import diy.uigeneric.data.Sample;
 import diy.uigeneric.data.SampleDataSource;
 
+/**
+ * The SampleEditActivity is an activity to edit diy.uigeneric.data.sample class data.
+ * <p/>
+ * ... more to come ...
+ */
 public class SampleEditActivity extends AppCompatActivity {
 
     private static final String TAG = "SampleEditActivity";
@@ -45,12 +50,12 @@ public class SampleEditActivity extends AppCompatActivity {
     private EditText editDetail = null;
 
     private PopupMenu menuIcon = null;
-    private ArrayAdapter<CharSequence> arrayAdapter = null;
 
     private Sample item = null;
     private boolean iconChanged = false;
-    private Uri tempUri = null;
-    private int category = 0;
+    private boolean iconDefault = false;
+    private Uri iconTempUrl = null;
+    private int categorySelected = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,9 +91,9 @@ public class SampleEditActivity extends AppCompatActivity {
                         try {
                             File path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
                             File temp = File.createTempFile("uigeneric-", ".jpg", path);
-                            tempUri = Uri.fromFile(temp);
+                            iconTempUrl = Uri.fromFile(temp);
                             Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                            intent.putExtra(MediaStore.EXTRA_OUTPUT, tempUri);
+                            intent.putExtra(MediaStore.EXTRA_OUTPUT, iconTempUrl);
                             startActivityForResult(intent, REQUEST_CODE_TAKE_PHOTO);
                         }
                         catch (IOException e) {
@@ -107,6 +112,7 @@ public class SampleEditActivity extends AppCompatActivity {
                 }
                 else if (id == R.id.action_icon_default_photo) {
                     iconChanged = true;
+                    iconDefault = true;
                     imageIcon.setImageResource(R.drawable.ic_face_black_48dp);
                     return true;
                 }
@@ -115,17 +121,17 @@ public class SampleEditActivity extends AppCompatActivity {
         });
         menuIcon.inflate(R.menu.sample_edit_icon);
 
-        arrayAdapter = ArrayAdapter.createFromResource(this, R.array.sample_edit_category, android.R.layout.simple_spinner_dropdown_item);
+        ArrayAdapter<CharSequence> arrayAdapter = ArrayAdapter.createFromResource(this, R.array.sample_edit_category, android.R.layout.simple_spinner_dropdown_item);
         spinCategory.setAdapter(arrayAdapter);
         spinCategory.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                category = position;
+                categorySelected = position;
             }
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
-                category = -1;
+                categorySelected = -1;
             }
         });
 
@@ -136,17 +142,16 @@ public class SampleEditActivity extends AppCompatActivity {
             long id = bundle.getLong("data.id");
             item = source.get(id);
             source.close();
-            category = item.getCategory();
+            categorySelected = item.getCategory();
         }
         else {
             item = new Sample();
-            category = 0;
+            categorySelected = 0;
         }
         iconChanged = false;
-        tempUri = null;
+        iconDefault = item.getIcon() == null;
+        iconTempUrl = null;
         uiFromData();
-
-        Log.d(TAG, "onCreate");
     }
 
     @Override
@@ -160,6 +165,10 @@ public class SampleEditActivity extends AppCompatActivity {
         int id = item.getItemId();
         if (id == R.id.action_save) {
             save();
+            Intent resultIntent = new Intent();
+            resultIntent.putExtra("data.id", this.item.getId());
+            setResult(Activity.RESULT_OK, resultIntent);
+            finish();
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -171,12 +180,13 @@ public class SampleEditActivity extends AppCompatActivity {
         if (requestCode == REQUEST_CODE_TAKE_PHOTO) {
             if (resultCode == RESULT_OK) {
                 try {
-                    InputStream stream = getContentResolver().openInputStream(tempUri);
+                    InputStream stream = getContentResolver().openInputStream(iconTempUrl);
                     if (stream != null) {
                         Bitmap bitmap = BitmapFactory.decodeStream(stream);
                         stream.close();
                         imageIcon.setImageBitmap(bitmap);
                         iconChanged = true;
+                        iconDefault = false;
                     }
                 }
                 catch (IOException e) {
@@ -184,7 +194,7 @@ public class SampleEditActivity extends AppCompatActivity {
                 }
             }
             else {
-                File file = new File(tempUri.getPath());
+                File file = new File(iconTempUrl.getPath());
                 file.delete();
             }
         }
@@ -196,6 +206,7 @@ public class SampleEditActivity extends AppCompatActivity {
                     stream.close();
                     imageIcon.setImageBitmap(bitmap);
                     iconChanged = true;
+                    iconDefault = false;
                 }
             }
             catch (IOException e) {
@@ -207,28 +218,25 @@ public class SampleEditActivity extends AppCompatActivity {
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
         super.onSaveInstanceState(savedInstanceState);
-        savedInstanceState.putLong("data.id", item.getId());
-        savedInstanceState.putBoolean("data.icon_changed", iconChanged);
-        if (imageIcon.getDrawable() != null && ((BitmapDrawable) imageIcon.getDrawable()).getBitmap() != null)
+        savedInstanceState.putBoolean("data.iconChanged", iconChanged);
+        savedInstanceState.putBoolean("data.iconDefault", iconDefault);
+        savedInstanceState.putParcelable("data.iconTempUrl", iconTempUrl);
+        if (!iconDefault)
             savedInstanceState.putParcelable("data.icon", ((BitmapDrawable) imageIcon.getDrawable()).getBitmap());
-        savedInstanceState.putParcelable("tempUri", tempUri);
-        Log.d(TAG, "onSaveInstanceState");
     }
 
     @Override
     public void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-        iconChanged = savedInstanceState.getBoolean("data.icon_changed");
-        if (savedInstanceState.containsKey("data.icon"))
+        iconChanged = savedInstanceState.getBoolean("data.iconChanged");
+        iconDefault = savedInstanceState.getBoolean("data.iconDefault");
+        iconTempUrl = savedInstanceState.getParcelable("data.iconTempUrl");
+        if (!iconDefault)
             imageIcon.setImageBitmap((Bitmap) savedInstanceState.getParcelable("data.icon"));
-        else
-            imageIcon.setImageResource(R.drawable.ic_face_black_48dp);
-        tempUri = savedInstanceState.getParcelable("tempUri");
-        Log.d(TAG, "onRestoreInstanceState");
     }
 
     private void uiFromData() {
-        if (item.getIcon() != null)
+        if (!iconDefault)
             imageIcon.setImageDrawable(new BitmapDrawable(getResources(), item.getIcon()));
         else
             imageIcon.setImageResource(R.drawable.ic_face_black_48dp);
@@ -238,9 +246,9 @@ public class SampleEditActivity extends AppCompatActivity {
     }
 
     private void uiToData() {
-        item.setIcon(imageIcon.getDrawable() != null ? ((BitmapDrawable) imageIcon.getDrawable()).getBitmap() : null);
+        item.setIcon(!iconDefault ? ((BitmapDrawable) imageIcon.getDrawable()).getBitmap() : null);
         item.setName(editName.getText().toString().trim());
-        item.setCategory(category);
+        item.setCategory(categorySelected);
         item.setDetail(editDetail.getText().toString());
     }
 
@@ -250,7 +258,7 @@ public class SampleEditActivity extends AppCompatActivity {
 
     private boolean changed() {
         return iconChanged ||
-                category != item.getCategory() ||
+                categorySelected != item.getCategory() ||
                 !editName.getText().toString().trim().equals(item.getName()) ||
                 !editDetail.getText().toString().equals(item.getDetail());
     }
@@ -273,10 +281,7 @@ public class SampleEditActivity extends AppCompatActivity {
                 }
                 source.close();
 
-                Intent resultIntent = new Intent();
-                resultIntent.putExtra("data.id", item.getId());
-                setResult(Activity.RESULT_OK, resultIntent);
-                finish();
+                iconChanged = false;
             }
         }
     }
