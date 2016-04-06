@@ -34,13 +34,12 @@
 
         <activity
             android:name=".sample.SampleEditActivity"
-            android:label="@string/title_activity_sample_edit"
             android:parentActivityName=".sample.SampleListActivity"
             android:theme="@style/AppTheme.NoActionBar"
             android:windowSoftInputMode="stateHidden">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="diy.uigeneric.sample.SampleListActivity"/>
+                android:value=".sample.SampleListActivity"/>
         </activity>
     </application>
 

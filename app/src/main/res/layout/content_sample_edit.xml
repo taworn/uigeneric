@@ -33,8 +33,7 @@
                 android:id="@+id/image_icon"
                 android:layout_width="96dp"
                 android:layout_height="96dp"
-                android:contentDescription="@string/sample_edit_hint_icon"
-                android:src="@drawable/ic_face_black_48dp"/>
+                android:contentDescription="@string/sample_edit_hint_icon"/>
 
             <Button
                 android:id="@+id/button_change"

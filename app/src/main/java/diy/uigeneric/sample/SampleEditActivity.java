@@ -1,6 +1,7 @@
 package diy.uigeneric.sample;
 
 import android.app.Activity;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -10,6 +11,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v7.app.ActionBar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.Toolbar;
@@ -35,7 +37,11 @@ import diy.uigeneric.data.SampleDataSource;
 /**
  * The SampleEditActivity is an activity to edit diy.uigeneric.data.sample class data.
  * <p/>
- * ... more to come ...
+ * Starts the activity to add data.  If user want to edit data, pass bundle "data.id" as long
+ * integer.
+ * <p/>
+ * There are two close events.  First, back pressed, just nothings change.  Second, when Save
+ * button saved and data can be saved.
  */
 public class SampleEditActivity extends AppCompatActivity {
 
@@ -43,6 +49,8 @@ public class SampleEditActivity extends AppCompatActivity {
 
     private static final int REQUEST_CODE_TAKE_PHOTO = 100;
     private static final int REQUEST_CODE_CHOOSE_PHOTO = 101;
+
+    private static final int ICON_DEFAULT_DRAWABLE = R.drawable.ic_face_black_48dp;
 
     private ImageView imageIcon = null;
     private EditText editName = null;
@@ -64,9 +72,8 @@ public class SampleEditActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        }
+        if (actionBar != null)
+            actionBar.setDisplayHomeAsUpEnabled(true);
 
         imageIcon = (ImageView) findViewById(R.id.image_icon);
         editName = (EditText) findViewById(R.id.edit_name);
@@ -113,7 +120,7 @@ public class SampleEditActivity extends AppCompatActivity {
                 else if (id == R.id.action_icon_default_photo) {
                     iconChanged = true;
                     iconDefault = true;
-                    imageIcon.setImageResource(R.drawable.ic_face_black_48dp);
+                    imageIcon.setImageResource(ICON_DEFAULT_DRAWABLE);
                     return true;
                 }
                 return false;
@@ -143,10 +150,14 @@ public class SampleEditActivity extends AppCompatActivity {
             item = source.get(id);
             source.close();
             categorySelected = item.getCategory();
+            if (actionBar != null)
+                actionBar.setTitle(R.string.sample_edit_title_edit);
         }
         else {
             item = new Sample();
             categorySelected = 0;
+            if (actionBar != null)
+                actionBar.setTitle(R.string.sample_edit_title_add);
         }
         iconChanged = false;
         iconDefault = item.getIcon() == null;
@@ -163,7 +174,11 @@ public class SampleEditActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        if (id == R.id.action_save) {
+        if (id == android.R.id.home) {
+            back();
+            return true;
+        }
+        else if (id == R.id.action_save) {
             save();
             Intent resultIntent = new Intent();
             resultIntent.putExtra("data.id", this.item.getId());
@@ -172,6 +187,11 @@ public class SampleEditActivity extends AppCompatActivity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onBackPressed() {
+        back();
     }
 
     @Override
@@ -239,7 +259,7 @@ public class SampleEditActivity extends AppCompatActivity {
         if (!iconDefault)
             imageIcon.setImageDrawable(new BitmapDrawable(getResources(), item.getIcon()));
         else
-            imageIcon.setImageResource(R.drawable.ic_face_black_48dp);
+            imageIcon.setImageResource(ICON_DEFAULT_DRAWABLE);
         editName.setText(item.getName());
         spinCategory.setSelection(item.getCategory());
         editDetail.setText(item.getDetail());
@@ -284,6 +304,22 @@ public class SampleEditActivity extends AppCompatActivity {
                 iconChanged = false;
             }
         }
+    }
+
+    private void back() {
+        if (changed())
+            new AlertDialog.Builder(this)
+                    .setTitle(R.string.sample_edit_dialog_title)
+                    .setMessage(R.string.sample_edit_dialog_message)
+                    .setNegativeButton(R.string.sample_edit_dialog_negative, null)
+                    .setPositiveButton(R.string.sample_edit_dialog_positive, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            finish();
+                        }
+                    })
+                    .show();
+        else
+            finish();
     }
 
     public long getItemId() {
