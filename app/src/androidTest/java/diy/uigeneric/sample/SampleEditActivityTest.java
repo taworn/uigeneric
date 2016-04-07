@@ -1,6 +1,5 @@
 package diy.uigeneric.sample;
 
-import android.app.Instrumentation;
 import android.content.Intent;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.rule.ActivityTestRule;
@@ -47,7 +46,6 @@ public class SampleEditActivityTest {
         assertTrue(list.size() == 1);
         assertTrue(list.get(0).getName().equals("Hello"));
 
-        Log.d(TAG, "ok");
         source.close();
     }
 
@@ -57,11 +55,9 @@ public class SampleEditActivityTest {
         source.open();
         source.deleteAll();
 
-        // pre-adds record
         Sample item = new Sample();
         item.setName("Hell");
         long id = source.insert(item);
-        source.close();
 
         Intent intent = new Intent();
         intent.putExtra("data.id", id);
@@ -69,15 +65,11 @@ public class SampleEditActivityTest {
         onView(withId(R.id.edit_name)).perform(clearText()).perform(typeText("Hello"));
         onView(withId(R.id.action_save)).perform(click());
 
-        source = new SampleDataSource(activityTestRule.getActivity());
-        source.open();
         item = source.get(id);
         assertTrue(item.getName().equals("Hello"));
         List<Sample> list = source.list(false, null, "H", null);
         assertTrue(list.size() == 1);
         assertTrue(list.get(0).getName().equals("Hello"));
-
-        Log.d(TAG, "ok");
 
         source.close();
     }
