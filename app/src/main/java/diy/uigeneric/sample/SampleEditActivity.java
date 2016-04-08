@@ -81,12 +81,14 @@ public class SampleEditActivity extends AppCompatActivity {
         editDetail = (EditText) findViewById(R.id.edit_detail);
 
         Button buttonChange = (Button) findViewById(R.id.button_change);
-        buttonChange.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                menuIcon.show();
-            }
-        });
+        if (buttonChange != null) {
+            buttonChange.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    menuIcon.show();
+                }
+            });
+        }
         menuIcon = new PopupMenu(this, buttonChange);
         menuIcon.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
@@ -179,11 +181,12 @@ public class SampleEditActivity extends AppCompatActivity {
             return true;
         }
         else if (id == R.id.action_save) {
-            save();
-            Intent resultIntent = new Intent();
-            resultIntent.putExtra("data.id", this.item.getId());
-            setResult(Activity.RESULT_OK, resultIntent);
-            finish();
+            if (save()) {
+                Intent resultIntent = new Intent();
+                resultIntent.putExtra("data.id", this.item.getId());
+                setResult(Activity.RESULT_OK, resultIntent);
+                finish();
+            }
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -283,7 +286,7 @@ public class SampleEditActivity extends AppCompatActivity {
                 !editDetail.getText().toString().equals(item.getDetail());
     }
 
-    private void save() {
+    private boolean save() {
         if (!empty()) {
             if (changed()) {
                 uiToData();
@@ -302,12 +305,14 @@ public class SampleEditActivity extends AppCompatActivity {
                 source.close();
 
                 iconChanged = false;
+                return true;
             }
         }
+        return false;
     }
 
     private void back() {
-        if (changed())
+        if (changed()) {
             new AlertDialog.Builder(this)
                     .setTitle(R.string.sample_edit_dialog_title)
                     .setMessage(R.string.sample_edit_dialog_message)
@@ -318,6 +323,7 @@ public class SampleEditActivity extends AppCompatActivity {
                         }
                     })
                     .show();
+        }
         else
             finish();
     }
