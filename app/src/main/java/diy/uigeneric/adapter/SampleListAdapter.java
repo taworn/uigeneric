@@ -1,10 +1,12 @@
 package diy.uigeneric.adapter;
 
 import android.content.Context;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -20,65 +22,69 @@ import diy.uigeneric.data.Sample;
 /**
  * Sample list adapter.
  */
-public class SampleListAdapter extends BaseAdapter {
+public class SampleListAdapter extends RecyclerView.Adapter<SampleListAdapter.ViewHolder> {
 
     private Context context = null;
-    private LayoutInflater inflater = null;
     private IndirectList<Sample> list = null;
-    private SimpleDateFormat format = null;
+    private SimpleDateFormat formatter = null;
     private boolean deleted = false;
 
     public SampleListAdapter(Context context, IndirectList<Sample> list, boolean deleted) {
         super();
         this.context = context;
-        this.inflater = null;
         this.list = list;
-        this.format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US);
+        this.formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US);
         this.deleted = deleted;
     }
 
     @Override
-    public int getCount() {
+    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.adapter_sample_edit, parent, false);
+        return new ViewHolder(view);
+    }
+
+    @Override
+    public void onBindViewHolder(ViewHolder holder, int position) {
+        Sample item = (Sample) list.get(position).item;
+        if (item.getIcon() != null) {
+            Drawable drawable = new BitmapDrawable(context.getResources(), item.getIcon());
+            holder.imageIcon.setImageDrawable(drawable);
+        }
+        else
+            holder.imageIcon.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_add_white_24dp));
+        holder.textName.setText(item.getName());
+        /*
+        if (deleted)
+            holder.textCategory.setText(formatter.format(item.getDeleted()));
+        else
+            holder.textCategory.setText(Sample.categoryToString[item.getCategory()].toString());
+         */
+    }
+
+    @Override
+    public int getItemCount() {
         return list.size();
     }
 
-    @Override
-    public Object getItem(int i) {
-        return list.get(i);
-    }
-
-    @Override
-    public long getItemId(int i) {
-        return ((Sample) list.get(i).item).getId();
-    }
-
-    @Override
-    public boolean hasStableIds() {
-        return true;
-    }
-
-    @Override
     public View getView(int i, View view, ViewGroup parent) {
+        /*
         Sample item = (Sample) list.get(i).item;
         ViewHolder holder;
 
         if (view == null) {
             if (inflater == null)
                 inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            view = inflater.inflate(R.layout.adapter_sample_item, parent, false);
+            view = inflater.inflate(R.layout.adapter_sample_edit, parent, false);
             holder = new ViewHolder();
-            /*
             holder.layoutItem = (ViewGroup) view.findViewById(R.id.layout_item);
             holder.imageIcon = (ImageView) view.findViewById(R.id.image_icon);
             holder.textName = (TextView) view.findViewById(R.id.text_name);
             holder.textCategory = (TextView) view.findViewById(R.id.text_category);
-            */
             view.setTag(holder);
         }
         else
             holder = (ViewHolder) view.getTag();
 
-        /*
         if (Build.VERSION.SDK_INT < 16) {
             if (!item.selected)
                 holder.layoutItem.setBackgroundDrawable(null);
@@ -99,7 +105,7 @@ public class SampleListAdapter extends BaseAdapter {
             holder.imageIcon.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_launcher));
         holder.textName.setText(item.object.getName());
         if (deleted)
-            holder.textCategory.setText(format.format(item.object.getDeleted()));
+            holder.textCategory.setText(formatter.formatter(item.object.getDeleted()));
         else
             holder.textCategory.setText(Generic.categoryToString[item.object.getCategory()].toString());
         */
@@ -150,11 +156,19 @@ public class SampleListAdapter extends BaseAdapter {
         this.deleted = deleted;
     }
 
-    private class ViewHolder {
+    public class ViewHolder extends RecyclerView.ViewHolder {
         public ViewGroup layoutItem;
         public ImageView imageIcon;
         public TextView textName;
         public TextView textCategory;
+
+        public ViewHolder(View view) {
+            super(view);
+            layoutItem = (ViewGroup) view.findViewById(R.id.layout_item);
+            imageIcon = (ImageView) view.findViewById(R.id.image_icon);
+            textName = (TextView) view.findViewById(R.id.text_name);
+            textCategory = (TextView) view.findViewById(R.id.text_category);
+        }
     }
 
 }

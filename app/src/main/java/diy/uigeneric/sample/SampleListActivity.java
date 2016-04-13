@@ -9,12 +9,20 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+import java.util.List;
+
+import diy.generic.IndirectList;
 import diy.uigeneric.R;
+import diy.uigeneric.adapter.SampleListAdapter;
+import diy.uigeneric.data.Sample;
+import diy.uigeneric.data.SampleDataSource;
 
 public class SampleListActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -29,13 +37,15 @@ public class SampleListActivity extends AppCompatActivity implements NavigationV
         setSupportActionBar(toolbar);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(SampleListActivity.this, SampleEditActivity.class);
-                startActivityForResult(intent, REQUEST_ADD);
-            }
-        });
+        if (fab != null) {
+            fab.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent intent = new Intent(SampleListActivity.this, SampleEditActivity.class);
+                    startActivityForResult(intent, REQUEST_ADD);
+                }
+            });
+        }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -44,6 +54,20 @@ public class SampleListActivity extends AppCompatActivity implements NavigationV
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        SampleDataSource source = new SampleDataSource(this);
+        source.open();
+        List<Sample> list = source.list(null, null, null, null);
+        source.close();
+        IndirectList<Sample> iList = new IndirectList<>();
+        iList.set(list);
+
+        RecyclerView listView = (RecyclerView) findViewById(R.id.list_view);
+        if (listView != null) {
+            listView.setHasFixedSize(true);
+            listView.setLayoutManager(new LinearLayoutManager(this));
+            listView.setAdapter(new SampleListAdapter(this, iList, false));
+        }
     }
 
     @Override
