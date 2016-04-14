@@ -21,7 +21,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/material_edit_each_margin"
+            android:layout_marginBottom="@dimen/material_margin"
             android:orientation="horizontal">
 
             <ImageView
@@ -46,7 +46,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/material_edit_each_margin"
+            android:layout_marginBottom="@dimen/material_margin"
             android:orientation="horizontal">
 
             <ImageView
@@ -60,14 +60,14 @@
                 android:layout_height="wrap_content"
                 android:hint="@string/sample_edit_hint_name"
                 android:singleLine="true"
-                android:textSize="@dimen/material_edit_input_text"/>
+                android:textSize="@dimen/material_input_text"/>
 
         </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/material_edit_each_margin"
+            android:layout_marginBottom="@dimen/material_margin"
             android:orientation="horizontal">
 
             <ImageView
@@ -80,14 +80,14 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/sample_edit_hint_category"
-                android:textSize="@dimen/material_edit_input_text"/>
+                android:textSize="@dimen/material_input_text"/>
 
         </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/material_edit_each_margin"
+            android:layout_marginBottom="@dimen/material_margin"
             android:orientation="horizontal">
 
             <ImageView
@@ -101,7 +101,7 @@
                 android:layout_height="wrap_content"
                 android:hint="@string/sample_edit_hint_detail"
                 android:singleLine="false"
-                android:textSize="@dimen/material_edit_input_text"/>
+                android:textSize="@dimen/material_input_text"/>
 
         </LinearLayout>
 
