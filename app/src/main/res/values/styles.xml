@@ -17,12 +17,35 @@
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light"/>
 
-    <style name="AppTheme.material_image_as_label">
-        <item name="android:layout_marginRight">32dp</item>
+    <style name="AppTheme.material_1st">
         <item name="android:layout_width">24dp</item>
         <item name="android:layout_height">48dp</item>
+        <item name="android:layout_marginLeft">@dimen/material_margin_1st</item>
+    </style>
+
+    <style name="AppTheme.material_1st_image" parent="AppTheme.material_1st">
         <item name="android:scaleType">fitCenter</item>
         <item name="android:tint">@color/material_image_as_label_tint</item>
+    </style>
+
+    <style name="AppTheme.material_2nd">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginLeft">@dimen/material_margin_2nd</item>
+        <item name="android:layout_marginRight">@dimen/material_margin_end</item>
+    </style>
+
+    <style name="AppTheme.material_2nd_text" parent="AppTheme.material_2nd">
+        <item name="android:textColor">@android:color/background_dark</item>
+        <item name="android:textSize">@dimen/material_text</item>
+    </style>
+
+    <style name="AppTheme.material_2nd_text_sub" parent="AppTheme.material_2nd">
+        <item name="android:textSize">@dimen/material_text_sub</item>
+    </style>
+
+    <style name="AppTheme.material_2nd_edit" parent="AppTheme.material_2nd">
+        <item name="android:textSize">@dimen/material_edit</item>
     </style>
 
 </resources>

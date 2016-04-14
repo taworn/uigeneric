@@ -8,7 +8,12 @@
     <dimen name="fab_margin">16dp</dimen>
 
     <dimen name="material_margin">16dp</dimen>
+    <dimen name="material_margin_1st">16dp</dimen>
+    <dimen name="material_margin_2nd">72dp</dimen>
+    <dimen name="material_margin_end">16dp</dimen>
+
     <dimen name="material_text">16sp</dimen>
-    <dimen name="material_text_2nd">14sp</dimen>
-    <dimen name="material_input_text">16sp</dimen>
+    <dimen name="material_text_sub">14sp</dimen>
+    <dimen name="material_edit">16sp</dimen>
+
 </resources>
