@@ -6,8 +6,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context="diy.uigeneric.sample.SampleEditActivity"
-    tools:showIn="@layout/activity_sample_edit">
+    tools:context="diy.uigeneric.sample.SampleViewActivity"
+    tools:showIn="@layout/activity_sample_view">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -33,16 +33,6 @@
                 android:layout_marginStart="@dimen/material_margin_2nd"
                 android:contentDescription="@string/sample_edit_hint_icon"/>
 
-            <Button
-                android:id="@+id/button_change"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="@dimen/material_margin"
-                android:layout_marginStart="@dimen/material_margin"
-                android:layout_toEndOf="@id/image_icon"
-                android:layout_toRightOf="@id/image_icon"
-                android:text="@string/sample_edit_button_change_icon"/>
-
         </RelativeLayout>
 
         <RelativeLayout
@@ -56,11 +46,11 @@
                 android:contentDescription="@string/sample_edit_hint_name"
                 android:src="@drawable/ic_label_black_24dp"/>
 
-            <EditText
-                android:id="@+id/edit_name"
-                style="@style/AppTheme.material_2nd_edit"
-                android:hint="@string/sample_edit_hint_name"
-                android:singleLine="true"/>
+            <TextView
+                android:id="@+id/text_name"
+                android:layout_marginTop="16dp"
+                style="@style/AppTheme.material_2nd_text"
+                android:hint="@string/sample_edit_hint_name"/>
 
         </RelativeLayout>
 
@@ -75,8 +65,9 @@
                 android:contentDescription="@string/sample_edit_hint_category"
                 android:src="@drawable/ic_folder_black_24dp"/>
 
-            <Spinner
-                android:id="@+id/spin_category"
+            <TextView
+                android:id="@+id/text_category"
+                android:layout_marginTop="16dp"
                 style="@style/AppTheme.material_2nd_text"
                 android:hint="@string/sample_edit_hint_category"/>
 
@@ -93,11 +84,11 @@
                 android:contentDescription="@string/sample_edit_hint_detail"
                 android:src="@drawable/ic_description_black_24dp"/>
 
-            <EditText
-                android:id="@+id/edit_detail"
-                style="@style/AppTheme.material_2nd_edit"
-                android:hint="@string/sample_edit_hint_detail"
-                android:singleLine="false"/>
+            <TextView
+                android:id="@+id/text_detail"
+                android:layout_marginTop="16dp"
+                style="@style/AppTheme.material_2nd_text"
+                android:hint="@string/sample_edit_hint_detail"/>
 
         </RelativeLayout>
 

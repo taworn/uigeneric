@@ -29,4 +29,6 @@
         <item name="category_archived">Archived</item>
     </string-array>
 
+    <string name="sample_view_title">View</string>
+
 </resources>

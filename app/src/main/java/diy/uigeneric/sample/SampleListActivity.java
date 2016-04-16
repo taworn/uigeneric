@@ -28,7 +28,7 @@ import diy.uigeneric.data.SampleDataSource;
 public class SampleListActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     private static final int REQUEST_ADD = 100;
-    private static final int REQUEST_EDIT = 101;
+    private static final int REQUEST_VIEW = 101;
 
     private IndirectList<Sample> iList = new IndirectList<>();
     private RecyclerView listView = null;
@@ -69,9 +69,9 @@ public class SampleListActivity extends AppCompatActivity implements NavigationV
                 @Override
                 public void onClick(View view, int position) {
                     Sample item = (Sample) iList.get(position).item;
-                    Intent intent = new Intent(SampleListActivity.this, SampleEditActivity.class);
+                    Intent intent = new Intent(SampleListActivity.this, SampleViewActivity.class);
                     intent.putExtra("data.id", item.getId());
-                    startActivityForResult(intent, REQUEST_EDIT);
+                    startActivityForResult(intent, REQUEST_VIEW);
                 }
             }));
         }
@@ -145,7 +145,7 @@ public class SampleListActivity extends AppCompatActivity implements NavigationV
         super.onActivityResult(requestCode, resultCode, resultIntent);
         switch (requestCode) {
             case REQUEST_ADD:
-            case REQUEST_EDIT:
+            case REQUEST_VIEW:
                 if (resultCode == Activity.RESULT_OK) {
                     loadData();
                     listView.getAdapter().notifyDataSetChanged();

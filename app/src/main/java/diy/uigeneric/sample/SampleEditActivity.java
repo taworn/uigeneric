@@ -193,11 +193,6 @@ public class SampleEditActivity extends AppCompatActivity {
     }
 
     @Override
-    public void onBackPressed() {
-        back();
-    }
-
-    @Override
     public void onActivityResult(int requestCode, int resultCode, Intent resultIntent) {
         super.onActivityResult(requestCode, resultCode, resultIntent);
         if (requestCode == REQUEST_CODE_TAKE_PHOTO) {
@@ -258,32 +253,26 @@ public class SampleEditActivity extends AppCompatActivity {
             imageIcon.setImageBitmap((Bitmap) savedInstanceState.getParcelable("data.icon"));
     }
 
-    private void uiFromData() {
-        if (!iconDefault)
-            imageIcon.setImageDrawable(new BitmapDrawable(getResources(), item.getIcon()));
+    @Override
+    public void onBackPressed() {
+        back();
+    }
+
+    private void back() {
+        if (changed()) {
+            new AlertDialog.Builder(this)
+                    .setTitle(R.string.sample_edit_dialog_title)
+                    .setMessage(R.string.sample_edit_dialog_message)
+                    .setNegativeButton(R.string.sample_edit_dialog_negative, null)
+                    .setPositiveButton(R.string.sample_edit_dialog_positive, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            finish();
+                        }
+                    })
+                    .show();
+        }
         else
-            imageIcon.setImageResource(ICON_DEFAULT_DRAWABLE);
-        editName.setText(item.getName());
-        spinCategory.setSelection(item.getCategory());
-        editDetail.setText(item.getDetail());
-    }
-
-    private void uiToData() {
-        item.setIcon(!iconDefault ? ((BitmapDrawable) imageIcon.getDrawable()).getBitmap() : null);
-        item.setName(editName.getText().toString().trim());
-        item.setCategory(categorySelected);
-        item.setDetail(editDetail.getText().toString());
-    }
-
-    private boolean empty() {
-        return editName.getText().toString().trim().length() <= 0;
-    }
-
-    private boolean changed() {
-        return iconChanged ||
-                categorySelected != item.getCategory() ||
-                !editName.getText().toString().trim().equals(item.getName()) ||
-                !editDetail.getText().toString().equals(item.getDetail());
+            finish();
     }
 
     private boolean save() {
@@ -311,21 +300,32 @@ public class SampleEditActivity extends AppCompatActivity {
         return false;
     }
 
-    private void back() {
-        if (changed()) {
-            new AlertDialog.Builder(this)
-                    .setTitle(R.string.sample_edit_dialog_title)
-                    .setMessage(R.string.sample_edit_dialog_message)
-                    .setNegativeButton(R.string.sample_edit_dialog_negative, null)
-                    .setPositiveButton(R.string.sample_edit_dialog_positive, new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                            finish();
-                        }
-                    })
-                    .show();
-        }
+    private boolean empty() {
+        return editName.getText().toString().trim().length() <= 0;
+    }
+
+    private boolean changed() {
+        return iconChanged ||
+                categorySelected != item.getCategory() ||
+                !editName.getText().toString().trim().equals(item.getName()) ||
+                !editDetail.getText().toString().equals(item.getDetail());
+    }
+
+    private void uiFromData() {
+        if (!iconDefault)
+            imageIcon.setImageDrawable(new BitmapDrawable(getResources(), item.getIcon()));
         else
-            finish();
+            imageIcon.setImageResource(ICON_DEFAULT_DRAWABLE);
+        editName.setText(item.getName());
+        spinCategory.setSelection(item.getCategory());
+        editDetail.setText(item.getDetail());
+    }
+
+    private void uiToData() {
+        item.setIcon(!iconDefault ? ((BitmapDrawable) imageIcon.getDrawable()).getBitmap() : null);
+        item.setName(editName.getText().toString().trim());
+        item.setCategory(categorySelected);
+        item.setDetail(editDetail.getText().toString());
     }
 
     public long getItemId() {
