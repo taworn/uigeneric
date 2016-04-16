@@ -30,6 +30,9 @@ public class SampleListActivity extends AppCompatActivity implements NavigationV
     private static final int REQUEST_ADD = 100;
     private static final int REQUEST_EDIT = 101;
 
+    private IndirectList<Sample> iList = new IndirectList<>();
+    private RecyclerView listView = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -56,14 +59,8 @@ public class SampleListActivity extends AppCompatActivity implements NavigationV
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        SampleDataSource source = new SampleDataSource(this);
-        source.open();
-        List<Sample> list = source.list(null, null, null, null);
-        source.close();
-        IndirectList<Sample> iList = new IndirectList<>();
-        iList.set(list);
-
-        RecyclerView listView = (RecyclerView) findViewById(R.id.list_view);
+        loadData();
+        listView = (RecyclerView) findViewById(R.id.list_view);
         if (listView != null) {
             listView.setHasFixedSize(true);
             listView.setLayoutManager(new LinearLayoutManager(this));
@@ -141,10 +138,19 @@ public class SampleListActivity extends AppCompatActivity implements NavigationV
         switch (requestCode) {
             case REQUEST_ADD:
                 if (resultCode == Activity.RESULT_OK) {
-                    //
+                    loadData();
+                    listView.getAdapter().notifyDataSetChanged();
                 }
                 break;
         }
+    }
+
+    public void loadData() {
+        SampleDataSource source = new SampleDataSource(this);
+        source.open();
+        List<Sample> list = source.list(null, null, null, null);
+        source.close();
+        iList.set(list);
     }
 
 }
