@@ -4,5 +4,7 @@
     <color name="colorPrimaryDark">#1976d2</color>
     <color name="colorAccent">#ffab40</color>
 
+    <color name="divider">#e0e0e0</color>
+
     <color name="material_image_as_label_tint">#757575</color>
 </resources>
