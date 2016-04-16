@@ -1,12 +1,16 @@
 package diy.uigeneric.data;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import java.util.Calendar;
 import java.util.Comparator;
 import java.util.GregorianCalendar;
 import java.util.Locale;
+
+import diy.uigeneric.R;
 
 /**
  * Sample data.
@@ -16,16 +20,6 @@ import java.util.Locale;
  * </p>
  */
 public class Sample implements Comparator<Sample> {
-
-    // category string constants
-    public static final CharSequence[] categoryToString = {
-            "Data",
-            "Priority Data",
-            "Importants",
-            "Sent",
-            "Drafts",
-            "Archived",
-    };
 
     // category constants
     public static int CATEGORY_DATA = 0;
@@ -77,7 +71,7 @@ public class Sample implements Comparator<Sample> {
         return icon;
     }
 
-    public void setIcon(Bitmap value) {
+    public void setIcon(@Nullable Bitmap value) {
         icon = value;
     }
 
@@ -85,8 +79,8 @@ public class Sample implements Comparator<Sample> {
         return name;
     }
 
-    public void setName(String value) {
-        String s = value == null ? "" : value.trim();
+    public void setName(@NonNull String value) {
+        String s = value.trim();
         if (s.length() <= 0)
             throw new IllegalArgumentException("Item name's length cannot be zero.");
         name = s;
@@ -96,7 +90,7 @@ public class Sample implements Comparator<Sample> {
         return detail;
     }
 
-    public void setDetail(String value) {
+    public void setDetail(@Nullable String value) {
         detail = value == null ? "" : value;
     }
 
@@ -105,16 +99,17 @@ public class Sample implements Comparator<Sample> {
     }
 
     public void setCategory(int value) {
-        if (value < CATEGORY_MIN || value > CATEGORY_MAX)
+        if (value >= CATEGORY_MIN && value <= CATEGORY_MAX)
+            category = value;
+        else
             throw new IllegalArgumentException("Item category must in range.");
-        category = value;
     }
 
     public Calendar getDeleted() {
         return deleted;
     }
 
-    public void setDeleted(Calendar value) {
+    public void setDeleted(@Nullable Calendar value) {
         if (value != null) {
             deleted = new GregorianCalendar(Locale.US);
             deleted.setTimeInMillis(value.getTimeInMillis());
@@ -139,6 +134,14 @@ public class Sample implements Comparator<Sample> {
     public int compare(@NonNull Sample l, @NonNull Sample r) {
         long result = l.getId() - r.getId();
         return result < 0 ? -1 : result > 0 ? 1 : 0;
+    }
+
+    public static String categoryToString(@NonNull Context context, int category) {
+        String[] list = context.getResources().getStringArray(R.array.sample_edit_category);
+        if (category >= 0 && category < list.length)
+            return list[category];
+        else
+            return null;
     }
 
 }

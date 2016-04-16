@@ -41,6 +41,7 @@
     </style>
 
     <style name="AppTheme.material_2nd_text_sub" parent="AppTheme.material_2nd">
+        <item name="android:textColor">@color/text_2nd_sub</item>
         <item name="android:textSize">@dimen/material_text_sub</item>
     </style>
 

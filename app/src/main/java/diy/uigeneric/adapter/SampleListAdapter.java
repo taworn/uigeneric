@@ -72,14 +72,20 @@ public class SampleListAdapter extends RecyclerView.Adapter<SampleListAdapter.Vi
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         Sample item = (Sample) list.get(position).item;
+
         if (item.getIcon() != null) {
             Drawable drawable = new BitmapDrawable(context.getResources(), item.getIcon());
             holder.imageIcon.setImageDrawable(drawable);
         }
         else
             holder.imageIcon.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_account_circle_black_24dp));
+
         holder.textName.setText(item.getName());
-        holder.textCategory.setText("Category: " + item.getCategory());
+
+        String categoryName = Sample.categoryToString(context, item.getCategory());
+        if (categoryName == null)
+            categoryName = Integer.toString(item.getCategory());
+        holder.textCategory.setText(categoryName);
     }
 
     @Override
