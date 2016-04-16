@@ -65,7 +65,15 @@ public class SampleListActivity extends AppCompatActivity implements NavigationV
             listView.setHasFixedSize(true);
             listView.setLayoutManager(new LinearLayoutManager(this));
             listView.setItemAnimator(new DefaultItemAnimator());
-            listView.setAdapter(new SampleListAdapter(this, iList, false));
+            listView.setAdapter(new SampleListAdapter(this, iList, false, new SampleListAdapter.OnItemClickListener() {
+                @Override
+                public void onClick(View view, int position) {
+                    Sample item = (Sample) iList.get(position).item;
+                    Intent intent = new Intent(SampleListActivity.this, SampleEditActivity.class);
+                    intent.putExtra("data.id", item.getId());
+                    startActivityForResult(intent, REQUEST_EDIT);
+                }
+            }));
         }
     }
 
@@ -137,6 +145,7 @@ public class SampleListActivity extends AppCompatActivity implements NavigationV
         super.onActivityResult(requestCode, resultCode, resultIntent);
         switch (requestCode) {
             case REQUEST_ADD:
+            case REQUEST_EDIT:
                 if (resultCode == Activity.RESULT_OK) {
                     loadData();
                     listView.getAdapter().notifyDataSetChanged();

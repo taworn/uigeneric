@@ -3,6 +3,7 @@ package diy.uigeneric.adapter;
 import android.content.Context;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,30 +23,44 @@ import diy.uigeneric.data.Sample;
  */
 public class SampleListAdapter extends RecyclerView.Adapter<SampleListAdapter.ViewHolder> {
 
-    public class ViewHolder extends RecyclerView.ViewHolder {
+    public interface OnItemClickListener {
+        void onClick(View view, int position);
+    }
+
+    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+
         public ImageView imageIcon;
         public TextView textName;
         public TextView textCategory;
 
         public ViewHolder(View view) {
             super(view);
+            view.setOnClickListener(this);
             imageIcon = (ImageView) view.findViewById(R.id.image_icon);
             textName = (TextView) view.findViewById(R.id.text_name);
             textCategory = (TextView) view.findViewById(R.id.text_category);
         }
+
+        @Override
+        public void onClick(View view) {
+            listener.onClick(view, this.getLayoutPosition());
+        }
+
     }
 
     private Context context = null;
     private IndirectList<Sample> list = null;
     private SimpleDateFormat formatter = null;
     private boolean deleted = false;
+    private OnItemClickListener listener = null;
 
-    public SampleListAdapter(Context context, IndirectList<Sample> list, boolean deleted) {
+    public SampleListAdapter(Context context, @NonNull IndirectList<Sample> list, boolean deleted, @NonNull OnItemClickListener listener) {
         super();
         this.context = context;
         this.list = list;
         this.formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US);
         this.deleted = deleted;
+        this.listener = listener;
     }
 
     @Override
