@@ -59,7 +59,6 @@ public class SampleViewActivity extends AppCompatActivity {
             item = source.get(id);
             source.close();
         }
-        changed = savedInstanceState != null && savedInstanceState.getBoolean("data.generic.changed");
         uiFromData();
     }
 
@@ -102,12 +101,14 @@ public class SampleViewActivity extends AppCompatActivity {
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
         super.onSaveInstanceState(savedInstanceState);
-        savedInstanceState.putLong("data.id", item.getId());
+        //savedInstanceState.putLong("data.id", item.getId());
+        savedInstanceState.putBoolean("data.changed", changed);
     }
 
     @Override
     public void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
+        changed = savedInstanceState.getBoolean("data.changed");
     }
 
     @Override

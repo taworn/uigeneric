@@ -145,6 +145,12 @@ public class SampleListActivity extends AppCompatActivity implements NavigationV
         super.onActivityResult(requestCode, resultCode, resultIntent);
         switch (requestCode) {
             case REQUEST_ADD:
+                if (resultCode == Activity.RESULT_OK) {
+                    loadData();
+                    listView.getAdapter().notifyDataSetChanged();
+                }
+                break;
+
             case REQUEST_VIEW:
                 if (resultCode == Activity.RESULT_OK) {
                     loadData();
