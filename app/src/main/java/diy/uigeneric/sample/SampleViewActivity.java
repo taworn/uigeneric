@@ -119,7 +119,8 @@ public class SampleViewActivity extends AppCompatActivity {
     private void back() {
         if (changed) {
             Intent resultIntent = new Intent();
-            resultIntent.putExtra("data.id", this.item.getId());
+            //resultIntent.putExtra("data.id", item.getId());
+            resultIntent.putExtra("data.changed", changed);
             setResult(Activity.RESULT_OK, resultIntent);
         }
         finish();
