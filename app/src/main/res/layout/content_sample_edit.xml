@@ -17,11 +17,10 @@
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/material_margin"
-            android:orientation="horizontal">
+            android:layout_marginTop="@dimen/material_margin">
 
             <ImageView
-                style="@style/AppTheme.material_1st_image"
+                style="@style/AppTheme.material_1st_image_text"
                 android:contentDescription="@string/sample_edit_hint_icon"
                 android:src="@drawable/ic_account_circle_black_24dp"/>
 
@@ -48,11 +47,10 @@
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/material_margin"
-            android:orientation="horizontal">
+            android:layout_marginTop="@dimen/material_margin">
 
             <ImageView
-                style="@style/AppTheme.material_1st_image"
+                style="@style/AppTheme.material_1st_image_edit"
                 android:contentDescription="@string/sample_edit_hint_name"
                 android:src="@drawable/ic_label_black_24dp"/>
 
@@ -67,17 +65,16 @@
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/material_margin"
-            android:orientation="horizontal">
+            android:layout_marginTop="@dimen/material_margin">
 
             <ImageView
-                style="@style/AppTheme.material_1st_image"
+                style="@style/AppTheme.material_1st_image_edit"
                 android:contentDescription="@string/sample_edit_hint_category"
                 android:src="@drawable/ic_folder_black_24dp"/>
 
             <Spinner
                 android:id="@+id/spin_category"
-                style="@style/AppTheme.material_2nd_text"
+                style="@style/AppTheme.material_2nd_spin"
                 android:hint="@string/sample_edit_hint_category"/>
 
         </RelativeLayout>
@@ -85,11 +82,11 @@
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/material_margin"
-            android:orientation="horizontal">
+            android:layout_marginBottom="@dimen/material_margin"
+            android:layout_marginTop="@dimen/material_margin">
 
             <ImageView
-                style="@style/AppTheme.material_1st_image"
+                style="@style/AppTheme.material_1st_image_edit"
                 android:contentDescription="@string/sample_edit_hint_detail"
                 android:src="@drawable/ic_description_black_24dp"/>
 

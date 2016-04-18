@@ -3,14 +3,11 @@
 
     <string name="sample_edit_title_add">Add New</string>
     <string name="sample_edit_title_edit">Edit</string>
-
     <string name="sample_edit_hint_icon">Icon</string>
     <string name="sample_edit_hint_name">Name</string>
     <string name="sample_edit_hint_category">Category</string>
     <string name="sample_edit_hint_detail">Detail (optional)</string>
-
     <string name="sample_edit_button_change_icon">Change</string>
-
     <string name="sample_edit_icon_take_photo">Take photo</string>
     <string name="sample_edit_icon_choose_photo">Choose photo</string>
     <string name="sample_edit_icon_default_photo">Default photo</string>
@@ -30,5 +27,9 @@
     </string-array>
 
     <string name="sample_view_title">View</string>
+    <string name="sample_view_hint_icon">Icon</string>
+    <string name="sample_view_hint_name">Name</string>
+    <string name="sample_view_hint_category">Category</string>
+    <string name="sample_view_hint_detail">Detail (optional)</string>
 
 </resources>

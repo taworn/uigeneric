@@ -17,11 +17,10 @@
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/material_margin"
-            android:orientation="horizontal">
+            android:layout_marginTop="@dimen/material_margin">
 
             <ImageView
-                style="@style/AppTheme.material_1st_image"
+                style="@style/AppTheme.material_1st_image_text"
                 android:contentDescription="@string/sample_edit_hint_icon"
                 android:src="@drawable/ic_account_circle_black_24dp"/>
 
@@ -31,64 +30,59 @@
                 android:layout_height="96dp"
                 android:layout_marginLeft="@dimen/material_margin_2nd"
                 android:layout_marginStart="@dimen/material_margin_2nd"
-                android:contentDescription="@string/sample_edit_hint_icon"/>
+                android:contentDescription="@string/sample_view_hint_icon"/>
 
         </RelativeLayout>
 
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/material_margin"
-            android:orientation="horizontal">
+            android:layout_marginTop="@dimen/material_margin">
 
             <ImageView
-                style="@style/AppTheme.material_1st_image"
-                android:contentDescription="@string/sample_edit_hint_name"
+                style="@style/AppTheme.material_1st_image_text"
+                android:contentDescription="@string/sample_view_hint_name"
                 android:src="@drawable/ic_label_black_24dp"/>
 
             <TextView
                 android:id="@+id/text_name"
-                android:layout_marginTop="16dp"
                 style="@style/AppTheme.material_2nd_text"
-                android:hint="@string/sample_edit_hint_name"/>
+                android:hint="@string/sample_view_hint_name"/>
 
         </RelativeLayout>
 
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/material_margin"
-            android:orientation="horizontal">
+            android:layout_marginTop="@dimen/material_margin">
 
             <ImageView
-                style="@style/AppTheme.material_1st_image"
-                android:contentDescription="@string/sample_edit_hint_category"
+                style="@style/AppTheme.material_1st_image_text"
+                android:contentDescription="@string/sample_view_hint_category"
                 android:src="@drawable/ic_folder_black_24dp"/>
 
             <TextView
                 android:id="@+id/text_category"
-                android:layout_marginTop="16dp"
                 style="@style/AppTheme.material_2nd_text"
-                android:hint="@string/sample_edit_hint_category"/>
+                android:hint="@string/sample_view_hint_category"/>
 
         </RelativeLayout>
 
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/material_margin"
-            android:orientation="horizontal">
+            android:layout_marginBottom="@dimen/material_margin"
+            android:layout_marginTop="@dimen/material_margin">
 
             <ImageView
-                style="@style/AppTheme.material_1st_image"
-                android:contentDescription="@string/sample_edit_hint_detail"
+                style="@style/AppTheme.material_1st_image_text"
+                android:contentDescription="@string/sample_view_hint_detail"
                 android:src="@drawable/ic_description_black_24dp"/>
 
             <TextView
                 android:id="@+id/text_detail"
-                android:layout_marginTop="16dp"
                 style="@style/AppTheme.material_2nd_text"
-                android:hint="@string/sample_edit_hint_detail"/>
+                android:hint="@string/sample_view_hint_detail"/>
 
         </RelativeLayout>
 

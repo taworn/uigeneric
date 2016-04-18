@@ -17,16 +17,17 @@
             style="@style/AppTheme.material_1st"
             android:layout_width="36dp"
             android:layout_height="36dp"
+            android:layout_marginTop="2dp"
             android:scaleType="fitCenter"/>
 
         <TextView
             android:id="@+id/text_name"
-            style="@style/AppTheme.material_2nd_text"
+            style="@style/AppTheme.material_2nd_text_0"
             android:singleLine="true"/>
 
         <TextView
             android:id="@+id/text_category"
-            style="@style/AppTheme.material_2nd_text_sub"
+            style="@style/AppTheme.material_2nd_text_1"
             android:layout_below="@id/text_name"/>
 
     </RelativeLayout>
