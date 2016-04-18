@@ -29,7 +29,7 @@ public class SampleDataSourceTest {
 
         // tests deleteAll() to clear data
         Log.d(TAG, "clears all data");
-        source.deleteAll();
+        source.removeAll();
         assertTrue(source.count() == 0);
 
         // tests insert
@@ -74,12 +74,12 @@ public class SampleDataSourceTest {
         assertTrue(source.count() == 3);
         Sample itemDelete = list.get(0);
         assertTrue(itemDelete.getDeleted() != null);
-        source.deleteReal(id);
+        source.remove(id);
         assertTrue(source.count() == 2);
 
-        // tests deleteAll() to clear data
+        // tests removeAll() to clear data
         Log.d(TAG, "clears all data, again");
-        source.deleteAll();
+        source.removeAll();
         assertTrue(source.count() == 0);
 
         source.close();

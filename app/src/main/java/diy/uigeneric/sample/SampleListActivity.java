@@ -148,12 +148,20 @@ public class SampleListActivity extends AppCompatActivity implements NavigationV
                 if (resultCode == Activity.RESULT_OK) {
                     loadData();
                     listView.getAdapter().notifyDataSetChanged();
+                    long id = resultIntent.getLongExtra("data.id", 0);
+                    if (id != 0) {
+                        Intent intent = new Intent(SampleListActivity.this, SampleViewActivity.class);
+                        intent.putExtra("data.id", id);
+                        startActivityForResult(intent, REQUEST_VIEW);
+                    }
                 }
                 break;
 
             case REQUEST_VIEW:
                 if (resultCode == Activity.RESULT_OK) {
-                    if (resultIntent.getBooleanExtra("data.changed", false)) {
+                    boolean changed = resultIntent.getBooleanExtra("data.changed", false);
+                    boolean deleted = resultIntent.getBooleanExtra("data.deleted", false);
+                    if (changed || deleted) {
                         loadData();
                         listView.getAdapter().notifyDataSetChanged();
                     }
@@ -165,7 +173,7 @@ public class SampleListActivity extends AppCompatActivity implements NavigationV
     public void loadData() {
         SampleDataSource source = new SampleDataSource(this);
         source.open();
-        List<Sample> list = source.list(null, null, null, null);
+        List<Sample> list = source.list(false, null, null, null);
         source.close();
         iList.set(list);
     }

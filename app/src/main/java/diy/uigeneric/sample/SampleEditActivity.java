@@ -276,26 +276,24 @@ public class SampleEditActivity extends AppCompatActivity {
     }
 
     private boolean save() {
-        if (!empty()) {
-            if (changed()) {
-                uiToData();
+        if (!empty() && changed()) {
+            uiToData();
 
-                SampleDataSource source = new SampleDataSource(this);
-                source.open();
-                if (item.getId() > 0) {
-                    source.update(item);
-                    Log.d(TAG, "saved " + item.getId() + "/" + item.getName());
-                }
-                else {
-                    long id = source.insert(item);
-                    item = source.get(id);
-                    Log.d(TAG, "added " + item.getId() + "/" + item.getName());
-                }
-                source.close();
-
-                iconChanged = false;
-                return true;
+            SampleDataSource source = new SampleDataSource(this);
+            source.open();
+            if (item.getId() > 0) {
+                source.update(item);
+                Log.d(TAG, "saved " + item.getId() + "/" + item.getName());
             }
+            else {
+                long id = source.insert(item);
+                item = source.get(id);
+                Log.d(TAG, "added " + item.getId() + "/" + item.getName());
+            }
+            source.close();
+
+            iconChanged = false;
+            return true;
         }
         return false;
     }

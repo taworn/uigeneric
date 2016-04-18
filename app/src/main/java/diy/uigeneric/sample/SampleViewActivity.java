@@ -11,6 +11,7 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ImageView;
@@ -59,6 +60,8 @@ public class SampleViewActivity extends AppCompatActivity {
             item = source.get(id);
             source.close();
         }
+        else
+            item = new Sample();
         uiFromData();
     }
 
@@ -80,6 +83,7 @@ public class SampleViewActivity extends AppCompatActivity {
             return true;
         }
         else if (id == R.id.action_delete) {
+            delete();
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -101,7 +105,6 @@ public class SampleViewActivity extends AppCompatActivity {
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
         super.onSaveInstanceState(savedInstanceState);
-        //savedInstanceState.putLong("data.id", item.getId());
         savedInstanceState.putBoolean("data.changed", changed);
     }
 
@@ -119,7 +122,7 @@ public class SampleViewActivity extends AppCompatActivity {
     private void back() {
         if (changed) {
             Intent resultIntent = new Intent();
-            //resultIntent.putExtra("data.id", item.getId());
+            resultIntent.putExtra("data.id", item.getId());
             resultIntent.putExtra("data.changed", changed);
             setResult(Activity.RESULT_OK, resultIntent);
         }
@@ -133,23 +136,16 @@ public class SampleViewActivity extends AppCompatActivity {
     }
 
     private void delete() {
-        new AlertDialog.Builder(this)
-                .setTitle("Confirm")
-                .setMessage("Are you sure you want to move this item to trash?")
-                .setNegativeButton("No", null)
-                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        /*
-                        Intent resultIntent = new Intent();
-                        setResult(Activity.RESULT_OK, resultIntent);
-                        resultIntent.putExtra("data.generic.id", fragment.getItemId());
-                        resultIntent.putExtra("data.generic.deleted", true);
-                        fragment.delete();
-                        finish();
-                        */
-                    }
-                })
-                .show();
+        SampleDataSource source = new SampleDataSource(this);
+        source.open();
+        source.delete(item.getId());
+        source.close();
+        Log.d(TAG, "deleted " + item.getId() + "/" + item.getName());
+        Intent resultIntent = new Intent();
+        setResult(Activity.RESULT_OK, resultIntent);
+        resultIntent.putExtra("data.id", item.getId());
+        resultIntent.putExtra("data.deleted", true);
+        finish();
     }
 
     private void uiFromData() {

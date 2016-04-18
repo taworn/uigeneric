@@ -335,7 +335,7 @@ public class SampleDataSource {
     /**
      * Deletes a record from trash.
      */
-    public void deleteReal(long id) {
+    public void remove(long id) {
         SQLiteStatement statement = database.compileStatement("DELETE FROM sample WHERE deleted IS NOT NULL AND id = ?");
         statement.clearBindings();
         statement.bindLong(1, id);
@@ -345,7 +345,7 @@ public class SampleDataSource {
     /**
      * Deletes list records from trash.
      */
-    public void deleteListReal(@NonNull List<Long> list) {
+    public void removeList(@NonNull List<Long> list) {
         SQLiteStatement statement = database.compileStatement("DELETE FROM sample WHERE deleted IS NOT NULL AND id = ?");
         statement.clearBindings();
         for (long id : list) {
@@ -357,7 +357,7 @@ public class SampleDataSource {
     /**
      * Deletes too old data in trash.
      */
-    public void deleteFromTrash() {
+    public void removeFromTrash() {
         long time = new GregorianCalendar(Locale.US).getTimeInMillis();
         time -= 3 * 24 * 60 * 60 * 1000; // three days
         SQLiteStatement statement = database.compileStatement("DELETE FROM sample WHERE deleted < ?");
@@ -369,7 +369,7 @@ public class SampleDataSource {
     /**
      * Deletes ALL data from table, includes trash.
      */
-    public void deleteAll() {
+    public void removeAll() {
         database.delete("sample", null, null);
     }
 

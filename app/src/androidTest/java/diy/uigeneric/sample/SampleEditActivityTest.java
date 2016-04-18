@@ -33,7 +33,7 @@ public class SampleEditActivityTest {
     public void testAdd() {
         SampleDataSource source = new SampleDataSource(InstrumentationRegistry.getTargetContext());
         source.open();
-        source.deleteAll();
+        source.removeAll();
 
         activityTestRule.launchActivity(null);
         onView(withId(R.id.edit_name)).perform(typeText("Hello"));
@@ -53,7 +53,7 @@ public class SampleEditActivityTest {
     public void testEdit() {
         SampleDataSource source = new SampleDataSource(InstrumentationRegistry.getTargetContext());
         source.open();
-        source.deleteAll();
+        source.removeAll();
 
         Sample item = new Sample();
         item.setName("Hell");
