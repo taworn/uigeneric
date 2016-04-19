@@ -1,14 +1,12 @@
 package diy.uigeneric.sample;
 
 import android.app.Activity;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -23,7 +21,7 @@ import diy.uigeneric.data.SampleDataSource;
 
 public class SampleViewActivity extends AppCompatActivity {
 
-    private static final String TAG = "SampleViewActivity";
+    private static final String TAG = SampleViewActivity.class.getSimpleName();
 
     private static final int REQUEST_EDIT = 100;
 

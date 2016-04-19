@@ -15,5 +15,4 @@
     <dimen name="material_text">16sp</dimen>
     <dimen name="material_text_sub">14sp</dimen>
     <dimen name="material_edit">16sp</dimen>
-
 </resources>

@@ -11,7 +11,7 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidJUnit4.class)
 public class SampleViewActivityTest {
 
-    private static final String TAG = "SampleViewActivityTest";
+    private static final String TAG = SampleViewActivityTest.class.getSimpleName();
 
     @Rule
     public ActivityTestRule<SampleViewActivity> activityTestRule = new ActivityTestRule<>(SampleViewActivity.class);

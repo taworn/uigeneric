@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
-import android.util.Log;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -25,7 +24,7 @@ import static org.junit.Assert.assertTrue;
 @RunWith(AndroidJUnit4.class)
 public class SampleEditActivityTest {
 
-    private static final String TAG = "SampleEditActivityTest";
+    private static final String TAG = SampleEditActivityTest.class.getSimpleName();
 
     public ActivityTestRule<SampleEditActivity> activityTestRule = new ActivityTestRule<>(SampleEditActivity.class, false, false);
 

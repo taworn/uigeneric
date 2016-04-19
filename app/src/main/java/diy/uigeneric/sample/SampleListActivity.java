@@ -27,6 +27,8 @@ import diy.uigeneric.data.SampleDataSource;
 
 public class SampleListActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
+    private static final String TAG = SampleListActivity.class.getSimpleName();
+
     private static final int REQUEST_ADD = 100;
     private static final int REQUEST_VIEW = 101;
 

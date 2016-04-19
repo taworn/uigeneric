@@ -16,7 +16,7 @@ import static org.junit.Assert.assertTrue;
 @RunWith(AndroidJUnit4.class)
 public class SampleDataSourceTest {
 
-    private static final String TAG = "SampleDataSourceTest";
+    private static final String TAG = SampleDataSourceTest.class.getSimpleName();
 
     @Test
     public void test() {
