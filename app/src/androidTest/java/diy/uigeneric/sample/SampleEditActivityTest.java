@@ -4,11 +4,10 @@ import android.content.Intent;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
+import android.util.Log;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import java.util.List;
 
 import diy.uigeneric.R;
 import diy.uigeneric.data.Sample;
@@ -30,45 +29,58 @@ public class SampleEditActivityTest {
 
     @Test
     public void testAdd() {
+        long id;
+
+        Log.d(TAG, "test on edit");
+
+        // first, removing all records
         SampleDataSource source = new SampleDataSource(InstrumentationRegistry.getTargetContext());
         source.open();
         source.removeAll();
 
+        // tests activity
         activityTestRule.launchActivity(null);
-        onView(withId(R.id.edit_name)).perform(typeText("Hello"));
+        onView(withId(R.id.edit_name)).perform(clearText()).perform(typeText("Aaa"));
         onView(withId(R.id.action_save)).perform(click());
 
-        long id = activityTestRule.getActivity().getItemId();
+        // checks record
+        id = activityTestRule.getActivity().getItemId();
         Sample item = source.get(id);
-        assertTrue(item.getName().equals("Hello"));
-        List<Sample> list = source.list(false, null, "H", null);
-        assertTrue(list.size() == 1);
-        assertTrue(list.get(0).getName().equals("Hello"));
+        assertTrue(item.getName().equals("Aaa"));
+        assertTrue(item.getDeleted() == null);
 
         source.close();
     }
 
     @Test
     public void testEdit() {
+        long id;
+
+        Log.d(TAG, "test on edit");
+
+        // first, removing all records
         SampleDataSource source = new SampleDataSource(InstrumentationRegistry.getTargetContext());
         source.open();
         source.removeAll();
 
+        // adds first record
         Sample item = new Sample();
-        item.setName("Hell");
-        long id = source.insert(item);
+        item.setName("Aaa");
+        id = source.insert(item);
+        assertTrue(item.getName().equals("Aaa"));
+        assertTrue(item.getDeleted() == null);
 
+        // tests activity
         Intent intent = new Intent();
         intent.putExtra("data.id", id);
         activityTestRule.launchActivity(intent);
-        onView(withId(R.id.edit_name)).perform(clearText()).perform(typeText("Hello"));
+        onView(withId(R.id.edit_name)).perform(clearText()).perform(typeText("Zzz"));
         onView(withId(R.id.action_save)).perform(click());
 
+        // checks record, it's name changed to "Zzz"
         item = source.get(id);
-        assertTrue(item.getName().equals("Hello"));
-        List<Sample> list = source.list(false, null, "H", null);
-        assertTrue(list.size() == 1);
-        assertTrue(list.get(0).getName().equals("Hello"));
+        assertTrue(item.getName().equals("Zzz"));
+        assertTrue(item.getDeleted() == null);
 
         source.close();
     }

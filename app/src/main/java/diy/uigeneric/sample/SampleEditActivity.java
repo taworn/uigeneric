@@ -36,10 +36,10 @@ import diy.uigeneric.data.SampleDataSource;
 
 /**
  * The SampleEditActivity is an activity to edit diy.uigeneric.data.sample class data.
- * <p>
+ * <p/>
  * Starts the activity to add data.  If user want to edit data, pass bundle "data.id" as long
  * integer.
- * <p>
+ * <p/>
  * There are two close events.  First, back pressed, just nothings change.  Second, when Save
  * button saved and data can be saved.
  */
@@ -165,6 +165,7 @@ public class SampleEditActivity extends AppCompatActivity {
         iconDefault = item.getIcon() == null;
         iconTempUrl = null;
         uiFromData();
+        Log.d(TAG, "onCreate() item: " + item.getId() + "/" + item.getName());
     }
 
     @Override
@@ -283,12 +284,12 @@ public class SampleEditActivity extends AppCompatActivity {
             source.open();
             if (item.getId() > 0) {
                 source.update(item);
-                Log.d(TAG, "saved " + item.getId() + "/" + item.getName());
+                Log.d(TAG, "saved item: " + item.getId() + "/" + item.getName());
             }
             else {
                 long id = source.insert(item);
                 item = source.get(id);
-                Log.d(TAG, "added " + item.getId() + "/" + item.getName());
+                Log.d(TAG, "added item: " + item.getId() + "/" + item.getName());
             }
             source.close();
 

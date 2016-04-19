@@ -19,13 +19,16 @@ import diy.uigeneric.R;
 import diy.uigeneric.data.Sample;
 import diy.uigeneric.data.SampleDataSource;
 
+/**
+ * The SampleViewActivity is an activity to view diy.uigeneric.data.sample class data.
+ * <p/>
+ * It has buttons (locate right, top) to edit and delete item.
+ */
 public class SampleViewActivity extends AppCompatActivity {
 
     private static final String TAG = SampleViewActivity.class.getSimpleName();
 
     private static final int REQUEST_EDIT = 100;
-
-    private static final int ICON_DEFAULT_DRAWABLE = R.drawable.ic_face_black_48dp;
 
     private ImageView imageIcon = null;
     private TextView textName = null;
@@ -58,9 +61,11 @@ public class SampleViewActivity extends AppCompatActivity {
             item = source.get(id);
             source.close();
         }
-        else
+        else {
             item = new Sample();
+        }
         uiFromData();
+        Log.d(TAG, "onCreate() item: " + item.getId() + "/" + item.getName());
     }
 
     @Override
@@ -91,6 +96,7 @@ public class SampleViewActivity extends AppCompatActivity {
     public void onActivityResult(int requestCode, int resultCode, Intent resultIntent) {
         super.onActivityResult(requestCode, resultCode, resultIntent);
         if (requestCode == REQUEST_EDIT && resultCode == RESULT_OK) {
+            Log.d(TAG, "onActivityResult(), return from SampleEditActivity");
             SampleDataSource source = new SampleDataSource(this);
             source.open();
             item = source.get(item.getId());
@@ -121,13 +127,15 @@ public class SampleViewActivity extends AppCompatActivity {
         if (changed) {
             Intent resultIntent = new Intent();
             resultIntent.putExtra("data.id", item.getId());
-            resultIntent.putExtra("data.changed", changed);
+            resultIntent.putExtra("data.changed", true);
             setResult(Activity.RESULT_OK, resultIntent);
+            Log.d(TAG, "back(), item: " + item.getId() + "/" + item.getName());
         }
         finish();
     }
 
     private void edit() {
+        Log.d(TAG, "edit(), call SampleEditActivity, item: " + item.getId() + "/" + item.getName());
         Intent intent = new Intent(this, SampleEditActivity.class);
         intent.putExtra("data.id", item.getId());
         startActivityForResult(intent, REQUEST_EDIT);
@@ -138,7 +146,7 @@ public class SampleViewActivity extends AppCompatActivity {
         source.open();
         source.delete(item.getId());
         source.close();
-        Log.d(TAG, "deleted " + item.getId() + "/" + item.getName());
+        Log.d(TAG, "deleted item: " + item.getId() + "/" + item.getName());
         Intent resultIntent = new Intent();
         setResult(Activity.RESULT_OK, resultIntent);
         resultIntent.putExtra("data.id", item.getId());
