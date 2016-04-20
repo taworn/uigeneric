@@ -137,7 +137,7 @@ public class Sample implements Comparator<Sample> {
     }
 
     public static String categoryToString(@NonNull Context context, int category) {
-        String[] list = context.getResources().getStringArray(R.array.sample_edit_category);
+        String[] list = context.getResources().getStringArray(R.array.sample_category);
         if (category >= 0 && category < list.length)
             return list[category];
         else

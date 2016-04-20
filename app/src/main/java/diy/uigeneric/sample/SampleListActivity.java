@@ -175,7 +175,7 @@ public class SampleListActivity extends AppCompatActivity implements NavigationV
     public void loadData() {
         SampleDataSource source = new SampleDataSource(this);
         source.open();
-        List<Sample> list = source.list(false, null, null, null);
+        List<Sample> list = source.list(null, null, null, null);
         source.close();
         iList.set(list);
     }

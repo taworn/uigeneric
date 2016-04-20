@@ -1,12 +1,14 @@
 package diy.uigeneric.sample;
 
 import android.app.Activity;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -60,9 +62,13 @@ public class SampleViewActivity extends AppCompatActivity {
             long id = bundle.getLong("data.id");
             item = source.get(id);
             source.close();
+            if (actionBar != null)
+                actionBar.setTitle(item.getDeleted() == null ? R.string.sample_view_title : R.string.sample_view_title_deleted);
         }
         else {
             item = new Sample();
+            if (actionBar != null)
+                actionBar.setTitle(R.string.sample_view_title);
         }
         uiFromData();
         Log.d(TAG, "onCreate() item: " + item.getId() + "/" + item.getName());
@@ -71,6 +77,14 @@ public class SampleViewActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.sample_view, menu);
+        if (item.getDeleted() == null) {
+            menu.findItem(R.id.action_restore).setVisible(false);
+            menu.findItem(R.id.action_remove).setVisible(false);
+        }
+        else {
+            menu.findItem(R.id.action_edit).setVisible(false);
+            menu.findItem(R.id.action_delete).setVisible(false);
+        }
         return true;
     }
 
@@ -85,8 +99,16 @@ public class SampleViewActivity extends AppCompatActivity {
             edit();
             return true;
         }
+        else if (id == R.id.action_restore) {
+            restore();
+            return true;
+        }
         else if (id == R.id.action_delete) {
             delete();
+            return true;
+        }
+        else if (id == R.id.action_remove) {
+            remove();
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -141,6 +163,19 @@ public class SampleViewActivity extends AppCompatActivity {
         startActivityForResult(intent, REQUEST_EDIT);
     }
 
+    private void restore() {
+        SampleDataSource source = new SampleDataSource(this);
+        source.open();
+        source.restore(item.getId());
+        source.close();
+        Log.d(TAG, "restored item: " + item.getId() + "/" + item.getName());
+        Intent resultIntent = new Intent();
+        setResult(Activity.RESULT_OK, resultIntent);
+        resultIntent.putExtra("data.id", item.getId());
+        resultIntent.putExtra("data.changed", true);
+        finish();
+    }
+
     private void delete() {
         SampleDataSource source = new SampleDataSource(this);
         source.open();
@@ -152,6 +187,28 @@ public class SampleViewActivity extends AppCompatActivity {
         resultIntent.putExtra("data.id", item.getId());
         resultIntent.putExtra("data.deleted", true);
         finish();
+    }
+
+    private void remove() {
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.sample_view_dialog_title)
+                .setMessage(R.string.sample_view_dialog_message)
+                .setNegativeButton(R.string.sample_view_dialog_negative, null)
+                .setPositiveButton(R.string.sample_view_dialog_positive, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        SampleDataSource source = new SampleDataSource(SampleViewActivity.this);
+                        source.open();
+                        source.remove(item.getId());
+                        source.close();
+                        Log.d(TAG, "removed item: " + item.getId() + "/" + item.getName());
+                        Intent resultIntent = new Intent();
+                        setResult(Activity.RESULT_OK, resultIntent);
+                        resultIntent.putExtra("data.id", item.getId());
+                        resultIntent.putExtra("data.deleted", true);
+                        finish();
+                    }
+                })
+                .show();
     }
 
     private void uiFromData() {

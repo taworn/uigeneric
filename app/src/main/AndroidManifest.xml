@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest
-    package="diy.uigeneric"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    package="diy.uigeneric">
 
     <uses-feature
         android:name="android.hardware.camera"
@@ -24,7 +24,6 @@
 
         <activity
             android:name=".sample.SampleListActivity"
-            android:label="@string/title_activity_sample_list"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
@@ -42,7 +41,6 @@
         </activity>
         <activity
             android:name=".sample.SampleViewActivity"
-            android:label="@string/sample_view_title"
             android:parentActivityName=".sample.SampleListActivity"
             android:theme="@style/AppTheme.NoActionBar">
         </activity>

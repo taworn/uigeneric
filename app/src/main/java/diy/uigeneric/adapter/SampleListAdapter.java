@@ -85,6 +85,8 @@ public class SampleListAdapter extends RecyclerView.Adapter<SampleListAdapter.Vi
         String categoryName = Sample.categoryToString(context, item.getCategory());
         if (categoryName == null)
             categoryName = Integer.toString(item.getCategory());
+        if (item.getDeleted() != null)
+            categoryName = context.getResources().getString(R.string.sample_deleted) + " -- " + categoryName;
         holder.textCategory.setText(categoryName);
     }
 

@@ -18,6 +18,7 @@ import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.action.ViewActions.click;
 import static android.support.test.espresso.action.ViewActions.typeText;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
+import static android.support.test.espresso.matcher.ViewMatchers.withText;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(AndroidJUnit4.class)
@@ -125,6 +126,71 @@ public class SampleViewActivityTest {
         item = source.get(id);
         assertTrue(item.getName().equals("Aaaa"));
         assertTrue(item.getDeleted() != null);
+
+        source.close();
+    }
+
+    @Test
+    public void testRestore() {
+        long id;
+
+        Log.d(TAG, "test on restore");
+
+        // first, removing all records
+        SampleDataSource source = new SampleDataSource(InstrumentationRegistry.getTargetContext());
+        source.open();
+        source.removeAll();
+
+        // adds first record
+        Sample item = new Sample();
+        item.setName("Aaa");
+        item.setDeleted(true);
+        id = source.insert(item);
+        assertTrue(item.getName().equals("Aaa"));
+        assertTrue(item.getDeleted() != null);
+
+        // tests activity
+        Intent intent = new Intent();
+        intent.putExtra("data.id", id);
+        activityTestRule.launchActivity(intent);
+        onView(withId(R.id.action_restore)).perform(click());
+
+        // checks record, it must be moved out of trash
+        item = source.get(id);
+        assertTrue(item.getName().equals("Aaa"));
+        assertTrue(item.getDeleted() == null);
+
+        source.close();
+    }
+
+    @Test
+    public void testRemove() {
+        long id;
+
+        Log.d(TAG, "test on remove");
+
+        // first, removing all records
+        SampleDataSource source = new SampleDataSource(InstrumentationRegistry.getTargetContext());
+        source.open();
+        source.removeAll();
+
+        // adds first record
+        Sample item = new Sample();
+        item.setName("Aaa");
+        item.setDeleted(true);
+        id = source.insert(item);
+        assertTrue(item.getName().equals("Aaa"));
+        assertTrue(item.getDeleted() != null);
+
+        // tests activity
+        Intent intent = new Intent();
+        intent.putExtra("data.id", id);
+        activityTestRule.launchActivity(intent);
+        onView(withId(R.id.action_remove)).perform(click());
+        onView(withText(R.string.sample_view_dialog_positive)).perform(click());
+
+        // checks record, it must be gone forever
+        assertTrue(source.count() == 0);
 
         source.close();
     }

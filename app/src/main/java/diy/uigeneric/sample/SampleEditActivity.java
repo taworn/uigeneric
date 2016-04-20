@@ -130,7 +130,7 @@ public class SampleEditActivity extends AppCompatActivity {
         });
         menuIcon.inflate(R.menu.sample_edit_icon);
 
-        ArrayAdapter<CharSequence> arrayAdapter = ArrayAdapter.createFromResource(this, R.array.sample_edit_category, android.R.layout.simple_spinner_item);
+        ArrayAdapter<CharSequence> arrayAdapter = ArrayAdapter.createFromResource(this, R.array.sample_category, android.R.layout.simple_spinner_item);
         spinCategory.setAdapter(arrayAdapter);
         spinCategory.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override

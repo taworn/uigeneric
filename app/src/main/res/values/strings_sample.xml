@@ -17,7 +17,21 @@
     <string name="sample_edit_dialog_positive">Yes</string>
     <string name="sample_edit_dialog_negative">No</string>
 
-    <string-array name="sample_edit_category">
+    <string name="sample_view_title">View</string>
+    <string name="sample_view_title_deleted">View in Trash</string>
+    <string name="sample_view_hint_icon">Icon</string>
+    <string name="sample_view_hint_name">Name</string>
+    <string name="sample_view_hint_category">Category</string>
+    <string name="sample_view_hint_detail">Detail (optional)</string>
+
+    <string name="sample_view_dialog_title">Confirm</string>
+    <string name="sample_view_dialog_message">Delete data?</string>
+    <string name="sample_view_dialog_positive">Yes</string>
+    <string name="sample_view_dialog_negative">No</string>
+
+    <string name="sample_deleted">DELETED</string>
+
+    <string-array name="sample_category">
         <item name="category_data">Data</item>
         <item name="category_priority_data">Priority Data</item>
         <item name="category_important">Important</item>
@@ -25,11 +39,5 @@
         <item name="category_draft">Drafts</item>
         <item name="category_archived">Archived</item>
     </string-array>
-
-    <string name="sample_view_title">View</string>
-    <string name="sample_view_hint_icon">Icon</string>
-    <string name="sample_view_hint_name">Name</string>
-    <string name="sample_view_hint_category">Category</string>
-    <string name="sample_view_hint_detail">Detail (optional)</string>
 
 </resources>

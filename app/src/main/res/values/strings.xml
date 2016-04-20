@@ -1,16 +1,14 @@
 <resources>
     <string name="app_name">UI Generic</string>
 
-    <string name="title_activity_sample_list">Sample List</string>
-    <string name="title_activity_sample_edit">Sample</string>
-    <string name="title_activity_sample_view">View</string>
-
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
     <string name="action_save">Save</string>
     <string name="action_edit">Edit</string>
+    <string name="action_restore">Restore</string>
     <string name="action_delete">Delete</string>
+    <string name="action_remove">Remove</string>
 
     <string name="action_settings">Settings</string>
 </resources>
