@@ -18,6 +18,7 @@ public class IndirectListTest {
 
         IndirectList<String> il = new IndirectList<>();
         il.set(l);
+
         assertEquals(il.get(0).item, "A");
         assertEquals(il.get(1).item, "B");
         assertEquals(il.get(2).item, "C");
