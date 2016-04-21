@@ -10,13 +10,8 @@ import java.util.List;
  */
 public class IndirectList<ItemType> {
 
-    public static class Item<ItemType> {
-        public ItemType item;
-        public boolean selected;
-    }
-
     private List<ItemType> list;
-    private List<Item> indexList;
+    private List<ItemType> indexList;
 
     public IndirectList() {
         super();
@@ -28,14 +23,11 @@ public class IndirectList<ItemType> {
         list = l;
         indexList = new ArrayList<>(list.size());
         for (ItemType i : list) {
-            Item<ItemType> ii = new Item<>();
-            ii.item = i;
-            ii.selected = false;
-            indexList.add(ii);
+            indexList.add(i);
         }
     }
 
-    public Item get(int i) {
+    public ItemType get(int i) {
         return indexList.get(i);
     }
 
