@@ -71,7 +71,7 @@ public class SampleListAdapter extends RecyclerView.Adapter<SampleListAdapter.Vi
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        Sample item = (Sample) list.get(position).item;
+        Sample item = list.get(position);
 
         if (item.getIcon() != null) {
             Drawable drawable = new BitmapDrawable(context.getResources(), item.getIcon());
@@ -85,8 +85,10 @@ public class SampleListAdapter extends RecyclerView.Adapter<SampleListAdapter.Vi
         String categoryName = Sample.categoryToString(context, item.getCategory());
         if (categoryName == null)
             categoryName = Integer.toString(item.getCategory());
-        if (item.getDeleted() != null)
-            categoryName = context.getResources().getString(R.string.sample_deleted) + " -- " + categoryName;
+        if (item.getDeleted() != null) {
+            categoryName += " - " + formatter.format(item.getDeleted().getTime());
+            categoryName += " " + context.getResources().getString(R.string.sample_deleted);
+        }
         holder.textCategory.setText(categoryName);
     }
 

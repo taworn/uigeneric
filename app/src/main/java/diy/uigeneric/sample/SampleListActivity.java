@@ -70,7 +70,7 @@ public class SampleListActivity extends AppCompatActivity implements NavigationV
             listView.setAdapter(new SampleListAdapter(this, iList, false, new SampleListAdapter.OnItemClickListener() {
                 @Override
                 public void onClick(View view, int position) {
-                    Sample item = (Sample) iList.get(position).item;
+                    Sample item = iList.get(position);
                     Intent intent = new Intent(SampleListActivity.this, SampleViewActivity.class);
                     intent.putExtra("data.id", item.getId());
                     startActivityForResult(intent, REQUEST_VIEW);
@@ -94,6 +94,29 @@ public class SampleListActivity extends AppCompatActivity implements NavigationV
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.sample_list, menu);
+
+        // inits radio and check menu items
+        /*
+        MenuItem item;
+        switch (fragment.getSortBy()) {
+            case GenericListIndirect.SORT_NAME:
+                item = menu.findItem(R.id.action_sort_name);
+                break;
+            case GenericListIndirect.SORT_NAME_IGNORE_CASE:
+                item = menu.findItem(R.id.action_sort_name_ignore_case);
+                break;
+            case GenericListIndirect.SORT_NAME_NATURAL:
+                item = menu.findItem(R.id.action_sort_name_natural);
+                break;
+            case GenericListIndirect.SORT_AS_IS:
+            default:
+                item = menu.findItem(R.id.action_sort_as_is);
+                break;
+        }
+        item.setChecked(true);
+        item = menu.findItem(R.id.action_sort_reverse);
+        item.setChecked(fragment.getSortReverse());
+        */
         return true;
     }
 
@@ -103,11 +126,6 @@ public class SampleListActivity extends AppCompatActivity implements NavigationV
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
 
         return super.onOptionsItemSelected(item);
     }
@@ -136,6 +154,34 @@ public class SampleListActivity extends AppCompatActivity implements NavigationV
         else if (id == R.id.nav_send) {
 
         }
+
+        /*
+        else if (id == R.id.action_sort_as_is) {
+            item.setChecked(true);
+            fragment.sort(GenericListIndirect.SORT_AS_IS, fragment.getSortReverse());
+            return true;
+        }
+        else if (id == R.id.action_sort_name) {
+            item.setChecked(true);
+            fragment.sort(GenericListIndirect.SORT_NAME, fragment.getSortReverse());
+            return true;
+        }
+        else if (id == R.id.action_sort_name_ignore_case) {
+            item.setChecked(true);
+            fragment.sort(GenericListIndirect.SORT_NAME_IGNORE_CASE, fragment.getSortReverse());
+            return true;
+        }
+        else if (id == R.id.action_sort_name_natural) {
+            item.setChecked(true);
+            fragment.sort(GenericListIndirect.SORT_NAME_NATURAL, fragment.getSortReverse());
+            return true;
+        }
+        else if (id == R.id.action_sort_reverse) {
+            item.setChecked(!item.isChecked());
+            fragment.sort(fragment.getSortBy(), !fragment.getSortReverse());
+            return true;
+        }
+        */
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);

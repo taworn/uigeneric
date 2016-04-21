@@ -29,7 +29,7 @@
     <string name="sample_view_dialog_positive">Yes</string>
     <string name="sample_view_dialog_negative">No</string>
 
-    <string name="sample_deleted">DELETED</string>
+    <string name="sample_deleted">deleted</string>
 
     <string-array name="sample_category">
         <item name="category_data">Data</item>

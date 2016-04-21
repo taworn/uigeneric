@@ -4,6 +4,13 @@
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
+    <string name="action_sort">Sort</string>
+    <string name="action_sort_as_is">As is</string>
+    <string name="action_sort_name">Name</string>
+    <string name="action_sort_name_ignore_case">Name ignore case</string>
+    <string name="action_sort_name_natural">Name natural sort</string>
+    <string name="action_sort_reverse">Reverse</string>
+
     <string name="action_save">Save</string>
     <string name="action_edit">Edit</string>
     <string name="action_restore">Restore</string>
