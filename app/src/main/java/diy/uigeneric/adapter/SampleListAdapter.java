@@ -14,9 +14,9 @@ import android.widget.TextView;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
 
-import diy.generic.IndirectList;
 import diy.uigeneric.R;
 import diy.uigeneric.data.Sample;
+import diy.uigeneric.data.SampleIndirectList;
 
 /**
  * Sample list adapter.
@@ -49,17 +49,15 @@ public class SampleListAdapter extends RecyclerView.Adapter<SampleListAdapter.Vi
     }
 
     private Context context = null;
-    private IndirectList<Sample> list = null;
+    private SampleIndirectList list = null;
     private SimpleDateFormat formatter = null;
-    private boolean deleted = false;
     private OnItemClickListener listener = null;
 
-    public SampleListAdapter(Context context, @NonNull IndirectList<Sample> list, boolean deleted, @NonNull OnItemClickListener listener) {
+    public SampleListAdapter(Context context, @NonNull SampleIndirectList list, @NonNull OnItemClickListener listener) {
         super();
         this.context = context;
         this.list = list;
         this.formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US);
-        this.deleted = deleted;
         this.listener = listener;
     }
 

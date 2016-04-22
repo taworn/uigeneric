@@ -2,12 +2,16 @@ package diy.uigeneric.data;
 
 import android.content.Context;
 
+import com.amjjd.alphanum.AlphanumericComparator;
+
+import java.text.Collator;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 
-import diy.generic.IndirectList;
-
-public class SampleIndirectList extends IndirectList<Sample> {
+public class SampleIndirectList {
 
     public static final int SORT_AS_IS = 0;
     public static final int SORT_NAME = 1;
@@ -50,7 +54,6 @@ public class SampleIndirectList extends IndirectList<Sample> {
             return r.getName().compareToIgnoreCase(l.getName());
         }
     };
-    /*
     private static final Comparator<Sample> compareNameNatural = new Comparator<Sample>() {
         @Override
         public int compare(Sample l, Sample r) {
@@ -63,24 +66,62 @@ public class SampleIndirectList extends IndirectList<Sample> {
             return comparator.compare(r.getName(), l.getName());
         }
     };
-    private static final Comparator<String> comparator = new NaturalComparator(Collator.getInstance(Locale.ENGLISH));
-    */
+    private static final Comparator<String> comparator = new AlphanumericComparator(Collator.getInstance(Locale.ENGLISH));
+
+    private List<Sample> list;
+    private List<Sample> indexList;
+
+    private Boolean deleted;
+    private Integer category;
+    private String query;
+    private int sortBy;
+    private boolean sortReverse;
 
     public SampleIndirectList() {
         super();
+        this.list = new ArrayList<>();
+        this.indexList = new ArrayList<>();
+        sortBy = SORT_AS_IS;
+        sortReverse = false;
+    }
+
+    public Sample get(int i) {
+        return indexList.get(i);
+    }
+
+    public int size() {
+        return indexList.size();
     }
 
     public void load(Context context, Boolean deleted, Integer category, String query, int sortBy, boolean sortReverse) {
         SampleDataSource source = new SampleDataSource(context);
         source.open();
-        List<Sample> list = source.list(deleted, category, query, null);
+        list = source.list(deleted, category, query, null);
         source.close();
+        this.deleted = deleted;
+        this.category = category;
+        this.query = query;
 
-        set(list);
-        //sort(sortBy, sortReverse);
+        indexList = new ArrayList<>(list.size());
+        for (Sample i : list) {
+            indexList.add(i);
+        }
+        sort(sortBy, sortReverse);
     }
 
-    /*
+    public void reload(Context context) {
+        SampleDataSource source = new SampleDataSource(context);
+        source.open();
+        list = source.list(deleted, category, query, null);
+        source.close();
+
+        indexList = new ArrayList<>(list.size());
+        for (Sample i : list) {
+            indexList.add(i);
+        }
+        sort(sortBy, sortReverse);
+    }
+
     public void sort(int sortBy, boolean sortReverse) {
         switch (sortBy) {
             default:
@@ -112,7 +153,29 @@ public class SampleIndirectList extends IndirectList<Sample> {
                     Collections.sort(indexList, compareNameNaturalReverse);
                 break;
         }
+        this.sortBy = sortBy;
+        this.sortReverse = sortReverse;
     }
-    */
+
+    public int getSortBy() {
+        return sortBy;
+    }
+
+    public void setSortBy(int value) {
+        if (sortBy != value) {
+            sort(value, sortReverse);
+        }
+    }
+
+    public boolean getSortReverse() {
+        return sortReverse;
+    }
+
+    public void setSortReverse(boolean value) {
+        if (sortReverse != value) {
+            Collections.reverse(indexList);
+            sortReverse = value;
+        }
+    }
 
 }

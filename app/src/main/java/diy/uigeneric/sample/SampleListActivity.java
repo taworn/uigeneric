@@ -17,13 +17,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
-import java.util.List;
-
-import diy.generic.IndirectList;
 import diy.uigeneric.R;
 import diy.uigeneric.adapter.SampleListAdapter;
 import diy.uigeneric.data.Sample;
-import diy.uigeneric.data.SampleDataSource;
+import diy.uigeneric.data.SampleIndirectList;
 
 public class SampleListActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -32,7 +29,7 @@ public class SampleListActivity extends AppCompatActivity implements NavigationV
     private static final int REQUEST_ADD = 100;
     private static final int REQUEST_VIEW = 101;
 
-    private IndirectList<Sample> iList = new IndirectList<>();
+    private SampleIndirectList list = null;
     private RecyclerView listView = null;
 
     @Override
@@ -61,16 +58,18 @@ public class SampleListActivity extends AppCompatActivity implements NavigationV
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        loadData();
+        list = new SampleIndirectList();
+        list.load(this, null, null, null, SampleIndirectList.SORT_AS_IS, false);
+
         listView = (RecyclerView) findViewById(R.id.list_view);
         if (listView != null) {
             listView.setHasFixedSize(true);
             listView.setLayoutManager(new LinearLayoutManager(this));
             listView.setItemAnimator(new DefaultItemAnimator());
-            listView.setAdapter(new SampleListAdapter(this, iList, false, new SampleListAdapter.OnItemClickListener() {
+            listView.setAdapter(new SampleListAdapter(this, list, new SampleListAdapter.OnItemClickListener() {
                 @Override
                 public void onClick(View view, int position) {
-                    Sample item = iList.get(position);
+                    Sample item = list.get(position);
                     Intent intent = new Intent(SampleListActivity.this, SampleViewActivity.class);
                     intent.putExtra("data.id", item.getId());
                     startActivityForResult(intent, REQUEST_VIEW);
@@ -96,27 +95,26 @@ public class SampleListActivity extends AppCompatActivity implements NavigationV
         getMenuInflater().inflate(R.menu.sample_list, menu);
 
         // inits radio and check menu items
-        /*
         MenuItem item;
-        switch (fragment.getSortBy()) {
-            case GenericListIndirect.SORT_NAME:
+        switch (list.getSortBy()) {
+            default:
+            case SampleIndirectList.SORT_AS_IS:
+                item = menu.findItem(R.id.action_sort_as_is);
+                break;
+            case SampleIndirectList.SORT_NAME:
                 item = menu.findItem(R.id.action_sort_name);
                 break;
-            case GenericListIndirect.SORT_NAME_IGNORE_CASE:
+            case SampleIndirectList.SORT_NAME_IGNORE_CASE:
                 item = menu.findItem(R.id.action_sort_name_ignore_case);
                 break;
-            case GenericListIndirect.SORT_NAME_NATURAL:
+            case SampleIndirectList.SORT_NAME_NATURAL:
                 item = menu.findItem(R.id.action_sort_name_natural);
-                break;
-            case GenericListIndirect.SORT_AS_IS:
-            default:
-                item = menu.findItem(R.id.action_sort_as_is);
                 break;
         }
         item.setChecked(true);
         item = menu.findItem(R.id.action_sort_reverse);
-        item.setChecked(fragment.getSortReverse());
-        */
+        item.setChecked(list.getSortReverse());
+
         return true;
     }
 
@@ -126,6 +124,37 @@ public class SampleListActivity extends AppCompatActivity implements NavigationV
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
+
+        if (id == R.id.action_sort_as_is) {
+            item.setChecked(true);
+            list.setSortBy(SampleIndirectList.SORT_AS_IS);
+            listView.getAdapter().notifyDataSetChanged();
+            return true;
+        }
+        else if (id == R.id.action_sort_name) {
+            item.setChecked(true);
+            list.setSortBy(SampleIndirectList.SORT_NAME);
+            listView.getAdapter().notifyDataSetChanged();
+            return true;
+        }
+        else if (id == R.id.action_sort_name_ignore_case) {
+            item.setChecked(true);
+            list.setSortBy(SampleIndirectList.SORT_NAME_IGNORE_CASE);
+            listView.getAdapter().notifyDataSetChanged();
+            return true;
+        }
+        else if (id == R.id.action_sort_name_natural) {
+            item.setChecked(true);
+            list.setSortBy(SampleIndirectList.SORT_NAME_NATURAL);
+            listView.getAdapter().notifyDataSetChanged();
+            return true;
+        }
+        else if (id == R.id.action_sort_reverse) {
+            item.setChecked(!item.isChecked());
+            list.setSortReverse(!list.getSortReverse());
+            listView.getAdapter().notifyDataSetChanged();
+            return true;
+        }
 
         return super.onOptionsItemSelected(item);
     }
@@ -155,34 +184,6 @@ public class SampleListActivity extends AppCompatActivity implements NavigationV
 
         }
 
-        /*
-        else if (id == R.id.action_sort_as_is) {
-            item.setChecked(true);
-            fragment.sort(GenericListIndirect.SORT_AS_IS, fragment.getSortReverse());
-            return true;
-        }
-        else if (id == R.id.action_sort_name) {
-            item.setChecked(true);
-            fragment.sort(GenericListIndirect.SORT_NAME, fragment.getSortReverse());
-            return true;
-        }
-        else if (id == R.id.action_sort_name_ignore_case) {
-            item.setChecked(true);
-            fragment.sort(GenericListIndirect.SORT_NAME_IGNORE_CASE, fragment.getSortReverse());
-            return true;
-        }
-        else if (id == R.id.action_sort_name_natural) {
-            item.setChecked(true);
-            fragment.sort(GenericListIndirect.SORT_NAME_NATURAL, fragment.getSortReverse());
-            return true;
-        }
-        else if (id == R.id.action_sort_reverse) {
-            item.setChecked(!item.isChecked());
-            fragment.sort(fragment.getSortBy(), !fragment.getSortReverse());
-            return true;
-        }
-        */
-
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
@@ -194,7 +195,7 @@ public class SampleListActivity extends AppCompatActivity implements NavigationV
         switch (requestCode) {
             case REQUEST_ADD:
                 if (resultCode == Activity.RESULT_OK) {
-                    loadData();
+                    list.reload(this);
                     listView.getAdapter().notifyDataSetChanged();
                     long id = resultIntent.getLongExtra("data.id", 0);
                     if (id != 0) {
@@ -210,20 +211,12 @@ public class SampleListActivity extends AppCompatActivity implements NavigationV
                     boolean changed = resultIntent.getBooleanExtra("data.changed", false);
                     boolean deleted = resultIntent.getBooleanExtra("data.deleted", false);
                     if (changed || deleted) {
-                        loadData();
+                        list.reload(this);
                         listView.getAdapter().notifyDataSetChanged();
                     }
                 }
                 break;
         }
-    }
-
-    public void loadData() {
-        SampleDataSource source = new SampleDataSource(this);
-        source.open();
-        List<Sample> list = source.list(null, null, null, null);
-        source.close();
-        iList.set(list);
     }
 
 }

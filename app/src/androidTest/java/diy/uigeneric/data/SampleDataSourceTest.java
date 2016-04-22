@@ -5,7 +5,6 @@ import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 import android.util.Log;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -19,8 +18,6 @@ import static org.junit.Assert.assertTrue;
 public class SampleDataSourceTest {
 
     private static final String TAG = SampleDataSourceTest.class.getSimpleName();
-
-    private SampleDataSource source = null;
 
     @Before
     public void before() {
