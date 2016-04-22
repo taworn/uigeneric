@@ -110,16 +110,11 @@ public class SampleIndirectList {
     }
 
     public void reload(Context context) {
-        SampleDataSource source = new SampleDataSource(context);
-        source.open();
-        list = source.list(deleted, category, query, null);
-        source.close();
+        load(context, deleted, category, query, sortBy, sortReverse);
+    }
 
-        indexList = new ArrayList<>(list.size());
-        for (Sample i : list) {
-            indexList.add(i);
-        }
-        sort(sortBy, sortReverse);
+    public void search(Context context, String query) {
+        load(context, deleted, category, query, sortBy, sortReverse);
     }
 
     public void sort(int sortBy, boolean sortReverse) {
