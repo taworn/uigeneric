@@ -50,7 +50,7 @@ public class SampleIndirectListTest {
         list.load(context, null, null, null, SampleIndirectList.SORT_AS_IS, false);
 
         // sorts as is
-        Log.d(TAG, "test sort as is");
+        Log.d(TAG, "test sort: as is");
         list.sort(SampleIndirectList.SORT_AS_IS, false);
         assertTrue(list.get(0).getName().equals("Aaa1"));
         assertTrue(list.get(1).getName().equals("Aaa2"));
@@ -58,7 +58,7 @@ public class SampleIndirectListTest {
         assertTrue(list.get(3).getName().equals("ZZZ"));
         assertTrue(list.get(4).getName().equals("zzz"));
         assertTrue(list.size() == 5);
-        Log.d(TAG, "test sort as is, reverse");
+        Log.d(TAG, "test sort: as is, reverse");
         list.sort(SampleIndirectList.SORT_AS_IS, true);
         assertTrue(list.get(0).getName().equals("zzz"));
         assertTrue(list.get(1).getName().equals("ZZZ"));
@@ -68,7 +68,7 @@ public class SampleIndirectListTest {
         assertTrue(list.size() == 5);
 
         // sorts name
-        Log.d(TAG, "test sort name");
+        Log.d(TAG, "test sort: name");
         list.sort(SampleIndirectList.SORT_NAME, false);
         assertTrue(list.get(0).getName().equals("Aaa03"));
         assertTrue(list.get(1).getName().equals("Aaa1"));
@@ -76,7 +76,7 @@ public class SampleIndirectListTest {
         assertTrue(list.get(3).getName().equals("ZZZ"));
         assertTrue(list.get(4).getName().equals("zzz"));
         assertTrue(list.size() == 5);
-        Log.d(TAG, "test sort name, reverse");
+        Log.d(TAG, "test sort: name, reverse");
         list.sort(SampleIndirectList.SORT_NAME, true);
         assertTrue(list.get(0).getName().equals("zzz"));
         assertTrue(list.get(1).getName().equals("ZZZ"));
@@ -86,7 +86,7 @@ public class SampleIndirectListTest {
         assertTrue(list.size() == 5);
 
         // sorts name ignore case
-        Log.d(TAG, "test sort name ignore case");
+        Log.d(TAG, "test sort: name ignore case");
         list.sort(SampleIndirectList.SORT_NAME_IGNORE_CASE, false);
         assertTrue(list.get(0).getName().equals("Aaa03"));
         assertTrue(list.get(1).getName().equals("Aaa1"));
@@ -94,7 +94,7 @@ public class SampleIndirectListTest {
         assertTrue(list.get(3).getName().equals("zzz"));
         assertTrue(list.get(4).getName().equals("ZZZ"));
         assertTrue(list.size() == 5);
-        Log.d(TAG, "test sort name ignore case, reverse");
+        Log.d(TAG, "test sort: name ignore case, reverse");
         list.sort(SampleIndirectList.SORT_NAME_IGNORE_CASE, true);
         assertTrue(list.get(0).getName().equals("zzz"));
         assertTrue(list.get(1).getName().equals("ZZZ"));
@@ -104,7 +104,7 @@ public class SampleIndirectListTest {
         assertTrue(list.size() == 5);
 
         // sorts natural
-        Log.d(TAG, "test sort name natural");
+        Log.d(TAG, "test sort: name natural");
         list.sort(SampleIndirectList.SORT_NAME_NATURAL, false);
         assertTrue(list.get(0).getName().equals("Aaa1"));
         assertTrue(list.get(1).getName().equals("Aaa2"));
@@ -112,7 +112,7 @@ public class SampleIndirectListTest {
         assertTrue(list.get(3).getName().equals("zzz"));
         assertTrue(list.get(4).getName().equals("ZZZ"));
         assertTrue(list.size() == 5);
-        Log.d(TAG, "test sort name natural, reverse");
+        Log.d(TAG, "test sort: name natural, reverse");
         list.sort(SampleIndirectList.SORT_NAME_NATURAL, true);
         assertTrue(list.get(0).getName().equals("ZZZ"));
         assertTrue(list.get(1).getName().equals("zzz"));

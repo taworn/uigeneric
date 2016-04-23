@@ -16,6 +16,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -128,6 +129,7 @@ public class SampleListActivity extends AppCompatActivity implements NavigationV
                 public boolean onClose() {
                     list.search(SampleListActivity.this, "");
                     listView.getAdapter().notifyDataSetChanged();
+                    Log.d(TAG, "search stop");
                     return false;
                 }
             });
@@ -146,30 +148,35 @@ public class SampleListActivity extends AppCompatActivity implements NavigationV
             item.setChecked(true);
             list.setSortBy(SampleIndirectList.SORT_AS_IS);
             listView.getAdapter().notifyDataSetChanged();
+            Log.d(TAG, "sort: as is");
             return true;
         }
         else if (id == R.id.action_sort_name) {
             item.setChecked(true);
             list.setSortBy(SampleIndirectList.SORT_NAME);
             listView.getAdapter().notifyDataSetChanged();
+            Log.d(TAG, "sort: name");
             return true;
         }
         else if (id == R.id.action_sort_name_ignore_case) {
             item.setChecked(true);
             list.setSortBy(SampleIndirectList.SORT_NAME_IGNORE_CASE);
             listView.getAdapter().notifyDataSetChanged();
+            Log.d(TAG, "sort: name ignore case");
             return true;
         }
         else if (id == R.id.action_sort_name_natural) {
             item.setChecked(true);
             list.setSortBy(SampleIndirectList.SORT_NAME_NATURAL);
             listView.getAdapter().notifyDataSetChanged();
+            Log.d(TAG, "sort: name natural");
             return true;
         }
         else if (id == R.id.action_sort_reverse) {
             item.setChecked(!item.isChecked());
             list.setSortReverse(!list.getSortReverse());
             listView.getAdapter().notifyDataSetChanged();
+            Log.d(TAG, "sort: " + (!list.getSortReverse() ? "ascending" : "descending"));
             return true;
         }
 
@@ -243,8 +250,9 @@ public class SampleListActivity extends AppCompatActivity implements NavigationV
 
     private void handleIntent(Intent intent) {
         if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
-            String query = intent.getStringExtra(SearchManager.QUERY);
-            list.search(SampleListActivity.this, query.trim());
+            String query = intent.getStringExtra(SearchManager.QUERY).trim();
+            Log.d(TAG, "search type: " + query);
+            list.search(SampleListActivity.this, query);
             listView.getAdapter().notifyDataSetChanged();
         }
     }
