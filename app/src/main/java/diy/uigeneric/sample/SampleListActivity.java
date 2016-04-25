@@ -23,6 +23,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
+import java.util.Locale;
+
 import diy.uigeneric.R;
 import diy.uigeneric.adapter.SampleListAdapter;
 import diy.uigeneric.data.Sample;
@@ -37,8 +39,11 @@ public class SampleListActivity extends AppCompatActivity implements NavigationV
 
     private ActionBar actionBar = null;
     private DrawerLayout drawer = null;
+    private ActionBarDrawerToggle toggle = null;
     private SampleIndirectList list = null;
     private RecyclerView listView = null;
+    private boolean actionMode = false;
+    private String saveTitle = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,7 +67,7 @@ public class SampleListActivity extends AppCompatActivity implements NavigationV
 
         // initializes navigation drawer
         drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.setDrawerListener(toggle);
         toggle.syncState();
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
@@ -91,6 +96,12 @@ public class SampleListActivity extends AppCompatActivity implements NavigationV
                 public void onLongClick(View view, int position) {
                     Sample item = list.get(position);
                     Toast.makeText(SampleListActivity.this, item.getName(), Toast.LENGTH_SHORT).show();
+
+                    saveTitle = actionBar.getTitle().toString();
+                    toggle.onDrawerOpened(null);
+                    actionBar.setTitle(String.format(Locale.US, "%d item", 1));
+                    actionMode = true;
+                    invalidateOptionsMenu();
                 }
             }));
         }
@@ -141,13 +152,32 @@ public class SampleListActivity extends AppCompatActivity implements NavigationV
     }
 
     @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        menu.findItem(R.id.action_restore).setVisible(actionMode);
+        menu.findItem(R.id.action_delete).setVisible(actionMode);
+        menu.findItem(R.id.action_remove).setVisible(actionMode);
+        menu.findItem(R.id.action_search).setVisible(!actionMode);
+        menu.findItem(R.id.action_sort).setVisible(!actionMode);
+        return true;
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        if (id == R.id.action_sort_as_is) {
+        if (id == android.R.id.home) {
+            if (actionMode) {
+                toggle.onDrawerClosed(null);
+                actionBar.setTitle(saveTitle);
+                actionMode = false;
+                invalidateOptionsMenu();
+                return true;
+            }
+        }
+        else if (id == R.id.action_sort_as_is) {
             item.setChecked(true);
             list.setSortBy(SampleIndirectList.SORT_AS_IS);
             listView.getAdapter().notifyDataSetChanged();
@@ -305,6 +335,12 @@ public class SampleListActivity extends AppCompatActivity implements NavigationV
     public void onBackPressed() {
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
+        }
+        else if (actionMode) {
+            toggle.onDrawerClosed(null);
+            actionBar.setTitle(saveTitle);
+            actionMode = false;
+            invalidateOptionsMenu();
         }
         else {
             super.onBackPressed();
