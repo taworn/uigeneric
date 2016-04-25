@@ -21,7 +21,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Toast;
 
 import java.util.Locale;
 
@@ -41,8 +40,9 @@ public class SampleListActivity extends AppCompatActivity implements NavigationV
     private DrawerLayout drawer = null;
     private ActionBarDrawerToggle toggle = null;
     private SampleIndirectList list = null;
+    private SampleListAdapter listAdapter = null;
     private RecyclerView listView = null;
-    private boolean actionMode = false;
+    private int listSelected = 0;
     private String saveTitle = null;
 
     @Override
@@ -78,32 +78,33 @@ public class SampleListActivity extends AppCompatActivity implements NavigationV
         actionBar.setTitle(R.string.sample_list_title_data);
         list = new SampleIndirectList();
         list.load(this, false, Sample.CATEGORY_DATA, null, SampleIndirectList.SORT_AS_IS, false);
+        listAdapter = new SampleListAdapter(this, list, new SampleListAdapter.OnItemClickListener() {
+            @Override
+            public void onClick(View view, int position) {
+                Sample item = list.get(position);
+                Intent intent = new Intent(SampleListActivity.this, SampleViewActivity.class);
+                intent.putExtra("data.id", item.getId());
+                startActivityForResult(intent, REQUEST_VIEW);
+            }
+
+            @Override
+            public void onLongClick(View view, int position) {
+                if (!list.getSelected().get(position)) {
+                    listAdapter.selectedItem(position, true);
+                    increaseListSelection();
+                }
+                else {
+                    listAdapter.selectedItem(position, false);
+                    decreaseListSelection();
+                }
+            }
+        });
         listView = (RecyclerView) findViewById(R.id.list_view);
         if (listView != null) {
             listView.setHasFixedSize(true);
             listView.setLayoutManager(new LinearLayoutManager(this));
             listView.setItemAnimator(new DefaultItemAnimator());
-            listView.setAdapter(new SampleListAdapter(this, list, new SampleListAdapter.OnItemClickListener() {
-                @Override
-                public void onClick(View view, int position) {
-                    Sample item = list.get(position);
-                    Intent intent = new Intent(SampleListActivity.this, SampleViewActivity.class);
-                    intent.putExtra("data.id", item.getId());
-                    startActivityForResult(intent, REQUEST_VIEW);
-                }
-
-                @Override
-                public void onLongClick(View view, int position) {
-                    Sample item = list.get(position);
-                    Toast.makeText(SampleListActivity.this, item.getName(), Toast.LENGTH_SHORT).show();
-
-                    saveTitle = actionBar.getTitle().toString();
-                    toggle.onDrawerOpened(null);
-                    actionBar.setTitle(String.format(Locale.US, "%d item", 1));
-                    actionMode = true;
-                    invalidateOptionsMenu();
-                }
-            }));
+            listView.setAdapter(listAdapter);
         }
     }
 
@@ -153,11 +154,11 @@ public class SampleListActivity extends AppCompatActivity implements NavigationV
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        menu.findItem(R.id.action_restore).setVisible(actionMode);
-        menu.findItem(R.id.action_delete).setVisible(actionMode);
-        menu.findItem(R.id.action_remove).setVisible(actionMode);
-        menu.findItem(R.id.action_search).setVisible(!actionMode);
-        menu.findItem(R.id.action_sort).setVisible(!actionMode);
+        menu.findItem(R.id.action_restore).setVisible(listSelected > 0);
+        menu.findItem(R.id.action_delete).setVisible(listSelected > 0);
+        menu.findItem(R.id.action_remove).setVisible(listSelected > 0);
+        menu.findItem(R.id.action_search).setVisible(listSelected <= 0);
+        menu.findItem(R.id.action_sort).setVisible(listSelected <= 0);
         return true;
     }
 
@@ -168,16 +169,7 @@ public class SampleListActivity extends AppCompatActivity implements NavigationV
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        if (id == android.R.id.home) {
-            if (actionMode) {
-                toggle.onDrawerClosed(null);
-                actionBar.setTitle(saveTitle);
-                actionMode = false;
-                invalidateOptionsMenu();
-                return true;
-            }
-        }
-        else if (id == R.id.action_sort_as_is) {
+        if (id == R.id.action_sort_as_is) {
             item.setChecked(true);
             list.setSortBy(SampleIndirectList.SORT_AS_IS);
             listView.getAdapter().notifyDataSetChanged();
@@ -336,11 +328,8 @@ public class SampleListActivity extends AppCompatActivity implements NavigationV
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         }
-        else if (actionMode) {
-            toggle.onDrawerClosed(null);
-            actionBar.setTitle(saveTitle);
-            actionMode = false;
-            invalidateOptionsMenu();
+        else if (listSelected > 0) {
+            cancelListSelection();
         }
         else {
             super.onBackPressed();
@@ -359,6 +348,31 @@ public class SampleListActivity extends AppCompatActivity implements NavigationV
             list.search(SampleListActivity.this, query);
             listView.getAdapter().notifyDataSetChanged();
         }
+    }
+
+    private void increaseListSelection() {
+        if (listSelected <= 0) {
+            saveTitle = actionBar.getTitle().toString();
+            toggle.onDrawerOpened(null);
+            listSelected = 1;
+        }
+        else
+            listSelected++;
+        actionBar.setTitle(String.format(Locale.US, "%d", listSelected));
+        invalidateOptionsMenu();
+    }
+
+    private void decreaseListSelection() {
+        listSelected--;
+        if (listSelected <= 0)
+            cancelListSelection();
+    }
+
+    private void cancelListSelection() {
+        toggle.onDrawerClosed(null);
+        actionBar.setTitle(saveTitle);
+        listSelected = 0;
+        invalidateOptionsMenu();
     }
 
 }

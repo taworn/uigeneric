@@ -70,6 +70,7 @@ public class SampleIndirectList {
 
     private List<Sample> list;
     private List<Sample> indexList;
+    private List<Boolean> selected;
 
     private Boolean deleted;
     private Integer category;
@@ -81,8 +82,9 @@ public class SampleIndirectList {
         super();
         this.list = new ArrayList<>();
         this.indexList = new ArrayList<>();
-        sortBy = SORT_AS_IS;
-        sortReverse = false;
+        this.selected = new ArrayList<>();
+        this.sortBy = SORT_AS_IS;
+        this.sortReverse = false;
     }
 
     public Sample get(int i) {
@@ -102,10 +104,14 @@ public class SampleIndirectList {
         this.category = category;
         this.query = query;
 
-        indexList = new ArrayList<>(list.size());
-        for (Sample i : list) {
-            indexList.add(i);
+        int size = list.size();
+        indexList = new ArrayList<>(size);
+        selected = new ArrayList<>(size);
+        for (int i = 0; i < size; i++) {
+            indexList.add(list.get(i));
+            selected.add(false);
         }
+
         sort(sortBy, sortReverse);
     }
 
@@ -187,6 +193,10 @@ public class SampleIndirectList {
             Collections.reverse(indexList);
             sortReverse = value;
         }
+    }
+
+    public List<Boolean> getSelected() {
+        return selected;
     }
 
 }

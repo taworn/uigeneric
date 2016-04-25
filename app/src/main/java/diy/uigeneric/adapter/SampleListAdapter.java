@@ -9,9 +9,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 import diy.uigeneric.R;
@@ -33,6 +36,7 @@ public class SampleListAdapter extends RecyclerView.Adapter<SampleListAdapter.Vi
 
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
 
+        public LinearLayout layout;
         public ImageView imageIcon;
         public TextView textName;
         public TextView textCategory;
@@ -41,6 +45,7 @@ public class SampleListAdapter extends RecyclerView.Adapter<SampleListAdapter.Vi
             super(view);
             view.setOnClickListener(this);
             view.setOnLongClickListener(this);
+            layout = (LinearLayout) view.findViewById(R.id.layout);
             imageIcon = (ImageView) view.findViewById(R.id.image_icon);
             textName = (TextView) view.findViewById(R.id.text_name);
             textCategory = (TextView) view.findViewById(R.id.text_category);
@@ -82,6 +87,10 @@ public class SampleListAdapter extends RecyclerView.Adapter<SampleListAdapter.Vi
     public void onBindViewHolder(ViewHolder holder, int position) {
         Sample item = list.get(position);
 
+        if (list.getSelected().get(position)) {
+            holder.layout.setBackgroundResource(R.color.list_selected);
+        }
+
         if (item.getIcon() != null) {
             Drawable drawable = new BitmapDrawable(context.getResources(), item.getIcon());
             holder.imageIcon.setImageDrawable(drawable);
@@ -104,6 +113,41 @@ public class SampleListAdapter extends RecyclerView.Adapter<SampleListAdapter.Vi
     @Override
     public int getItemCount() {
         return list.size();
+    }
+
+    public void selectedItem(int i, boolean value) {
+        list.getSelected().set(i, value);
+        notifyItemChanged(i);
+    }
+
+    public void toggleSelection(int i) {
+        list.getSelected().set(i, !list.getSelected().get(i));
+        notifyItemChanged(i);
+    }
+
+    public void removeSelection() {
+        for (int i = 0; i < list.size(); i++) {
+            list.getSelected().set(i, false);
+        }
+        notifyItemRangeChanged(0, list.size());
+    }
+
+    public int getSelectedCount() {
+        int count = 0;
+        for (int i = 0; i < list.size(); i++) {
+            if (list.getSelected().get(i))
+                count++;
+        }
+        return count;
+    }
+
+    public List<Long> getSelectedItems() {
+        List<Long> selectedList = new ArrayList<>();
+        for (int i = 0; i < list.size(); i++) {
+            if (list.getSelected().get(i))
+                selectedList.add(list.get(i).getId());
+        }
+        return selectedList;
     }
 
 }
