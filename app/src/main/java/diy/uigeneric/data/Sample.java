@@ -24,7 +24,7 @@ public class Sample implements Comparator<Sample> {
     // category constants
     public static int CATEGORY_DATA = 0;
     public static int CATEGORY_PRIORITY_DATA = 1;
-    public static int CATEGORY_IMPORTANTS = 2;
+    public static int CATEGORY_IMPORTANT = 2;
     public static int CATEGORY_SENT = 3;
     public static int CATEGORY_DRAFTS = 4;
     public static int CATEGORY_ARCHIVED = 5;

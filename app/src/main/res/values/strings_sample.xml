@@ -29,7 +29,13 @@
     <string name="sample_view_dialog_positive">Yes</string>
     <string name="sample_view_dialog_negative">No</string>
 
-    <string name="sample_deleted">deleted</string>
+    <string name="sample_list_title_data">Data</string>
+    <string name="sample_list_title_priority_data">Priority Data</string>
+    <string name="sample_list_title_important">Important</string>
+    <string name="sample_list_title_sent">Sent</string>
+    <string name="sample_list_title_draft">Draft</string>
+    <string name="sample_list_title_archived">Archived</string>
+    <string name="sample_list_title_trash">Trash</string>
 
     <string-array name="sample_category">
         <item name="category_data">Data</item>
@@ -39,5 +45,14 @@
         <item name="category_draft">Drafts</item>
         <item name="category_archived">Archived</item>
     </string-array>
+    <string name="sample_category_data">Data</string>
+    <string name="sample_category_priority_data">Priority Data</string>
+    <string name="sample_category_important">Important</string>
+    <string name="sample_category_sent">Sent</string>
+    <string name="sample_category_draft">Drafts</string>
+    <string name="sample_category_archived">Archived</string>
+
+    <string name="sample_trash">Trash</string>
+    <string name="sample_deleted">deleted</string>
 
 </resources>

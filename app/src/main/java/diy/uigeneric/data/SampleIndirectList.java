@@ -109,6 +109,10 @@ public class SampleIndirectList {
         sort(sortBy, sortReverse);
     }
 
+    public void load(Context context, Boolean deleted, Integer category) {
+        load(context, deleted, category, query, sortBy, sortReverse);
+    }
+
     public void reload(Context context) {
         load(context, deleted, category, query, sortBy, sortReverse);
     }
@@ -150,6 +154,18 @@ public class SampleIndirectList {
         }
         this.sortBy = sortBy;
         this.sortReverse = sortReverse;
+    }
+
+    public Boolean getDeleted() {
+        return deleted;
+    }
+
+    public Integer getCategory() {
+        return category;
+    }
+
+    public String getQuery() {
+        return query;
     }
 
     public int getSortBy() {

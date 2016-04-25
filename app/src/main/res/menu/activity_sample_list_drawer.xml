@@ -2,36 +2,42 @@
 <menu
     xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <group android:checkableBehavior="single">
+    <group
+        android:id="@+id/nav_group_data"
+        android:checkableBehavior="single">
         <item
-            android:id="@+id/nav_camera"
-            android:icon="@drawable/ic_menu_camera"
-            android:title="Import"/>
+            android:id="@+id/nav_data"
+            android:icon="@drawable/ic_inbox_black_24dp"
+            android:title="@string/sample_category_data"/>
         <item
-            android:id="@+id/nav_gallery"
-            android:icon="@drawable/ic_menu_gallery"
-            android:title="Gallery"/>
+            android:id="@+id/nav_priority_data"
+            android:icon="@drawable/ic_priority_high_black_24dp"
+            android:title="@string/sample_category_priority_data"/>
         <item
-            android:id="@+id/nav_slideshow"
-            android:icon="@drawable/ic_menu_slideshow"
-            android:title="Slideshow"/>
+            android:id="@+id/nav_important"
+            android:icon="@drawable/ic_important_devices_black_24dp"
+            android:title="@string/sample_category_important"/>
         <item
-            android:id="@+id/nav_manage"
-            android:icon="@drawable/ic_menu_manage"
-            android:title="Tools"/>
+            android:id="@+id/nav_sent"
+            android:icon="@drawable/ic_send_black_24dp"
+            android:title="@string/sample_category_sent"/>
+        <item
+            android:id="@+id/nav_draft"
+            android:icon="@drawable/ic_drafts_black_24dp"
+            android:title="@string/sample_category_draft"/>
+        <item
+            android:id="@+id/nav_archived"
+            android:icon="@drawable/ic_archive_black_24dp"
+            android:title="@string/sample_category_archived"/>
     </group>
 
-    <item android:title="Communicate">
-        <menu>
-            <item
-                android:id="@+id/nav_share"
-                android:icon="@drawable/ic_menu_share"
-                android:title="Share"/>
-            <item
-                android:id="@+id/nav_send"
-                android:icon="@drawable/ic_menu_send"
-                android:title="Send"/>
-        </menu>
-    </item>
+    <group
+        android:id="@+id/nav_group_trash"
+        android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_trash"
+            android:icon="@drawable/ic_delete_black_24dp"
+            android:title="@string/sample_trash"/>
+    </group>
 
 </menu>
