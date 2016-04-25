@@ -21,6 +21,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
 
 import diy.uigeneric.R;
 import diy.uigeneric.adapter.SampleListAdapter;
@@ -84,6 +85,12 @@ public class SampleListActivity extends AppCompatActivity implements NavigationV
                     Intent intent = new Intent(SampleListActivity.this, SampleViewActivity.class);
                     intent.putExtra("data.id", item.getId());
                     startActivityForResult(intent, REQUEST_VIEW);
+                }
+
+                @Override
+                public void onLongClick(View view, int position) {
+                    Sample item = list.get(position);
+                    Toast.makeText(SampleListActivity.this, item.getName(), Toast.LENGTH_SHORT).show();
                 }
             }));
         }

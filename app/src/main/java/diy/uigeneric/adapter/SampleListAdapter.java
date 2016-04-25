@@ -24,10 +24,14 @@ import diy.uigeneric.data.SampleIndirectList;
 public class SampleListAdapter extends RecyclerView.Adapter<SampleListAdapter.ViewHolder> {
 
     public interface OnItemClickListener {
+
         void onClick(View view, int position);
+
+        void onLongClick(View view, int position);
+
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
 
         public ImageView imageIcon;
         public TextView textName;
@@ -36,6 +40,7 @@ public class SampleListAdapter extends RecyclerView.Adapter<SampleListAdapter.Vi
         public ViewHolder(View view) {
             super(view);
             view.setOnClickListener(this);
+            view.setOnLongClickListener(this);
             imageIcon = (ImageView) view.findViewById(R.id.image_icon);
             textName = (TextView) view.findViewById(R.id.text_name);
             textCategory = (TextView) view.findViewById(R.id.text_category);
@@ -43,7 +48,13 @@ public class SampleListAdapter extends RecyclerView.Adapter<SampleListAdapter.Vi
 
         @Override
         public void onClick(View view) {
-            listener.onClick(view, this.getLayoutPosition());
+            listener.onClick(view, getLayoutPosition());
+        }
+
+        @Override
+        public boolean onLongClick(View view) {
+            listener.onLongClick(view, getLayoutPosition());
+            return true;
         }
 
     }
