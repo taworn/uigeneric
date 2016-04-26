@@ -15,6 +15,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 import diy.uigeneric.R;
@@ -129,6 +131,15 @@ public class SampleListAdapter extends RecyclerView.Adapter<SampleListAdapter.Vi
 
     public boolean getSelected(int position) {
         return selected.get(position, false);
+    }
+
+    public List<Long> getSelectedIdList() {
+        List<Long> list = new ArrayList<>();
+        for (int i = 0; i < selected.size(); i++) {
+            int position = selected.keyAt(i);
+            list.add(this.list.get(position).getId());
+        }
+        return list;
     }
 
     public void toggleSelection(int position) {

@@ -3,6 +3,7 @@ package diy.uigeneric.sample;
 import android.app.Activity;
 import android.app.SearchManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -11,6 +12,7 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
@@ -22,11 +24,13 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+import java.util.List;
 import java.util.Locale;
 
 import diy.uigeneric.R;
 import diy.uigeneric.adapter.SampleListAdapter;
 import diy.uigeneric.data.Sample;
+import diy.uigeneric.data.SampleDataSource;
 import diy.uigeneric.data.SampleIndirectList;
 
 public class SampleListActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
@@ -168,7 +172,20 @@ public class SampleListActivity extends AppCompatActivity implements NavigationV
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        if (id == R.id.action_sort_as_is) {
+        if (id == R.id.action_delete) {
+            deleteSelected();
+            return true;
+        }
+        else if (id == R.id.action_restore) {
+            restoreSelected();
+            return true;
+        }
+        else if (id == R.id.action_remove) {
+            removeSelected();
+            return true;
+        }
+
+        else if (id == R.id.action_sort_as_is) {
             item.setChecked(true);
             list.setSortBy(SampleIndirectList.SORT_AS_IS);
             listAdapter.notifyDataSetChanged();
@@ -248,11 +265,17 @@ public class SampleListActivity extends AppCompatActivity implements NavigationV
             listAdapter.notifyDataSetChanged();
             Log.d(TAG, "load category: archived");
         }
+        else if (id == R.id.nav_all) {
+            actionBar.setTitle(R.string.sample_list_title_all);
+            list.load(this, false, null);
+            listAdapter.notifyDataSetChanged();
+            Log.d(TAG, "load all categories");
+        }
         else if (id == R.id.nav_trash) {
             actionBar.setTitle(R.string.sample_list_title_trash);
             list.load(this, true, null);
             listAdapter.notifyDataSetChanged();
-            Log.d(TAG, "load data on trash");
+            Log.d(TAG, "load on trash");
         }
 
         drawer.closeDrawer(GravityCompat.START);
@@ -352,20 +375,83 @@ public class SampleListActivity extends AppCompatActivity implements NavigationV
         }
     }
 
+    private void deleteSelected() {
+        if (listAdapter.getSelectedItemCount() > 0) {
+            List<Long> idList = listAdapter.getSelectedIdList();
+            if (idList.size() > 0) {
+                SampleDataSource source = new SampleDataSource(this);
+                source.open();
+                source.deleteList(idList);
+                Log.d(TAG, "deleted item(s): " + idList.size());
+                for (int i = 0; i < idList.size(); i++)
+                    Log.d(TAG, "deleted item: " + idList.get(i));
+                source.close();
+                list.reload(this);
+                listAdapter.notifyDataSetChanged();
+            }
+            cancelListSelection();
+        }
+    }
+
+    private void restoreSelected() {
+        if (listAdapter.getSelectedItemCount() > 0) {
+            List<Long> idList = listAdapter.getSelectedIdList();
+            if (idList.size() > 0) {
+                SampleDataSource source = new SampleDataSource(this);
+                source.open();
+                source.restoreList(idList);
+                Log.d(TAG, "restore item(s): " + idList.size());
+                for (int i = 0; i < idList.size(); i++)
+                    Log.d(TAG, "restore item: " + idList.get(i));
+                source.close();
+                list.reload(this);
+                listAdapter.notifyDataSetChanged();
+            }
+            cancelListSelection();
+        }
+    }
+
+    private void removeSelected() {
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.sample_list_dialog_title)
+                .setMessage(R.string.sample_list_dialog_message)
+                .setNegativeButton(R.string.sample_list_dialog_negative, null)
+                .setPositiveButton(R.string.sample_list_dialog_positive, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        if (listAdapter.getSelectedItemCount() > 0) {
+                            List<Long> idList = listAdapter.getSelectedIdList();
+                            if (idList.size() > 0) {
+                                SampleDataSource source = new SampleDataSource(SampleListActivity.this);
+                                source.open();
+                                source.removeList(idList);
+                                Log.d(TAG, "remove item(s): " + idList.size());
+                                for (int i = 0; i < idList.size(); i++)
+                                    Log.d(TAG, "remove item: " + idList.get(i));
+                                source.close();
+                                list.reload(SampleListActivity.this);
+                                listAdapter.notifyDataSetChanged();
+                            }
+                            cancelListSelection();
+                        }
+                    }
+                })
+                .show();
+    }
+
     private void increaseListSelection() {
         if (!actionMode) {
             actionMode = true;
             saveTitle = actionBar.getTitle().toString();
             toggle.onDrawerOpened(null);
         }
-        actionBar.setTitle(String.format(Locale.US, "%d", listAdapter.getSelectedItemCount()));
+        actionBar.setTitle(String.format(Locale.US, "%d/%d", listAdapter.getSelectedItemCount(), listAdapter.getItemCount()));
         invalidateOptionsMenu();
     }
 
     private void decreaseListSelection() {
         if (actionMode) {
             if (listAdapter.getSelectedItemCount() > 0)
-                actionBar.setTitle(String.format(Locale.US, "%d", listAdapter.getSelectedItemCount()));
+                actionBar.setTitle(String.format(Locale.US, "%d/%d", listAdapter.getSelectedItemCount(), listAdapter.getItemCount()));
             else
                 cancelListSelection();
         }

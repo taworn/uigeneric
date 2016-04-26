@@ -32,8 +32,12 @@
     </group>
 
     <group
-        android:id="@+id/nav_group_trash"
+        android:id="@+id/nav_group_all"
         android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_all"
+            android:icon="@drawable/ic_reorder_black_24dp"
+            android:title="@string/sample_category_all"/>
         <item
             android:id="@+id/nav_trash"
             android:icon="@drawable/ic_delete_black_24dp"

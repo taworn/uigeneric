@@ -50,8 +50,6 @@ public class SampleEditActivity extends AppCompatActivity {
     private static final int REQUEST_CODE_TAKE_PHOTO = 100;
     private static final int REQUEST_CODE_CHOOSE_PHOTO = 101;
 
-    private static final int ICON_DEFAULT_DRAWABLE = R.drawable.ic_face_black_48dp;
-
     private ImageView imageIcon = null;
     private EditText editName = null;
     private Spinner spinCategory = null;
@@ -122,7 +120,7 @@ public class SampleEditActivity extends AppCompatActivity {
                 else if (id == R.id.action_icon_default_photo) {
                     iconChanged = true;
                     iconDefault = true;
-                    imageIcon.setImageResource(ICON_DEFAULT_DRAWABLE);
+                    imageIcon.setImageResource(R.drawable.ic_face_black_48dp);
                     return true;
                 }
                 return false;
@@ -314,7 +312,7 @@ public class SampleEditActivity extends AppCompatActivity {
         if (!iconDefault)
             imageIcon.setImageDrawable(new BitmapDrawable(getResources(), item.getIcon()));
         else
-            imageIcon.setImageResource(ICON_DEFAULT_DRAWABLE);
+            imageIcon.setImageResource(R.drawable.ic_face_black_48dp);
         editName.setText(item.getName());
         spinCategory.setSelection(item.getCategory());
         editDetail.setText(item.getDetail());

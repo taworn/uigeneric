@@ -25,7 +25,7 @@
     <string name="sample_view_hint_detail">Detail (optional)</string>
 
     <string name="sample_view_dialog_title">Confirm</string>
-    <string name="sample_view_dialog_message">Delete data?</string>
+    <string name="sample_view_dialog_message">Delete this data?</string>
     <string name="sample_view_dialog_positive">Yes</string>
     <string name="sample_view_dialog_negative">No</string>
 
@@ -35,7 +35,13 @@
     <string name="sample_list_title_sent">Sent</string>
     <string name="sample_list_title_draft">Draft</string>
     <string name="sample_list_title_archived">Archived</string>
+    <string name="sample_list_title_all">All</string>
     <string name="sample_list_title_trash">Trash</string>
+
+    <string name="sample_list_dialog_title">Confirm</string>
+    <string name="sample_list_dialog_message">Delete selected data?</string>
+    <string name="sample_list_dialog_positive">Yes</string>
+    <string name="sample_list_dialog_negative">No</string>
 
     <string-array name="sample_category">
         <item name="category_data">Data</item>
@@ -51,6 +57,7 @@
     <string name="sample_category_sent">Sent</string>
     <string name="sample_category_draft">Drafts</string>
     <string name="sample_category_archived">Archived</string>
+    <string name="sample_category_all">All</string>
 
     <string name="sample_trash">Trash</string>
     <string name="sample_deleted">deleted</string>
