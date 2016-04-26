@@ -3,8 +3,10 @@ package diy.uigeneric.adapter;
 import android.content.Context;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,8 +15,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
 
 import diy.uigeneric.R;
@@ -66,6 +66,7 @@ public class SampleListAdapter extends RecyclerView.Adapter<SampleListAdapter.Vi
 
     private Context context = null;
     private SampleIndirectList list = null;
+    private SparseBooleanArray selected = null;
     private SimpleDateFormat formatter = null;
     private OnItemClickListener listener = null;
 
@@ -73,6 +74,7 @@ public class SampleListAdapter extends RecyclerView.Adapter<SampleListAdapter.Vi
         super();
         this.context = context;
         this.list = list;
+        this.selected = new SparseBooleanArray();
         this.formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US);
         this.listener = listener;
     }
@@ -87,7 +89,13 @@ public class SampleListAdapter extends RecyclerView.Adapter<SampleListAdapter.Vi
     public void onBindViewHolder(ViewHolder holder, int position) {
         Sample item = list.get(position);
 
-        if (list.getSelected().get(position)) {
+        if (!getSelected(position)) {
+            if (Build.VERSION.SDK_INT < 16)
+                holder.layout.setBackgroundDrawable(null);
+            else
+                holder.layout.setBackground(null);
+        }
+        else {
             holder.layout.setBackgroundResource(R.color.list_selected);
         }
 
@@ -115,39 +123,25 @@ public class SampleListAdapter extends RecyclerView.Adapter<SampleListAdapter.Vi
         return list.size();
     }
 
-    public void selectedItem(int i, boolean value) {
-        list.getSelected().set(i, value);
-        notifyItemChanged(i);
+    public int getSelectedItemCount() {
+        return selected.size();
     }
 
-    public void toggleSelection(int i) {
-        list.getSelected().set(i, !list.getSelected().get(i));
-        notifyItemChanged(i);
+    public boolean getSelected(int position) {
+        return selected.get(position, false);
     }
 
-    public void removeSelection() {
-        for (int i = 0; i < list.size(); i++) {
-            list.getSelected().set(i, false);
-        }
-        notifyItemRangeChanged(0, list.size());
+    public void toggleSelection(int position) {
+        if (selected.get(position, false))
+            selected.delete(position);
+        else
+            selected.put(position, true);
+        notifyItemChanged(position);
     }
 
-    public int getSelectedCount() {
-        int count = 0;
-        for (int i = 0; i < list.size(); i++) {
-            if (list.getSelected().get(i))
-                count++;
-        }
-        return count;
-    }
-
-    public List<Long> getSelectedItems() {
-        List<Long> selectedList = new ArrayList<>();
-        for (int i = 0; i < list.size(); i++) {
-            if (list.getSelected().get(i))
-                selectedList.add(list.get(i).getId());
-        }
-        return selectedList;
+    public void clearSelections() {
+        selected.clear();
+        notifyItemRangeChanged(0, getItemCount());
     }
 
 }

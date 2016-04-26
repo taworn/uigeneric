@@ -42,7 +42,7 @@ public class SampleListActivity extends AppCompatActivity implements NavigationV
     private SampleIndirectList list = null;
     private SampleListAdapter listAdapter = null;
     private RecyclerView listView = null;
-    private int listSelected = 0;
+    private boolean actionMode = false;
     private String saveTitle = null;
 
     @Override
@@ -89,12 +89,11 @@ public class SampleListActivity extends AppCompatActivity implements NavigationV
 
             @Override
             public void onLongClick(View view, int position) {
-                if (!list.getSelected().get(position)) {
-                    listAdapter.selectedItem(position, true);
+                listAdapter.toggleSelection(position);
+                if (listAdapter.getSelected(position)) {
                     increaseListSelection();
                 }
                 else {
-                    listAdapter.selectedItem(position, false);
                     decreaseListSelection();
                 }
             }
@@ -143,7 +142,7 @@ public class SampleListActivity extends AppCompatActivity implements NavigationV
                 @Override
                 public boolean onClose() {
                     list.search(SampleListActivity.this, "");
-                    listView.getAdapter().notifyDataSetChanged();
+                    listAdapter.notifyDataSetChanged();
                     Log.d(TAG, "search stop");
                     return false;
                 }
@@ -154,11 +153,11 @@ public class SampleListActivity extends AppCompatActivity implements NavigationV
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        menu.findItem(R.id.action_restore).setVisible(listSelected > 0);
-        menu.findItem(R.id.action_delete).setVisible(listSelected > 0);
-        menu.findItem(R.id.action_remove).setVisible(listSelected > 0);
-        menu.findItem(R.id.action_search).setVisible(listSelected <= 0);
-        menu.findItem(R.id.action_sort).setVisible(listSelected <= 0);
+        menu.findItem(R.id.action_restore).setVisible(actionMode);
+        menu.findItem(R.id.action_delete).setVisible(actionMode);
+        menu.findItem(R.id.action_remove).setVisible(actionMode);
+        menu.findItem(R.id.action_search).setVisible(!actionMode);
+        menu.findItem(R.id.action_sort).setVisible(!actionMode);
         return true;
     }
 
@@ -172,35 +171,35 @@ public class SampleListActivity extends AppCompatActivity implements NavigationV
         if (id == R.id.action_sort_as_is) {
             item.setChecked(true);
             list.setSortBy(SampleIndirectList.SORT_AS_IS);
-            listView.getAdapter().notifyDataSetChanged();
+            listAdapter.notifyDataSetChanged();
             Log.d(TAG, "sort: as is");
             return true;
         }
         else if (id == R.id.action_sort_name) {
             item.setChecked(true);
             list.setSortBy(SampleIndirectList.SORT_NAME);
-            listView.getAdapter().notifyDataSetChanged();
+            listAdapter.notifyDataSetChanged();
             Log.d(TAG, "sort: name");
             return true;
         }
         else if (id == R.id.action_sort_name_ignore_case) {
             item.setChecked(true);
             list.setSortBy(SampleIndirectList.SORT_NAME_IGNORE_CASE);
-            listView.getAdapter().notifyDataSetChanged();
+            listAdapter.notifyDataSetChanged();
             Log.d(TAG, "sort: name ignore case");
             return true;
         }
         else if (id == R.id.action_sort_name_natural) {
             item.setChecked(true);
             list.setSortBy(SampleIndirectList.SORT_NAME_NATURAL);
-            listView.getAdapter().notifyDataSetChanged();
+            listAdapter.notifyDataSetChanged();
             Log.d(TAG, "sort: name natural");
             return true;
         }
         else if (id == R.id.action_sort_reverse) {
             item.setChecked(!item.isChecked());
             list.setSortReverse(!list.getSortReverse());
-            listView.getAdapter().notifyDataSetChanged();
+            listAdapter.notifyDataSetChanged();
             Log.d(TAG, "sort: " + (!list.getSortReverse() ? "ascending" : "descending"));
             return true;
         }
@@ -216,43 +215,43 @@ public class SampleListActivity extends AppCompatActivity implements NavigationV
         if (id == R.id.nav_data) {
             actionBar.setTitle(R.string.sample_list_title_data);
             list.load(this, false, Sample.CATEGORY_DATA);
-            listView.getAdapter().notifyDataSetChanged();
+            listAdapter.notifyDataSetChanged();
             Log.d(TAG, "load category: data");
         }
         else if (id == R.id.nav_priority_data) {
             actionBar.setTitle(R.string.sample_list_title_priority_data);
             list.load(this, false, Sample.CATEGORY_PRIORITY_DATA);
-            listView.getAdapter().notifyDataSetChanged();
+            listAdapter.notifyDataSetChanged();
             Log.d(TAG, "load category: priority data");
         }
         else if (id == R.id.nav_important) {
             actionBar.setTitle(R.string.sample_list_title_important);
             list.load(this, false, Sample.CATEGORY_IMPORTANT);
-            listView.getAdapter().notifyDataSetChanged();
+            listAdapter.notifyDataSetChanged();
             Log.d(TAG, "load category: important");
         }
         else if (id == R.id.nav_sent) {
             actionBar.setTitle(R.string.sample_list_title_sent);
             list.load(this, false, Sample.CATEGORY_SENT);
-            listView.getAdapter().notifyDataSetChanged();
+            listAdapter.notifyDataSetChanged();
             Log.d(TAG, "load category: sent");
         }
         else if (id == R.id.nav_draft) {
             actionBar.setTitle(R.string.sample_list_title_draft);
             list.load(this, false, Sample.CATEGORY_DRAFTS);
-            listView.getAdapter().notifyDataSetChanged();
+            listAdapter.notifyDataSetChanged();
             Log.d(TAG, "load category: draft");
         }
         else if (id == R.id.nav_archived) {
             actionBar.setTitle(R.string.sample_list_title_archived);
             list.load(this, false, Sample.CATEGORY_ARCHIVED);
-            listView.getAdapter().notifyDataSetChanged();
+            listAdapter.notifyDataSetChanged();
             Log.d(TAG, "load category: archived");
         }
         else if (id == R.id.nav_trash) {
             actionBar.setTitle(R.string.sample_list_title_trash);
             list.load(this, true, null);
-            listView.getAdapter().notifyDataSetChanged();
+            listAdapter.notifyDataSetChanged();
             Log.d(TAG, "load data on trash");
         }
 
@@ -267,7 +266,8 @@ public class SampleListActivity extends AppCompatActivity implements NavigationV
             case REQUEST_ADD:
                 if (resultCode == Activity.RESULT_OK) {
                     list.reload(this);
-                    listView.getAdapter().notifyDataSetChanged();
+                    listAdapter.notifyDataSetChanged();
+                    cancelListSelection();
                     long id = resultIntent.getLongExtra("data.id", 0);
                     if (id != 0) {
                         Intent intent = new Intent(SampleListActivity.this, SampleViewActivity.class);
@@ -283,7 +283,8 @@ public class SampleListActivity extends AppCompatActivity implements NavigationV
                     boolean deleted = resultIntent.getBooleanExtra("data.deleted", false);
                     if (changed || deleted) {
                         list.reload(this);
-                        listView.getAdapter().notifyDataSetChanged();
+                        listAdapter.notifyDataSetChanged();
+                        cancelListSelection();
                     }
                 }
                 break;
@@ -293,6 +294,7 @@ public class SampleListActivity extends AppCompatActivity implements NavigationV
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
         super.onSaveInstanceState(savedInstanceState);
+        cancelListSelection();
         savedInstanceState.putString("ui.title", actionBar.getTitle().toString());
         if (list.getDeleted() != null)
             savedInstanceState.putBoolean("data.deleted", list.getDeleted());
@@ -328,7 +330,7 @@ public class SampleListActivity extends AppCompatActivity implements NavigationV
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         }
-        else if (listSelected > 0) {
+        else if (actionMode) {
             cancelListSelection();
         }
         else {
@@ -346,33 +348,37 @@ public class SampleListActivity extends AppCompatActivity implements NavigationV
             String query = intent.getStringExtra(SearchManager.QUERY).trim();
             Log.d(TAG, "search type: " + query);
             list.search(SampleListActivity.this, query);
-            listView.getAdapter().notifyDataSetChanged();
+            listAdapter.notifyDataSetChanged();
         }
     }
 
     private void increaseListSelection() {
-        if (listSelected <= 0) {
+        if (!actionMode) {
+            actionMode = true;
             saveTitle = actionBar.getTitle().toString();
             toggle.onDrawerOpened(null);
-            listSelected = 1;
         }
-        else
-            listSelected++;
-        actionBar.setTitle(String.format(Locale.US, "%d", listSelected));
+        actionBar.setTitle(String.format(Locale.US, "%d", listAdapter.getSelectedItemCount()));
         invalidateOptionsMenu();
     }
 
     private void decreaseListSelection() {
-        listSelected--;
-        if (listSelected <= 0)
-            cancelListSelection();
+        if (actionMode) {
+            if (listAdapter.getSelectedItemCount() > 0)
+                actionBar.setTitle(String.format(Locale.US, "%d", listAdapter.getSelectedItemCount()));
+            else
+                cancelListSelection();
+        }
     }
 
     private void cancelListSelection() {
-        toggle.onDrawerClosed(null);
-        actionBar.setTitle(saveTitle);
-        listSelected = 0;
-        invalidateOptionsMenu();
+        if (actionMode) {
+            listAdapter.clearSelections();
+            actionBar.setTitle(saveTitle);
+            toggle.onDrawerClosed(null);
+            actionMode = false;
+            invalidateOptionsMenu();
+        }
     }
 
 }
