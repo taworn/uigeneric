@@ -9,7 +9,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.Locale;
 
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -170,6 +173,52 @@ public class SampleDataSourceTest {
         assertTrue(source.count() == 2);
         assertTrue(source.count(false, null, null) == 2);
         assertTrue(source.count(true, null, null) == 0);
+
+        source.close();
+    }
+
+    @Test
+    public void testRemoveFromTrash() {
+        Context context = InstrumentationRegistry.getTargetContext();
+        SampleDataSource source = new SampleDataSource(context);
+        source.open();
+
+        // sets delete time in back 3 days
+        Calendar c = new GregorianCalendar(Locale.US);
+        long l = c.getTimeInMillis() - (3 * 24 * 60 * 60 * 1000 + 1);
+        c.setTimeInMillis(l);
+
+        // tests insert
+        Log.d(TAG, "tests insert, 3 records inserted");
+        Sample itemInsert = new Sample();
+        itemInsert.setName("Aaa");
+        itemInsert.setDeleted(c);
+        source.insert(itemInsert);
+        itemInsert.setName("Bbb");
+        itemInsert.setDeleted(c);
+        source.insert(itemInsert);
+        itemInsert.setName("Ccc");
+        itemInsert.setDeleted(c);
+        source.insert(itemInsert);
+
+        // tests delete (move to trash)
+        assertTrue(source.count() == 3);
+        assertTrue(source.count(false, null, null) == 0);
+        assertTrue(source.count(true, null, null) == 3);
+
+        // delete in 4 days (no data deleted)
+        source.removeTrash(4 * 24 * 60 * 60 * 1000);
+        assertTrue(source.count() == 3);
+        assertTrue(source.count(false, null, null) == 0);
+        assertTrue(source.count(true, null, null) == 3);
+        Log.d(TAG, "not delete in 4 days");
+
+        // delete in 3 days (deleted all)
+        source.removeTrash(3 * 24 * 60 * 60 * 1000);
+        assertTrue(source.count() == 0);
+        assertTrue(source.count(false, null, null) == 0);
+        assertTrue(source.count(true, null, null) == 0);
+        Log.d(TAG, "delete in 3 days");
 
         source.close();
     }

@@ -12,22 +12,12 @@
     <string name="sample_edit_icon_choose_photo">Choose photo</string>
     <string name="sample_edit_icon_default_photo">Default photo</string>
 
-    <string name="sample_edit_dialog_title">Confirm</string>
-    <string name="sample_edit_dialog_message">Discard changes?</string>
-    <string name="sample_edit_dialog_positive">Yes</string>
-    <string name="sample_edit_dialog_negative">No</string>
-
     <string name="sample_view_title">View</string>
     <string name="sample_view_title_deleted">View in Trash</string>
     <string name="sample_view_hint_icon">Icon</string>
     <string name="sample_view_hint_name">Name</string>
     <string name="sample_view_hint_category">Category</string>
     <string name="sample_view_hint_detail">Detail (optional)</string>
-
-    <string name="sample_view_dialog_title">Confirm</string>
-    <string name="sample_view_dialog_message">Delete this data?</string>
-    <string name="sample_view_dialog_positive">Yes</string>
-    <string name="sample_view_dialog_negative">No</string>
 
     <string name="sample_list_title_data">Data</string>
     <string name="sample_list_title_priority_data">Priority Data</string>
@@ -38,10 +28,28 @@
     <string name="sample_list_title_all">All</string>
     <string name="sample_list_title_trash">Trash</string>
 
-    <string name="sample_list_dialog_title">Confirm</string>
-    <string name="sample_list_dialog_message">Delete selected data?</string>
-    <string name="sample_list_dialog_positive">Yes</string>
-    <string name="sample_list_dialog_negative">No</string>
+    <string name="sample_deleted_snackbar_message">Sample(s) deleted.</string>
+    <string name="sample_deleted_snackbar_action">UNDO</string>
+
+    <string name="sample_discard_dialog_title">Confirm</string>
+    <string name="sample_discard_dialog_message">Discard changes?</string>
+    <string name="sample_discard_dialog_positive">Yes</string>
+    <string name="sample_discard_dialog_negative">No</string>
+
+    <string name="sample_remove_dialog_title">Confirm</string>
+    <string name="sample_remove_dialog_message">Delete this data?</string>
+    <string name="sample_remove_dialog_positive">Yes</string>
+    <string name="sample_remove_dialog_negative">No</string>
+
+    <string name="sample_remove_selected_dialog_title">Confirm</string>
+    <string name="sample_remove_selected_dialog_message">Delete selected data?</string>
+    <string name="sample_remove_selected_dialog_positive">Yes</string>
+    <string name="sample_remove_selected_dialog_negative">No</string>
+
+    <string name="sample_remove_all_dialog_title">Confirm</string>
+    <string name="sample_remove_all_dialog_message">Delete ALL data, include trash?</string>
+    <string name="sample_remove_all_dialog_positive">Yes</string>
+    <string name="sample_remove_all_dialog_negative">No</string>
 
     <string-array name="sample_category">
         <item name="category_data">Data</item>

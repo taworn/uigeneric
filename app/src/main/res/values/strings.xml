@@ -6,6 +6,7 @@
     <string name="action_restore">Restore</string>
     <string name="action_delete">Delete</string>
     <string name="action_remove">Remove</string>
+    <string name="action_remove_all">Remove All</string>
     <string name="action_sort">Sort</string>
     <string name="action_sort_as_is">As is</string>
     <string name="action_sort_name">Name</string>

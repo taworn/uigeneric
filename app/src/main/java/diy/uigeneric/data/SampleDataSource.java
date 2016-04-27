@@ -357,9 +357,9 @@ public class SampleDataSource {
     /**
      * Deletes too old data in trash.
      */
-    public void removeFromTrash() {
+    public void removeTrash(long deleteTime) {
         long time = new GregorianCalendar(Locale.US).getTimeInMillis();
-        time -= 3 * 24 * 60 * 60 * 1000; // three days
+        time -= deleteTime;
         SQLiteStatement statement = database.compileStatement("DELETE FROM sample WHERE deleted < ?");
         statement.clearBindings();
         statement.bindLong(1, time);

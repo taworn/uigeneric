@@ -191,10 +191,10 @@ public class SampleViewActivity extends AppCompatActivity {
 
     private void remove() {
         new AlertDialog.Builder(this)
-                .setTitle(R.string.sample_view_dialog_title)
-                .setMessage(R.string.sample_view_dialog_message)
-                .setNegativeButton(R.string.sample_view_dialog_negative, null)
-                .setPositiveButton(R.string.sample_view_dialog_positive, new DialogInterface.OnClickListener() {
+                .setTitle(R.string.sample_remove_dialog_title)
+                .setMessage(R.string.sample_remove_dialog_message)
+                .setNegativeButton(R.string.sample_remove_dialog_negative, null)
+                .setPositiveButton(R.string.sample_remove_dialog_positive, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         SampleDataSource source = new SampleDataSource(SampleViewActivity.this);
                         source.open();

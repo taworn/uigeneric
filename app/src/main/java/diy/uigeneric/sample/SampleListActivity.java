@@ -5,9 +5,11 @@ import android.app.SearchManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
@@ -19,6 +21,8 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
+import android.text.SpannableString;
+import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -57,6 +61,11 @@ public class SampleListActivity extends AppCompatActivity implements NavigationV
         setSupportActionBar(toolbar);
         actionBar = getSupportActionBar();
 
+        SampleDataSource source = new SampleDataSource(SampleListActivity.this);
+        source.open();
+        source.removeTrash(3 * 24 * 60 * 60 * 1000); // three days
+        source.close();
+
         // initializes FAB
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         if (fab != null) {
@@ -94,12 +103,10 @@ public class SampleListActivity extends AppCompatActivity implements NavigationV
             @Override
             public void onLongClick(View view, int position) {
                 listAdapter.toggleSelection(position);
-                if (listAdapter.getSelected(position)) {
+                if (listAdapter.getSelected(position))
                     increaseListSelection();
-                }
-                else {
+                else
                     decreaseListSelection();
-                }
             }
         });
         listView = (RecyclerView) findViewById(R.id.list_view);
@@ -137,6 +144,12 @@ public class SampleListActivity extends AppCompatActivity implements NavigationV
         item = menu.findItem(R.id.action_sort_reverse);
         item.setChecked(list.getSortReverse());
 
+        // paints action_remove_all menu item to color red
+        item = menu.findItem(R.id.action_remove_all);
+        SpannableString spanString = new SpannableString(item.getTitle());
+        spanString.setSpan(new ForegroundColorSpan(Color.RED), 0, spanString.length(), 0);
+        item.setTitle(spanString);
+
         // Associate searchable configuration with the SearchView
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
         SearchView searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
@@ -160,6 +173,7 @@ public class SampleListActivity extends AppCompatActivity implements NavigationV
         menu.findItem(R.id.action_restore).setVisible(actionMode);
         menu.findItem(R.id.action_delete).setVisible(actionMode);
         menu.findItem(R.id.action_remove).setVisible(actionMode);
+        menu.findItem(R.id.action_remove_all).setVisible(!actionMode);
         menu.findItem(R.id.action_search).setVisible(!actionMode);
         menu.findItem(R.id.action_sort).setVisible(!actionMode);
         return true;
@@ -182,6 +196,26 @@ public class SampleListActivity extends AppCompatActivity implements NavigationV
         }
         else if (id == R.id.action_remove) {
             removeSelected();
+            return true;
+        }
+        else if (id == R.id.action_remove_all) {
+            new AlertDialog.Builder(this)
+                    .setTitle(R.string.sample_remove_all_dialog_title)
+                    .setMessage(R.string.sample_remove_all_dialog_message)
+                    .setNegativeButton(R.string.sample_remove_all_dialog_negative, null)
+                    .setPositiveButton(R.string.sample_remove_all_dialog_positive, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            SampleDataSource source = new SampleDataSource(SampleListActivity.this);
+                            source.open();
+                            source.removeAll();
+                            Log.d(TAG, "removed ALL data");
+                            source.close();
+                            list.reload(SampleListActivity.this);
+                            listAdapter.notifyDataSetChanged();
+                            cancelListSelection();
+                        }
+                    })
+                    .show();
             return true;
         }
 
@@ -230,48 +264,56 @@ public class SampleListActivity extends AppCompatActivity implements NavigationV
         int id = item.getItemId();
 
         if (id == R.id.nav_data) {
+            cancelListSelection();
             actionBar.setTitle(R.string.sample_list_title_data);
             list.load(this, false, Sample.CATEGORY_DATA);
             listAdapter.notifyDataSetChanged();
             Log.d(TAG, "load category: data");
         }
         else if (id == R.id.nav_priority_data) {
+            cancelListSelection();
             actionBar.setTitle(R.string.sample_list_title_priority_data);
             list.load(this, false, Sample.CATEGORY_PRIORITY_DATA);
             listAdapter.notifyDataSetChanged();
             Log.d(TAG, "load category: priority data");
         }
         else if (id == R.id.nav_important) {
+            cancelListSelection();
             actionBar.setTitle(R.string.sample_list_title_important);
             list.load(this, false, Sample.CATEGORY_IMPORTANT);
             listAdapter.notifyDataSetChanged();
             Log.d(TAG, "load category: important");
         }
         else if (id == R.id.nav_sent) {
+            cancelListSelection();
             actionBar.setTitle(R.string.sample_list_title_sent);
             list.load(this, false, Sample.CATEGORY_SENT);
             listAdapter.notifyDataSetChanged();
             Log.d(TAG, "load category: sent");
         }
         else if (id == R.id.nav_draft) {
+            cancelListSelection();
             actionBar.setTitle(R.string.sample_list_title_draft);
             list.load(this, false, Sample.CATEGORY_DRAFTS);
             listAdapter.notifyDataSetChanged();
             Log.d(TAG, "load category: draft");
         }
         else if (id == R.id.nav_archived) {
+            cancelListSelection();
             actionBar.setTitle(R.string.sample_list_title_archived);
             list.load(this, false, Sample.CATEGORY_ARCHIVED);
             listAdapter.notifyDataSetChanged();
             Log.d(TAG, "load category: archived");
         }
         else if (id == R.id.nav_all) {
+            cancelListSelection();
             actionBar.setTitle(R.string.sample_list_title_all);
             list.load(this, false, null);
             listAdapter.notifyDataSetChanged();
             Log.d(TAG, "load all categories");
         }
         else if (id == R.id.nav_trash) {
+            cancelListSelection();
             actionBar.setTitle(R.string.sample_list_title_trash);
             list.load(this, true, null);
             listAdapter.notifyDataSetChanged();
@@ -377,7 +419,7 @@ public class SampleListActivity extends AppCompatActivity implements NavigationV
 
     private void deleteSelected() {
         if (listAdapter.getSelectedItemCount() > 0) {
-            List<Long> idList = listAdapter.getSelectedIdList();
+            final List<Long> idList = listAdapter.getSelectedIdList();
             if (idList.size() > 0) {
                 SampleDataSource source = new SampleDataSource(this);
                 source.open();
@@ -388,6 +430,23 @@ public class SampleListActivity extends AppCompatActivity implements NavigationV
                 source.close();
                 list.reload(this);
                 listAdapter.notifyDataSetChanged();
+                Snackbar snackbar = Snackbar
+                        .make(listView, R.string.sample_deleted_snackbar_message, Snackbar.LENGTH_LONG)
+                        .setAction(R.string.sample_deleted_snackbar_action, new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                SampleDataSource source = new SampleDataSource(SampleListActivity.this);
+                                source.open();
+                                source.restoreList(idList);
+                                Log.d(TAG, "undo: restore item(s): " + idList.size());
+                                for (int i = 0; i < idList.size(); i++)
+                                    Log.d(TAG, "undo: restore item: " + idList.get(i));
+                                source.close();
+                                list.reload(SampleListActivity.this);
+                                listAdapter.notifyDataSetChanged();
+                            }
+                        });
+                snackbar.show();
             }
             cancelListSelection();
         }
@@ -395,7 +454,7 @@ public class SampleListActivity extends AppCompatActivity implements NavigationV
 
     private void restoreSelected() {
         if (listAdapter.getSelectedItemCount() > 0) {
-            List<Long> idList = listAdapter.getSelectedIdList();
+            final List<Long> idList = listAdapter.getSelectedIdList();
             if (idList.size() > 0) {
                 SampleDataSource source = new SampleDataSource(this);
                 source.open();
@@ -413,13 +472,13 @@ public class SampleListActivity extends AppCompatActivity implements NavigationV
 
     private void removeSelected() {
         new AlertDialog.Builder(this)
-                .setTitle(R.string.sample_list_dialog_title)
-                .setMessage(R.string.sample_list_dialog_message)
-                .setNegativeButton(R.string.sample_list_dialog_negative, null)
-                .setPositiveButton(R.string.sample_list_dialog_positive, new DialogInterface.OnClickListener() {
+                .setTitle(R.string.sample_remove_selected_dialog_title)
+                .setMessage(R.string.sample_remove_selected_dialog_message)
+                .setNegativeButton(R.string.sample_remove_selected_dialog_negative, null)
+                .setPositiveButton(R.string.sample_remove_selected_dialog_positive, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         if (listAdapter.getSelectedItemCount() > 0) {
-                            List<Long> idList = listAdapter.getSelectedIdList();
+                            final List<Long> idList = listAdapter.getSelectedIdList();
                             if (idList.size() > 0) {
                                 SampleDataSource source = new SampleDataSource(SampleListActivity.this);
                                 source.open();

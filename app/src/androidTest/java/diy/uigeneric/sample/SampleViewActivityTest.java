@@ -187,7 +187,7 @@ public class SampleViewActivityTest {
         intent.putExtra("data.id", id);
         activityTestRule.launchActivity(intent);
         onView(withId(R.id.action_remove)).perform(click());
-        onView(withText(R.string.sample_view_dialog_positive)).perform(click());
+        onView(withText(R.string.sample_remove_dialog_positive)).perform(click());
 
         // checks record, it must be gone forever
         assertTrue(source.count() == 0);
