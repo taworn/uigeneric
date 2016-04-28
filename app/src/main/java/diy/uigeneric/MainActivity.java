@@ -26,6 +26,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onSettingsClick(View view) {
+        startActivity(new Intent(this, SettingsActivity.class));
     }
 
     public void onAboutClick(View view) {

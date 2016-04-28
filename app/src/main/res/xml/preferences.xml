@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <ListPreference
+        android:defaultValue="0"
+        android:entries="@array/settings_database_entries"
+        android:entryValues="@array/settings_database_entry_values"
+        android:key="database"
+        android:summary="Locate database file at internal or external."
+        android:title="Database file location"/>
+
+    <EditTextPreference
+        android:defaultValue="127.0.0.1"
+        android:key="ip"
+        android:summary="Provide server address to connect in Sample Server."
+        android:title="IP or Host"/>
+
+    <EditTextPreference
+        android:defaultValue="Oo"
+        android:key="username"
+        android:summary="Please provide your profile name."
+        android:title="Profile name"/>
+
+    <EditTextPreference
+        android:defaultValue="oo@oo"
+        android:key="email"
+        android:summary="Please provide your email name."
+        android:title="Profile email"/>
+
+</PreferenceScreen>
