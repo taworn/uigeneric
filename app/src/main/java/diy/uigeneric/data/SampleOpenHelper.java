@@ -1,17 +1,27 @@
 package diy.uigeneric.data;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.support.v7.preference.PreferenceManager;
 
 /**
- * The helper class to creation of database and version management.
+ * A helper class to manage database creation and version management.
  */
 public class SampleOpenHelper extends SQLiteOpenHelper {
 
+    private static String getDatabase(Context context) {
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
+        String database = pref.getString("database", "0");
+        if (database.equals("") || database.equals("0"))
+            return "uigeneric.db";
+        else
+            return context.getExternalFilesDir(null) + "/uigeneric.db";
+    }
+
     public SampleOpenHelper(Context context) {
-        //super(context, "uigeneric.db", null, 1);
-        super(context, context.getExternalFilesDir(null) + "/uigeneric.db", null, 1);
+        super(context, getDatabase(context), null, 1);
     }
 
     @Override

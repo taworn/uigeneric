@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Locale;
 
 /**
- * The class to manage sample database.  It's provide list, insert, update and delete easier.
+ * A class to manage Sample database.  It's provide list, insert, update and delete easier.
  */
 public class SampleDataSource {
 
@@ -27,7 +27,7 @@ public class SampleDataSource {
     private SQLiteStatement updateStatement = null;
 
     /**
-     * Creates a helper class to manage database.
+     * Constructs class to manage database.
      */
     public SampleDataSource(@NonNull Context context) {
         helper = new SampleOpenHelper(context);

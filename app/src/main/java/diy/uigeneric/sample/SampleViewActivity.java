@@ -224,7 +224,11 @@ public class SampleViewActivity extends AppCompatActivity {
             imageIcon.setImageDrawable(null);
 
         textName.setText(item.getName());
-        textCategory.setText(Sample.categoryToString(this, item.getCategory()));
+        String[] categoryList = getResources().getStringArray(R.array.sample_category);
+        String categoryName = Integer.toString(item.getCategory());;
+        if (item.getCategory() >= 0 && item.getCategory() < categoryList.length)
+            categoryName = categoryList[item.getCategory()];
+        textCategory.setText(categoryName);
 
         Typeface typeface = Typeface.create("monospace", 0);
         textDetail.setTypeface(typeface);

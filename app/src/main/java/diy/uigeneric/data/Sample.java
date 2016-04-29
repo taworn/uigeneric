@@ -1,6 +1,5 @@
 package diy.uigeneric.data;
 
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -10,14 +9,8 @@ import java.util.Comparator;
 import java.util.GregorianCalendar;
 import java.util.Locale;
 
-import diy.uigeneric.R;
-
 /**
- * Sample data.
- * <p>
- * This is a template that serve as data object.  It just composes of data
- * which hiding and methods get/set for accessing data.
- * </p>
+ * A Sample class is a data object.
  */
 public class Sample implements Comparator<Sample> {
 
@@ -37,7 +30,7 @@ public class Sample implements Comparator<Sample> {
     private String name;       // name, it trim() before set
     private String detail;     // detail, can have multiple lines
     private int category;      // category
-    private Calendar deleted;  // deleted date/time when deleted, otherwise, it is null
+    private Calendar deleted;  // date/time when deleted, otherwise, it is null
 
     /**
      * Constructs a new data.
@@ -134,14 +127,6 @@ public class Sample implements Comparator<Sample> {
     public int compare(@NonNull Sample l, @NonNull Sample r) {
         long result = l.getId() - r.getId();
         return result < 0 ? -1 : result > 0 ? 1 : 0;
-    }
-
-    public static String categoryToString(@NonNull Context context, int category) {
-        String[] list = context.getResources().getStringArray(R.array.sample_category);
-        if (category >= 0 && category < list.length)
-            return list[category];
-        else
-            return null;
     }
 
 }

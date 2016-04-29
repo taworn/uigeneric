@@ -110,9 +110,10 @@ public class SampleListAdapter extends RecyclerView.Adapter<SampleListAdapter.Vi
 
         holder.textName.setText(item.getName());
 
-        String categoryName = Sample.categoryToString(context, item.getCategory());
-        if (categoryName == null)
-            categoryName = Integer.toString(item.getCategory());
+        String[] categoryList = context.getResources().getStringArray(R.array.sample_category);
+        String categoryName = Integer.toString(item.getCategory());;
+        if (item.getCategory() >= 0 && item.getCategory() < categoryList.length)
+            categoryName = categoryList[item.getCategory()];
         if (item.getDeleted() != null) {
             categoryName += " - " + formatter.format(item.getDeleted().getTime());
             categoryName += " " + context.getResources().getString(R.string.sample_deleted);
