@@ -18,58 +18,58 @@ public class SampleIndirectList {
     public static final int SORT_NAME_IGNORE_CASE = 2;
     public static final int SORT_NAME_NATURAL = 3;
 
-    private static final Comparator<Sample> compareAsIs = new Comparator<Sample>() {
+    private final Comparator<Integer> compareAsIs = new Comparator<Integer>() {
         @Override
-        public int compare(Sample l, Sample r) {
-            return l.compare(l, r);
+        public int compare(Integer l, Integer r) {
+            return list.get(l).compare(list.get(l), list.get(r));
         }
     };
-    private static final Comparator<Sample> compareAsIsReverse = new Comparator<Sample>() {
+    private final Comparator<Integer> compareAsIsReverse = new Comparator<Integer>() {
         @Override
-        public int compare(Sample l, Sample r) {
-            return r.compare(r, l);
+        public int compare(Integer l, Integer r) {
+            return list.get(r).compare(list.get(r), list.get(l));
         }
     };
-    private static final Comparator<Sample> compareName = new Comparator<Sample>() {
+    private final Comparator<Integer> compareName = new Comparator<Integer>() {
         @Override
-        public int compare(Sample l, Sample r) {
-            return l.getName().compareTo(r.getName());
+        public int compare(Integer l, Integer r) {
+            return list.get(l).getName().compareTo(list.get(r).getName());
         }
     };
-    private static final Comparator<Sample> compareNameReverse = new Comparator<Sample>() {
+    private final Comparator<Integer> compareNameReverse = new Comparator<Integer>() {
         @Override
-        public int compare(Sample l, Sample r) {
-            return r.getName().compareTo(l.getName());
+        public int compare(Integer l, Integer r) {
+            return list.get(r).getName().compareTo(list.get(l).getName());
         }
     };
-    private static final Comparator<Sample> compareNameIgnoreCase = new Comparator<Sample>() {
+    private final Comparator<Integer> compareNameIgnoreCase = new Comparator<Integer>() {
         @Override
-        public int compare(Sample l, Sample r) {
-            return l.getName().compareToIgnoreCase(r.getName());
+        public int compare(Integer l, Integer r) {
+            return list.get(l).getName().compareToIgnoreCase(list.get(r).getName());
         }
     };
-    private static final Comparator<Sample> compareNameIgnoreCaseReverse = new Comparator<Sample>() {
+    private final Comparator<Integer> compareNameIgnoreCaseReverse = new Comparator<Integer>() {
         @Override
-        public int compare(Sample l, Sample r) {
-            return r.getName().compareToIgnoreCase(l.getName());
+        public int compare(Integer l, Integer r) {
+            return list.get(r).getName().compareToIgnoreCase(list.get(l).getName());
         }
     };
-    private static final Comparator<Sample> compareNameNatural = new Comparator<Sample>() {
+    private final Comparator<Integer> compareNameNatural = new Comparator<Integer>() {
         @Override
-        public int compare(Sample l, Sample r) {
-            return comparator.compare(l.getName(), r.getName());
+        public int compare(Integer l, Integer r) {
+            return comparator.compare(list.get(l).getName(), list.get(r).getName());
         }
     };
-    private static final Comparator<Sample> compareNameNaturalReverse = new Comparator<Sample>() {
+    private final Comparator<Integer> compareNameNaturalReverse = new Comparator<Integer>() {
         @Override
-        public int compare(Sample l, Sample r) {
-            return comparator.compare(r.getName(), l.getName());
+        public int compare(Integer l, Integer r) {
+            return comparator.compare(list.get(r).getName(), list.get(l).getName());
         }
     };
-    private static final Comparator<String> comparator = new AlphanumericComparator(Collator.getInstance(Locale.ENGLISH));
+    private final Comparator<String> comparator = new AlphanumericComparator(Collator.getInstance(Locale.ENGLISH));
 
     private List<Sample> list;
-    private List<Sample> indexList;
+    private List<Integer> indexList;
 
     private Boolean deleted;
     private Integer category;
@@ -86,7 +86,7 @@ public class SampleIndirectList {
     }
 
     public Sample get(int i) {
-        return indexList.get(i);
+        return list.get(indexList.get(i));
     }
 
     public int size() {
@@ -102,9 +102,10 @@ public class SampleIndirectList {
         this.category = category;
         this.query = query;
 
-        indexList = new ArrayList<>(list.size());
-        for (Sample sample : list) {
-            indexList.add(sample);
+        int l = list.size();
+        indexList = new ArrayList<>(l);
+        for (int i = 0; i < l; i++) {
+            indexList.add(i);
         }
 
         sort(sortBy, sortReverse);
@@ -155,6 +156,10 @@ public class SampleIndirectList {
         }
         this.sortBy = sortBy;
         this.sortReverse = sortReverse;
+    }
+
+    public void sort() {
+        sort(sortBy, sortReverse);
     }
 
     public Boolean getDeleted() {
