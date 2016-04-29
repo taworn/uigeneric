@@ -9,6 +9,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.List;
@@ -173,6 +174,73 @@ public class SampleDataSourceTest {
         assertTrue(source.count() == 2);
         assertTrue(source.count(false, null, null) == 2);
         assertTrue(source.count(true, null, null) == 0);
+
+        source.close();
+    }
+
+    @Test
+    public void testDeleteList() {
+        List<Sample> list;
+        List<Long> deleteList;
+        Context context = InstrumentationRegistry.getTargetContext();
+        SampleDataSource source = new SampleDataSource(context);
+        source.open();
+
+        // tests insert
+        Log.d(TAG, "tests insert, 3 records inserted");
+        Sample itemInsert = new Sample();
+        itemInsert.setName("Aaa");
+        source.insert(itemInsert);
+        itemInsert.setName("Bbb");
+        source.insert(itemInsert);
+        itemInsert.setName("Ccc");
+        source.insert(itemInsert);
+        itemInsert.setName("Ddd");
+        source.insert(itemInsert);
+        itemInsert.setName("Eee");
+        source.insert(itemInsert);
+
+        // tests delete list
+        Log.d(TAG, "tests delete list");
+        list = source.list(false, null, null, null);
+        deleteList = new ArrayList<>();
+        deleteList.add(list.get(0).getId());
+        deleteList.add(list.get(2).getId());
+        deleteList.add(list.get(4).getId());
+        source.deleteList(deleteList);
+
+        // result
+        list = source.list(null, null, null, null);
+        assertTrue(list.size() == 5);
+        list = source.list(false, null, null, null);
+        assertTrue(list.size() == 2);
+        assertTrue(list.get(0).getName().equals("Bbb"));
+        assertTrue(list.get(1).getName().equals("Ddd"));
+        list = source.list(true, null, null, null);
+        assertTrue(list.size() == 3);
+        assertTrue(source.count() == 5);
+        assertTrue(source.count(false, null, null) == 2);
+        assertTrue(source.count(true, null, null) == 3);
+
+        // tests remove list
+        Log.d(TAG, "tests remove (delete real) list");
+        list = source.list(true, null, null, null);
+        deleteList = new ArrayList<>();
+        deleteList.add(list.get(0).getId());
+        deleteList.add(list.get(2).getId());
+        source.removeList(deleteList);
+
+        // result
+        list = source.list(null, null, null, null);
+        assertTrue(list.size() == 3);
+        list = source.list(false, null, null, null);
+        assertTrue(list.size() == 2);
+        list = source.list(true, null, null, null);
+        assertTrue(list.size() == 1);
+        assertTrue(list.get(0).getName().equals("Ccc"));
+        assertTrue(source.count() == 3);
+        assertTrue(source.count(false, null, null) == 2);
+        assertTrue(source.count(true, null, null) == 1);
 
         source.close();
     }

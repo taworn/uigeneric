@@ -17,7 +17,8 @@ import java.util.List;
 import java.util.Locale;
 
 /**
- * A class to manage Sample database.  It's provide list, insert, update and delete easier.
+ * A class to manage Sample table.  It's provide list, insert, update, delete and utilities
+ * functions easier.
  */
 public class SampleDataSource {
 
@@ -27,14 +28,14 @@ public class SampleDataSource {
     private SQLiteStatement updateStatement = null;
 
     /**
-     * Constructs class to manage database.
+     * Constructs to manage table.
      */
     public SampleDataSource(@NonNull Context context) {
         helper = new SampleOpenHelper(context);
     }
 
     /**
-     * A utility to converts from bitmap to byte array.
+     * Converts from bitmap to byte array.
      *
      * @param icon Bitmap data.
      * @return Byte array that converted from bitmap.
@@ -54,7 +55,7 @@ public class SampleDataSource {
     }
 
     /**
-     * A utility to converts from byte array to bitmap.
+     * Converts from byte array to bitmap.
      *
      * @param byteArray Byte array data.
      * @return Bitmap that converted from byte array.
@@ -67,10 +68,10 @@ public class SampleDataSource {
     }
 
     /**
-     * A utility to converts from date/time to long.
+     * Converts from date/time to long.
      *
      * @param datetime Datetime data.
-     * @return Long, as milli-seconds, that converted from date/time.
+     * @return Long, as milli-seconds, that converted from datetime.
      */
     public static Long longFromDate(@Nullable Calendar datetime) {
         if (datetime != null)
@@ -80,7 +81,7 @@ public class SampleDataSource {
     }
 
     /**
-     * A utility to converts from long to date/time.
+     * Converts from long to date/time.
      *
      * @param milli Long, as milli-seconds, data.
      * @return Datetime that converted from long.
@@ -96,14 +97,14 @@ public class SampleDataSource {
     }
 
     /**
-     * Opens the database.
+     * Opens the table.
      */
     public void open() {
         database = helper.getWritableDatabase();
     }
 
     /**
-     * Closes the database.
+     * Closes the table.
      */
     public void close() {
         helper.close();
@@ -222,17 +223,19 @@ public class SampleDataSource {
         // executes query
         Cursor cursor = database.rawQuery(query, null);
 
-        // copied data to item
-        if (!cursor.moveToFirst())
-            throw new IllegalArgumentException("Item not found.");
-        Sample item = new Sample(cursor.getLong(0));
-        item.setIcon(iconFromBlob(cursor.getBlob(1)));
-        item.setName(cursor.getString(2));
-        item.setDetail(cursor.getString(3));
-        item.setCategory(cursor.getInt(4));
-        item.setDeleted(dateFromLong(cursor.getLong(5)));
-        cursor.close();
-        return item;
+        // copied data
+        if (cursor.moveToFirst()) {
+            Sample item = new Sample(cursor.getLong(0));
+            item.setIcon(iconFromBlob(cursor.getBlob(1)));
+            item.setName(cursor.getString(2));
+            item.setDetail(cursor.getString(3));
+            item.setCategory(cursor.getInt(4));
+            item.setDeleted(dateFromLong(cursor.getLong(5)));
+            cursor.close();
+            return item;
+        }
+        else
+            return null;
     }
 
     /**
