@@ -37,6 +37,9 @@ import diy.uigeneric.data.Sample;
 import diy.uigeneric.data.SampleDataSource;
 import diy.uigeneric.data.SampleIndirectList;
 
+/**
+ * The SampleListActivity is an activity to view and manage Sample(s) data.
+ */
 public class SampleListActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     private static final String TAG = SampleListActivity.class.getSimpleName();
@@ -45,11 +48,12 @@ public class SampleListActivity extends AppCompatActivity implements NavigationV
     private static final int REQUEST_VIEW = 101;
 
     private ActionBar actionBar = null;
-    private DrawerLayout drawer = null;
     private ActionBarDrawerToggle toggle = null;
+    private DrawerLayout drawer = null;
     private SampleIndirectList list = null;
     private SampleListAdapter listAdapter = null;
     private RecyclerView listView = null;
+
     private boolean actionMode = false;
     private String saveTitle = null;
 
@@ -150,7 +154,7 @@ public class SampleListActivity extends AppCompatActivity implements NavigationV
         spanString.setSpan(new ForegroundColorSpan(Color.RED), 0, spanString.length(), 0);
         item.setTitle(spanString);
 
-        // Associate searchable configuration with the SearchView
+        // associate searchable configuration with the SearchView
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
         SearchView searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
         if (searchView != null) {
@@ -360,7 +364,7 @@ public class SampleListActivity extends AppCompatActivity implements NavigationV
     public void onSaveInstanceState(Bundle savedInstanceState) {
         super.onSaveInstanceState(savedInstanceState);
         cancelListSelection();
-        savedInstanceState.putString("ui.title", actionBar.getTitle().toString());
+        savedInstanceState.putString("ui.title", actionBar.getTitle() != null ? actionBar.getTitle().toString() : "");
         if (list.getDeleted() != null)
             savedInstanceState.putBoolean("data.deleted", list.getDeleted());
         if (list.getCategory() != null)

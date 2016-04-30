@@ -22,9 +22,7 @@ import diy.uigeneric.data.Sample;
 import diy.uigeneric.data.SampleDataSource;
 
 /**
- * The SampleViewActivity is an activity to view diy.uigeneric.data.sample class data.
- * <p/>
- * It has buttons (locate right, top) to edit and delete item.
+ * The SampleViewActivity is an activity to view a Sample data.
  */
 public class SampleViewActivity extends AppCompatActivity {
 
@@ -224,8 +222,9 @@ public class SampleViewActivity extends AppCompatActivity {
             imageIcon.setImageDrawable(null);
 
         textName.setText(item.getName());
+
         String[] categoryList = getResources().getStringArray(R.array.sample_category);
-        String categoryName = Integer.toString(item.getCategory());;
+        String categoryName = Integer.toString(item.getCategory());
         if (item.getCategory() >= 0 && item.getCategory() < categoryList.length)
             categoryName = categoryList[item.getCategory()];
         textCategory.setText(categoryName);

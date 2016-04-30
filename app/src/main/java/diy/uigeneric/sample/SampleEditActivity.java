@@ -35,13 +35,7 @@ import diy.uigeneric.data.Sample;
 import diy.uigeneric.data.SampleDataSource;
 
 /**
- * The SampleEditActivity is an activity to edit diy.uigeneric.data.sample class data.
- * <p/>
- * Starts the activity to add data.  If user want to edit data, pass bundle "data.id" as long
- * integer.
- * <p/>
- * There are two close events.  First, back pressed, just nothings change.  Second, when Save
- * button saved and data can be saved.
+ * The SampleEditActivity is an activity to edit a Sample data.
  */
 public class SampleEditActivity extends AppCompatActivity {
 

@@ -30,8 +30,14 @@ public class SampleListAdapter extends RecyclerView.Adapter<SampleListAdapter.Vi
 
     public interface OnItemClickListener {
 
+        /**
+         * Calls when an item has clicked.
+         */
         void onClick(View view, int position);
 
+        /**
+         * Calls when an item has long clicked.
+         */
         void onLongClick(View view, int position);
 
     }
@@ -111,7 +117,7 @@ public class SampleListAdapter extends RecyclerView.Adapter<SampleListAdapter.Vi
         holder.textName.setText(item.getName());
 
         String[] categoryList = context.getResources().getStringArray(R.array.sample_category);
-        String categoryName = Integer.toString(item.getCategory());;
+        String categoryName = Integer.toString(item.getCategory());
         if (item.getCategory() >= 0 && item.getCategory() < categoryList.length)
             categoryName = categoryList[item.getCategory()];
         if (item.getDeleted() != null) {
