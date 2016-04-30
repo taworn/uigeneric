@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="restlite_NOERRORS">No errors.</string>
+    <string name="restlite_EUNKNOWN">Unknown error.</string>
+    <string name="restlite_ETIMEOUT">Timeout error.</string>
+    <string name="restlite_EUNREACH">Network unreachable.</string>
+</resources>
