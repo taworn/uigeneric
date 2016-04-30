@@ -16,6 +16,7 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.view.ActionMode;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -47,15 +48,14 @@ public class SampleListActivity extends AppCompatActivity implements NavigationV
     private static final int REQUEST_ADD = 100;
     private static final int REQUEST_VIEW = 101;
 
-    private ActionBar actionBar = null;
-    private ActionBarDrawerToggle toggle = null;
     private DrawerLayout drawer = null;
     private SampleIndirectList list = null;
     private SampleListAdapter listAdapter = null;
     private RecyclerView listView = null;
 
-    private boolean actionMode = false;
-    private String saveTitle = null;
+    private ActionMode actionMode = null;
+    private ActionMode.Callback actionModeCallback = null;
+    private ActionBar actionBar = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,7 +84,7 @@ public class SampleListActivity extends AppCompatActivity implements NavigationV
 
         // initializes navigation drawer
         drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.setDrawerListener(toggle);
         toggle.syncState();
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
@@ -92,7 +92,6 @@ public class SampleListActivity extends AppCompatActivity implements NavigationV
             navigationView.setNavigationItemSelectedListener(this);
 
         // initializes RecycledView and its data
-        actionBar.setTitle(R.string.sample_list_title_data);
         list = new SampleIndirectList();
         list.load(this, false, Sample.CATEGORY_DATA, null, SampleIndirectList.SORT_AS_IS, false);
         listAdapter = new SampleListAdapter(this, list, new SampleListAdapter.OnItemClickListener() {
@@ -120,6 +119,49 @@ public class SampleListActivity extends AppCompatActivity implements NavigationV
             listView.setItemAnimator(new DefaultItemAnimator());
             listView.setAdapter(listAdapter);
         }
+
+        // initializes contextual action mode
+        actionModeCallback = new ActionMode.Callback() {
+            @Override
+            public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+                boolean b = !list.getDeleted();
+                mode.getMenuInflater().inflate(R.menu.sample_list_context, menu);
+                menu.findItem(R.id.action_restore).setVisible(!b);
+                menu.findItem(R.id.action_delete).setVisible(b);
+                menu.findItem(R.id.action_remove).setVisible(!b);
+                return true;
+            }
+
+            @Override
+            public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+                return false;
+            }
+
+            @Override
+            public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+                int id = item.getItemId();
+                if (id == R.id.action_delete) {
+                    deleteSelected();
+                    return true;
+                }
+                else if (id == R.id.action_restore) {
+                    restoreSelected();
+                    return true;
+                }
+                else if (id == R.id.action_remove) {
+                    removeSelected();
+                    return true;
+                }
+                return false;
+            }
+
+            @Override
+            public void onDestroyActionMode(ActionMode mode) {
+                cancelListSelection();
+            }
+        };
+
+        actionBar.setTitle(R.string.sample_list_title_data);
     }
 
     @Override
@@ -173,57 +215,13 @@ public class SampleListActivity extends AppCompatActivity implements NavigationV
     }
 
     @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
-        menu.findItem(R.id.action_restore).setVisible(actionMode);
-        menu.findItem(R.id.action_delete).setVisible(actionMode);
-        menu.findItem(R.id.action_remove).setVisible(actionMode);
-        menu.findItem(R.id.action_remove_all).setVisible(!actionMode);
-        menu.findItem(R.id.action_search).setVisible(!actionMode);
-        menu.findItem(R.id.action_sort).setVisible(!actionMode);
-        return true;
-    }
-
-    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        if (id == R.id.action_delete) {
-            deleteSelected();
-            return true;
-        }
-        else if (id == R.id.action_restore) {
-            restoreSelected();
-            return true;
-        }
-        else if (id == R.id.action_remove) {
-            removeSelected();
-            return true;
-        }
-        else if (id == R.id.action_remove_all) {
-            new AlertDialog.Builder(this)
-                    .setTitle(R.string.sample_remove_all_dialog_title)
-                    .setMessage(R.string.sample_remove_all_dialog_message)
-                    .setNegativeButton(R.string.sample_remove_all_dialog_negative, null)
-                    .setPositiveButton(R.string.sample_remove_all_dialog_positive, new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                            SampleDataSource source = new SampleDataSource(SampleListActivity.this);
-                            source.open();
-                            source.removeAll();
-                            Log.d(TAG, "removed ALL data");
-                            source.close();
-                            list.reload(SampleListActivity.this);
-                            listAdapter.notifyDataSetChanged();
-                            cancelListSelection();
-                        }
-                    })
-                    .show();
-            return true;
-        }
-
-        else if (id == R.id.action_sort_as_is) {
+        if (id == R.id.action_sort_as_is) {
             item.setChecked(true);
             list.setSortBy(SampleIndirectList.SORT_AS_IS);
             listAdapter.notifyDataSetChanged();
@@ -256,6 +254,27 @@ public class SampleListActivity extends AppCompatActivity implements NavigationV
             list.setSortReverse(!list.getSortReverse());
             listAdapter.notifyDataSetChanged();
             Log.d(TAG, "sort: " + (!list.getSortReverse() ? "ascending" : "descending"));
+            return true;
+        }
+
+        else if (id == R.id.action_remove_all) {
+            new AlertDialog.Builder(this)
+                    .setTitle(R.string.sample_remove_all_dialog_title)
+                    .setMessage(R.string.sample_remove_all_dialog_message)
+                    .setNegativeButton(R.string.sample_remove_all_dialog_negative, null)
+                    .setPositiveButton(R.string.sample_remove_all_dialog_positive, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            SampleDataSource source = new SampleDataSource(SampleListActivity.this);
+                            source.open();
+                            source.removeAll();
+                            Log.d(TAG, "removed ALL data");
+                            source.close();
+                            list.reload(SampleListActivity.this);
+                            listAdapter.notifyDataSetChanged();
+                            cancelListSelection();
+                        }
+                    })
+                    .show();
             return true;
         }
 
@@ -399,9 +418,6 @@ public class SampleListActivity extends AppCompatActivity implements NavigationV
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         }
-        else if (actionMode) {
-            cancelListSelection();
-        }
         else {
             super.onBackPressed();
         }
@@ -502,31 +518,25 @@ public class SampleListActivity extends AppCompatActivity implements NavigationV
     }
 
     private void increaseListSelection() {
-        if (!actionMode) {
-            actionMode = true;
-            saveTitle = actionBar.getTitle().toString();
-            toggle.onDrawerOpened(null);
+        if (actionMode == null) {
+            actionMode = startSupportActionMode(actionModeCallback);
         }
-        actionBar.setTitle(String.format(Locale.US, "%d/%d", listAdapter.getSelectedItemCount(), listAdapter.getItemCount()));
-        invalidateOptionsMenu();
+        actionMode.setTitle(String.format(Locale.US, "%d/%d", listAdapter.getSelectedItemCount(), listAdapter.getItemCount()));
     }
 
     private void decreaseListSelection() {
-        if (actionMode) {
-            if (listAdapter.getSelectedItemCount() > 0)
-                actionBar.setTitle(String.format(Locale.US, "%d/%d", listAdapter.getSelectedItemCount(), listAdapter.getItemCount()));
-            else
+        if (actionMode != null) {
+            actionMode.setTitle(String.format(Locale.US, "%d/%d", listAdapter.getSelectedItemCount(), listAdapter.getItemCount()));
+            if (listAdapter.getSelectedItemCount() <= 0)
                 cancelListSelection();
         }
     }
 
     private void cancelListSelection() {
-        if (actionMode) {
+        if (actionMode != null) {
             listAdapter.clearSelections();
-            actionBar.setTitle(saveTitle);
-            toggle.onDrawerClosed(null);
-            actionMode = false;
-            invalidateOptionsMenu();
+            actionMode.finish();
+            actionMode = null;
         }
     }
 
