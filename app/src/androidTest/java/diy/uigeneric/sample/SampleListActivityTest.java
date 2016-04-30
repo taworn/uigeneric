@@ -26,7 +26,7 @@ public class SampleListActivityTest {
     private static final String TAG = SampleListActivityTest.class.getSimpleName();
 
     @Rule
-    public ActivityTestRule<SampleListActivity> activityTestRule = new ActivityTestRule<>(SampleListActivity.class);
+    public ActivityTestRule<SampleListActivity> activityTestRule = new ActivityTestRule<>(SampleListActivity.class, false, false);
 
     @Before
     public void before() {
@@ -54,6 +54,7 @@ public class SampleListActivityTest {
         Context context = InstrumentationRegistry.getTargetContext();
 
         // opens menu and clicks Remove All
+        activityTestRule.launchActivity(null);
         openActionBarOverflowOrOptionsMenu(context);
         onView(withText("Remove All")).perform(click());
 
