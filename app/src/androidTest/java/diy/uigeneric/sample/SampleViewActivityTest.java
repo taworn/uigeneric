@@ -27,7 +27,7 @@ public class SampleViewActivityTest {
     private static final String TAG = SampleViewActivityTest.class.getSimpleName();
 
     @Rule
-    public ActivityTestRule<SampleViewActivity> activityTestRule = new ActivityTestRule<>(SampleViewActivity.class);
+    public ActivityTestRule<SampleViewActivity> activityTestRule = new ActivityTestRule<>(SampleViewActivity.class, false, false);
 
     @Test
     public void testEdit() {
