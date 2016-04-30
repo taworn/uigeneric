@@ -16,7 +16,6 @@ import diy.uigeneric.sample.SampleViewActivityTest;
         SampleEditActivityTest.class,
         SampleViewActivityTest.class,
         SampleListActivityTest.class,
-        ApplicationTest.class,
 })
 public class ApplicationSuite {
 }

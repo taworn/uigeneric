@@ -11,6 +11,10 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 
+/**
+ * A SampleIndirectList is an implementation of list with sort feature.  The functions are load,
+ * reload, sort and search.  This class is convenient to use as list in Android UI.
+ */
 public class SampleIndirectList {
 
     public static final int SORT_AS_IS = 0;
@@ -68,15 +72,19 @@ public class SampleIndirectList {
     };
     private final Comparator<String> comparator = new AlphanumericComparator(Collator.getInstance(Locale.ENGLISH));
 
-    private List<Sample> list;
-    private List<Integer> indexList;
+    private List<Sample> list;        // a list of data
+    private List<Integer> indexList;  // an integer list used by indices
 
+    // variables to load data
     private Boolean deleted;
     private Integer category;
     private String query;
     private int sortBy;
     private boolean sortReverse;
 
+    /**
+     * Constructs an indirect list.
+     */
     public SampleIndirectList() {
         super();
         this.list = new ArrayList<>();
@@ -85,14 +93,30 @@ public class SampleIndirectList {
         this.sortReverse = false;
     }
 
+    /**
+     * Gets an item with index list.
+     */
     public Sample get(int i) {
         return list.get(indexList.get(i));
     }
 
+    /**
+     * Gets size of index list.
+     */
     public int size() {
         return indexList.size();
     }
 
+    /**
+     * Loads data.
+     *
+     * @param context     Context to use.
+     * @param deleted     Deleted flags to use, can be null.
+     * @param category    Category to load, can be null.
+     * @param query       Query to search, can be null.
+     * @param sortBy      How to sort data.
+     * @param sortReverse Sort by ascending or descending.
+     */
     public void load(Context context, Boolean deleted, Integer category, String query, int sortBy, boolean sortReverse) {
         SampleDataSource source = new SampleDataSource(context);
         source.open();
