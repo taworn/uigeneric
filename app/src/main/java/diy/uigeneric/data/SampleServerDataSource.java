@@ -9,10 +9,6 @@ import android.support.annotation.Nullable;
 import android.support.v7.preference.PreferenceManager;
 import android.util.Log;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -20,7 +16,7 @@ import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Locale;
 
-import diy.restlite.HttpRestLite;
+import diy.restlite.HttpRestLiteIndirect;
 
 /**
  * A class to manage Sample table on server.  It's provide list, insert, update, delete and
@@ -31,7 +27,7 @@ public class SampleServerDataSource {
     private static final String TAG = SampleServerDataSource.class.getSimpleName();
 
     private Context context = null;
-    private HttpRestLite rest = null;
+    private HttpRestLiteIndirect rest = null;
 
     /**
      * Constructs to manage table.
@@ -142,14 +138,14 @@ public class SampleServerDataSource {
      * @param orderBy  Order by string, can be null.
      * @return All data in list that matched records in table.
      */
-    public HttpRestLite list(@Nullable Boolean deleted, @Nullable Integer category, @Nullable String search, @Nullable String orderBy, @NonNull HttpRestLite.ResultListener listener) {
+    public HttpRestLiteIndirect list(@Nullable Boolean deleted, @Nullable Integer category, @Nullable String search, @Nullable String orderBy, @NonNull HttpRestLiteIndirect.ResultListener listener) {
         final ArrayList<Sample> list = new ArrayList<>();
 
         SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
         String server = pref.getString("server", "");
         Log.d(TAG, "server: " + server);
 
-        rest = new HttpRestLite(server + "api/sample/list.php", "POST", listener);
+        rest = new HttpRestLiteIndirect(server + "api/sample/list.php", "POST", listener);
         return rest;
     }
 

@@ -8,20 +8,13 @@ import android.util.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
 import java.util.List;
-import java.util.Locale;
 
-import diy.restlite.HttpRestLite;
-
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import diy.restlite.HttpRestLiteIndirect;
 
 @RunWith(AndroidJUnit4.class)
 public class SampleServerDataSourceTest {
@@ -32,9 +25,9 @@ public class SampleServerDataSourceTest {
     public void testBasic() throws InterruptedException {
         Context context = InstrumentationRegistry.getTargetContext();
         SampleServerDataSource source = new SampleServerDataSource(context);
-        source.list(null, null, null, null, new HttpRestLite.ResultListener() {
+        source.list(null, null, null, null, new HttpRestLiteIndirect.ResultListener() {
             @Override
-            public void success(HttpRestLite.HttpResult result) {
+            public void success(HttpRestLiteIndirect.HttpResult result) {
                 try {
                     List<Sample> list = new ArrayList<Sample>();
                     if (result.data.has("ok") && result.data.getBoolean("ok")) {
@@ -51,7 +44,7 @@ public class SampleServerDataSourceTest {
                         }
                     }
                 }
-                catch(JSONException e){
+                catch (JSONException e) {
                     e.printStackTrace();
                 }
             }

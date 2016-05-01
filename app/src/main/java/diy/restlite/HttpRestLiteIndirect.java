@@ -28,9 +28,9 @@ import diy.uigeneric.R;
 /**
  * An HTTP REST with minimal passing parameters.
  */
-public class HttpRestLite {
+public class HttpRestLiteIndirect {
 
-    private static final String TAG = HttpRestLite.class.getSimpleName();
+    private static final String TAG = HttpRestLiteIndirect.class.getSimpleName();
 
     private String url;               // URL to send REST
     private String request;           // request method
@@ -64,7 +64,7 @@ public class HttpRestLite {
     private JSONObject result;
     private int errorCode;
 
-    public HttpRestLite(@NonNull String url, @Nullable String request, @NonNull ResultListener listener) {
+    public HttpRestLiteIndirect(@NonNull String url, @Nullable String request, @NonNull ResultListener listener) {
         super();
         this.url = url;
         this.request = request;
