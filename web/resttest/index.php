@@ -10,15 +10,8 @@ session_start();
 	<title>Home</title>
 
 	<link rel="stylesheet" href="./css/main.css"/>
-	<link rel="stylesheet" href="./css/form.css"/>
-	<style>
-	</style>
 
 	<script src="./js/jquery-1.11.1.js"></script>
-	<script>
-	$(function() {
-	});
-	</script>
 </head>
 
 <body>

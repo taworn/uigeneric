@@ -9,7 +9,6 @@ session_start();
 $in = array (
 	'name' => isset($_POST['name']) ? trim($_POST['name']) : "",
 	'category' => isset($_POST['category']) ? intval($_POST['category']) : 0,
-	'deleted' => isset($_POST['deleted']) ? intval($_POST['deleted']) : 0,
 );
 
 // checks input
@@ -28,7 +27,7 @@ if (count($errors) <= 0) {
 	$last_id = $pdo->lastInsertId();
 
 	// reloads data
-	$query = "SELECT id, name, category, deleted FROM sample WHERE id = :id";
+	$query = "SELECT id, icon, name, category, deleted FROM sample WHERE id = :id";
 	$stmt = $pdo->prepare($query);
 	$stmt->execute(array (
 		':id' => $last_id,

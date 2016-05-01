@@ -12,6 +12,7 @@ session_start();
 	<link rel="stylesheet" href="./css/jquery-ui.css"/>
 	<link rel="stylesheet" href="./css/main.css"/>
 	<link rel="stylesheet" href="./css/form.css"/>
+	<link rel="stylesheet" href="./css/list.css"/>
 	<link rel="stylesheet" href="./css/breadcrumb.css"/>
 
 	<script src="./js/jquery-1.11.1.js"></script>
@@ -27,14 +28,14 @@ session_start();
 
 	<div id="main">
 		<div class="breadcrumb">
-			<a href="./">Home</a> &gt;&gt; 
+			<a href="./">Home</a> &gt;&gt;
 			<span class="here">Sample</span>
 		</div>
 
 		<form id="form-list" class="form">
-			<table id="list">
+			<table id="list" class="list">
 				<thead>
-					<th><input type="checkbox" name="toggle"/></th>
+					<th>&nbsp;</th>
 					<th>Name</th>
 					<th>Category</th>
 					<th>Deleted</th>
@@ -42,11 +43,11 @@ session_start();
 				<tbody>
 				</tbody>
 			</table>
-			
+
 			<button type="submit" id="add">Add</button>
 			<button type="button" id="delete">Delete</button>
 		</form>
-		
+
 		<div style="display:none">
 			<form id="form" class="form">
 				<div class="field">
@@ -56,10 +57,6 @@ session_start();
 				<div class="field">
 					<label>Category</label>
 					<input name="category" type="text" maxlength="1"/>
-				</div>
-				<div class="field">
-					<label>Deleted</label>
-					<input name="deleted" type="checkbox" value="1"/>
 				</div>
 			</form>
 		</div>

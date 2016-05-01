@@ -46,7 +46,7 @@ $(function() {
 		dialog.dialog('open');
 		return false;
 	});
-	
+
 	// deletes
 	$('#delete').click(function() {
 		var checked = new Array();
@@ -62,8 +62,8 @@ $(function() {
 				type: 'DELETE',
 				data: { list: checked }
 			}).done(function(data) {
-				handleError(data);
 				if (data.ok) {
+					console.log("delete data is ...");
 					var tbody = $('#list tbody');
 					tbody.empty();
 					var i = 0;
@@ -74,6 +74,10 @@ $(function() {
 						tbody.append(tr);
 						i++;
 					}
+					console.log("delete data is ok");
+				}
+				else {
+					handleError(data);
 				}
 			});
 		}
@@ -84,7 +88,6 @@ $(function() {
 		$.ajax({
 			url: "./api/sample/get.php/" + id,
 		}).done(function(data) {
-			handleError(data);
 			if (data.ok) {
 				var form = $('#form');
 				var dialog = form.dialog({
@@ -96,12 +99,16 @@ $(function() {
 								type: 'PUT',
 								data: form.serialize(),
 							}).done(function(data) {
-								handleError(data);
 								if (data.ok) {
+									console.log("edit data is ...");
 									dialog.dialog('close');
 									var item = data.item;
 									tr.empty();
 									loadData(item, tr);
+									console.log("edit data is ok");
+								}
+								else {
+									handleError(data);
 								}
 							});
 						},
@@ -111,12 +118,14 @@ $(function() {
 					},
 					open: function() {
 						$(this).trigger('reset');
-						$('#form input[name=name]').val(data.item.name),
-						$('#form input[name=cost]').val(data.item.cost),
-						$('#form input[name=price]').val(data.item.price)
+						$('#form input[name=name]').val(data.item.name);
+						$('#form input[name=category]').val(data.item.category);
 					},
 				});
 				dialog.dialog('open');
+			}
+			else {
+				handleError(data);
 			}
 		});
 	}
@@ -128,25 +137,25 @@ $(function() {
 			e.preventDefault();
 			edit(e.data.id, tr);
 		};
-		
+
 		td = $(document.createElement('td'));
 		var checkbox = $(document.createElement('input'));
 		checkbox.prop('type', 'checkbox');
 		checkbox.prop('name', 'checked');
 		checkbox.prop('value', item.id);
-		td.append(checkbox);				
+		td.append(checkbox);
 		tr.append(td);
-		
+
 		td = $(document.createElement('td'));
-		td.text(item.name);				
+		td.text(item.name);
 		td.on('click', {id: item.id}, click);
 		tr.append(td);
-		
+
 		td = $(document.createElement('td'));
 		td.text(item.category);
 		td.on('click', {id: item.id}, click);
 		tr.append(td);
-		
+
 		td = $(document.createElement('td'));
 		td.text(item.deleted);
 		td.on('click', {id: item.id}, click);
@@ -180,6 +189,6 @@ $(function() {
 			}
 		});
 	}
-	
+
 	refresh();
 });
