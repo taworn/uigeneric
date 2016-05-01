@@ -1,0 +1,17 @@
+.breadcrumb {
+}
+
+.breadcrumb a {
+	color: #00c;
+}
+
+.breadcrumb a:link {
+	text-decoration: none;
+}
+
+.breadcrumb .here {
+	font-size: 150%;
+	font-weight: bold;
+	color: #000;
+}
+

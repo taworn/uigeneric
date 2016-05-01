@@ -1,0 +1,23 @@
+.form {
+}
+
+.form > div {
+	margin: 20px;
+}
+
+.form > div label {
+	display: block;
+}
+
+.form > div .field {
+	display: block;
+}
+
+.form > div input[type=text] {
+	width: 100%;
+}
+
+.form > div input[type=password] {
+	width: 100%;
+}
+

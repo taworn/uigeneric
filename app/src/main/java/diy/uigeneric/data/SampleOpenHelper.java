@@ -26,18 +26,19 @@ public class SampleOpenHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase database) {
-        String query = "CREATE TABLE sample(id INTEGER PRIMARY KEY"
+        String query = "CREATE TABLE sample (id INTEGER NOT NULL"
                 + ", icon BLOB"
                 + ", name TEXT NOT NULL"
                 + ", detail TEXT DEFAULT ''"
                 + ", category INT DEFAULT 0"
-                + ", deleted INT)";
+                + ", deleted INT"
+                + ", PRIMARY KEY (id));";
         database.execSQL(query);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase database, int i, int i2) {
-        database.execSQL("DROP TABLE IF EXISTS generic");
+        database.execSQL("DROP TABLE IF EXISTS sample");
         onCreate(database);
     }
 
