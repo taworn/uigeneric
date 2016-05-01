@@ -35,7 +35,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Shared
         addPreferencesFromResource(R.xml.preferences);
         sharedPref = PreferenceManager.getDefaultSharedPreferences(getActivity());
         onSharedPreferenceChanged(sharedPref, "database");
-        onSharedPreferenceChanged(sharedPref, "ip");
+        onSharedPreferenceChanged(sharedPref, "server");
         onSharedPreferenceChanged(sharedPref, "username");
         onSharedPreferenceChanged(sharedPref, "email");
     }

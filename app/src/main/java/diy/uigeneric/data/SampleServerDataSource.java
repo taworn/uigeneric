@@ -1,10 +1,17 @@
 package diy.uigeneric.data;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v7.preference.PreferenceManager;
+import android.util.Log;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
@@ -13,16 +20,25 @@ import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Locale;
 
+import diy.restlite.HttpRestLite;
+
 /**
  * A class to manage Sample table on server.  It's provide list, insert, update, delete and
  * utilities functions easier.
  */
 public class SampleServerDataSource {
 
+    private static final String TAG = SampleServerDataSource.class.getSimpleName();
+
+    private Context context = null;
+    private HttpRestLite rest = null;
+
     /**
      * Constructs to manage table.
      */
     public SampleServerDataSource(@NonNull Context context) {
+        this.context = context;
+        this.rest = null;
     }
 
     /**
@@ -126,9 +142,15 @@ public class SampleServerDataSource {
      * @param orderBy  Order by string, can be null.
      * @return All data in list that matched records in table.
      */
-    public List<Sample> list(@Nullable Boolean deleted, @Nullable Integer category, @Nullable String search, @Nullable String orderBy) {
-        ArrayList<Sample> list = new ArrayList<>();
-        return list;
+    public HttpRestLite list(@Nullable Boolean deleted, @Nullable Integer category, @Nullable String search, @Nullable String orderBy, @NonNull HttpRestLite.ResultListener listener) {
+        final ArrayList<Sample> list = new ArrayList<>();
+
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
+        String server = pref.getString("server", "");
+        Log.d(TAG, "server: " + server);
+
+        rest = new HttpRestLite(server + "api/sample/list.php", "POST", listener);
+        return rest;
     }
 
     /**

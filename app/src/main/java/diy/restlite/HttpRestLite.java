@@ -7,6 +7,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
@@ -46,7 +47,7 @@ public class HttpRestLite {
         /**
          * @param result
          */
-        void success(HttpResult result);
+        void success(HttpResult result) throws JSONException;
 
         /**
          * @param code
@@ -238,8 +239,14 @@ public class HttpRestLite {
             if (dialog != null)
                 dialog.dismiss();
             if (!isCancelled()) {
-                if (result != null)
-                    listener.success(result);
+                if (result != null) {
+                    try {
+                        listener.success(result);
+                    }
+                    catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
                 else
                     listener.failed(errorCode);
             }

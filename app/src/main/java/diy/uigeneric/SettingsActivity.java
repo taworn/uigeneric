@@ -13,8 +13,6 @@ public class SettingsActivity extends AppCompatActivity {
 
     private static final String TAG = SettingsActivity.class.getSimpleName();
 
-    private SharedPreferences sharedPref;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -29,13 +27,13 @@ public class SettingsActivity extends AppCompatActivity {
                 .replace(R.id.content, new SettingsFragment())
                 .commit();
 
-        sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         String database = sharedPref.getString("database", "0");
-        String ip = sharedPref.getString("ip", "");
+        String server = sharedPref.getString("server", "");
         String username = sharedPref.getString("username", "");
         String email = sharedPref.getString("email", "");
         Log.d(TAG, "database: " + database);
-        Log.d(TAG, "ip: " + ip);
+        Log.d(TAG, "server: " + server);
         Log.d(TAG, "username: " + username);
         Log.d(TAG, "email: " + email);
     }

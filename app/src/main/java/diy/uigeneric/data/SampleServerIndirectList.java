@@ -11,11 +11,13 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 
+import diy.restlite.HttpRestLite;
+
 /**
  * A SampleIndirectList is an implementation of list with sort feature.  The functions are load,
  * reload, sort and search.  This class is convenient to use as list in Android UI.
  */
-public class SampleIndirectList {
+public class SampleServerIndirectList {
 
     public static final int SORT_AS_IS = 0;
     public static final int SORT_NAME = 1;
@@ -82,10 +84,13 @@ public class SampleIndirectList {
     private int sortBy;
     private boolean sortReverse;
 
+    // HTTP REST
+    private HttpRestLite rest = null;
+
     /**
      * Constructs an indirect list.
      */
-    public SampleIndirectList() {
+    public SampleServerIndirectList() {
         super();
         this.list = new ArrayList<>();
         this.indexList = new ArrayList<>();
@@ -94,6 +99,7 @@ public class SampleIndirectList {
         this.query = null;
         this.sortBy = SORT_AS_IS;
         this.sortReverse = false;
+        this.rest = null;
     }
 
     /**

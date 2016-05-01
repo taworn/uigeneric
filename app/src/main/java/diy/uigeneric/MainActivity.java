@@ -8,6 +8,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 
 import diy.uigeneric.sample.SampleListActivity;
+import diy.uigeneric.sampleserver.SampleServerListActivity;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -24,6 +25,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onSampleServerClick(View view) {
+        startActivity(new Intent(this, SampleServerListActivity.class));
     }
 
     public void onSettingsClick(View view) {
