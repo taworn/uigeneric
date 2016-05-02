@@ -19,7 +19,7 @@ public class SampleServerIndirectListTest {
     public void test() {
         Context context = InstrumentationRegistry.getTargetContext();
         SampleServerIndirectList list = new SampleServerIndirectList(context);
-        HttpRestLite.Result result = list.load(null, null, null, SampleServerIndirectList.SORT_AS_IS, true);
+        HttpRestLite.Result result = list.load(false, null, "d", SampleServerIndirectList.SORT_AS_IS, true);
 
         Log.d(TAG, "result.errorCode = " + result.errorCode);
         for (int i = 0; i < list.size(); i++)

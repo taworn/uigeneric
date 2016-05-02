@@ -1,6 +1,7 @@
 package diy.uigeneric.sampleserver;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -9,7 +10,6 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
-import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
@@ -30,16 +30,13 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
-import java.util.List;
 import java.util.Locale;
 
 import diy.restlite.HttpRestLite;
 import diy.uigeneric.R;
 import diy.uigeneric.adapter.SampleServerListAdapter;
 import diy.uigeneric.data.Sample;
-import diy.uigeneric.data.SampleDataSource;
 import diy.uigeneric.data.SampleServerIndirectList;
-import diy.uigeneric.sample.SampleEditActivity;
 import diy.uigeneric.sample.SampleViewActivity;
 
 /**
@@ -53,6 +50,8 @@ public class SampleServerListActivity extends AppCompatActivity implements Navig
     private static final int REQUEST_VIEW = 101;
 
     private DrawerLayout drawer = null;
+    private SampleServerIndirectList.ResultListener listener = null;
+    private SampleServerIndirectList.ResultListener listenerCancel = null;
     private SampleServerIndirectList list = null;
     private SampleServerListAdapter listAdapter = null;
     private RecyclerView listView = null;
@@ -60,6 +59,10 @@ public class SampleServerListActivity extends AppCompatActivity implements Navig
     private ActionMode actionMode = null;
     private ActionMode.Callback actionModeCallback = null;
     private ActionBar actionBar = null;
+
+    private ProgressDialog progress = null;
+    private DialogInterface.OnCancelListener progressCancel = null;
+    private HttpRestLite rest = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,19 +72,14 @@ public class SampleServerListActivity extends AppCompatActivity implements Navig
         setSupportActionBar(toolbar);
         actionBar = getSupportActionBar();
 
-        SampleDataSource source = new SampleDataSource(SampleServerListActivity.this);
-        source.open();
-        source.removeTrash(3 * 24 * 60 * 60 * 1000); // three days
-        source.close();
-
         // initializes FAB
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         if (fab != null) {
             fab.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    Intent intent = new Intent(SampleServerListActivity.this, SampleEditActivity.class);
-                    startActivityForResult(intent, REQUEST_ADD);
+                    //Intent intent = new Intent(SampleServerListActivity.this, SampleEditActivity.class);
+                    //startActivityForResult(intent, REQUEST_ADD);
                 }
             });
         }
@@ -95,15 +93,52 @@ public class SampleServerListActivity extends AppCompatActivity implements Navig
         if (navigationView != null)
             navigationView.setNavigationItemSelectedListener(this);
 
+        // initializes callback
+        listener = new SampleServerIndirectList.ResultListener() {
+            @Override
+            public void finish(final int errorCode) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        progress.dismiss();
+                        if (errorCode == 0)
+                            listAdapter.notifyDataSetChanged();
+                        else
+                            Toast.makeText(SampleServerListActivity.this, HttpRestLite.getErrorMessage(SampleServerListActivity.this, errorCode), Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+        };
+        listenerCancel = new SampleServerIndirectList.ResultListener() {
+            @Override
+            public void finish(final int errorCode) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        progress.dismiss();
+                        if (errorCode == 0) {
+                            listAdapter.notifyDataSetChanged();
+                            cancelListSelection();
+                        }
+                        else
+                            Toast.makeText(SampleServerListActivity.this, HttpRestLite.getErrorMessage(SampleServerListActivity.this, errorCode), Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+        };
+        progressCancel = new DialogInterface.OnCancelListener() {
+            @Override
+            public void onCancel(DialogInterface dialogInterface) {
+                if (rest != null) {
+                    rest.cancel();
+                }
+            }
+        };
+
         // initializes RecycledView and its data
         list = new SampleServerIndirectList(this);
-        list.load(false, Sample.CATEGORY_DATA, null, SampleServerIndirectList.SORT_AS_IS, false, new SampleServerIndirectList.ResultListener() {
-            @Override
-            public void finish(int errorCode) {
-                if (errorCode != 0)
-                    Toast.makeText(SampleServerListActivity.this, HttpRestLite.getErrorMessage(SampleServerListActivity.this, errorCode), Toast.LENGTH_SHORT).show();
-            }
-        });
+        openProgressDialog();
+        list.load(false, Sample.CATEGORY_DATA, null, SampleServerIndirectList.SORT_AS_IS, false, listener);
         listAdapter = new SampleServerListAdapter(this, list, new SampleServerListAdapter.OnItemClickListener() {
             @Override
             public void onClick(View view, int position) {
@@ -214,8 +249,7 @@ public class SampleServerListActivity extends AppCompatActivity implements Navig
             searchView.setOnCloseListener(new SearchView.OnCloseListener() {
                 @Override
                 public boolean onClose() {
-                    list.search(SampleServerListActivity.this, "");
-                    listAdapter.notifyDataSetChanged();
+                    list.search("", listener);
                     Log.d(TAG, "search stop");
                     return false;
                 }
@@ -268,6 +302,7 @@ public class SampleServerListActivity extends AppCompatActivity implements Navig
         }
 
         else if (id == R.id.action_remove_all) {
+            /*
             new AlertDialog.Builder(this)
                     .setTitle(R.string.sample_remove_all_dialog_title)
                     .setMessage(R.string.sample_remove_all_dialog_message)
@@ -279,12 +314,11 @@ public class SampleServerListActivity extends AppCompatActivity implements Navig
                             source.removeAll();
                             Log.d(TAG, "removed ALL data");
                             source.close();
-                            list.reload(SampleServerListActivity.this);
-                            listAdapter.notifyDataSetChanged();
-                            cancelListSelection();
+                            list.reload(listenerCancel);
                         }
                     })
                     .show();
+            */
             return true;
         }
 
@@ -299,57 +333,57 @@ public class SampleServerListActivity extends AppCompatActivity implements Navig
         if (id == R.id.nav_data) {
             cancelListSelection();
             actionBar.setTitle(R.string.sample_list_title_data);
-            list.load(this, false, Sample.CATEGORY_DATA);
-            listAdapter.notifyDataSetChanged();
+            openProgressDialog();
+            list.load(false, Sample.CATEGORY_DATA, listener);
             Log.d(TAG, "load category: data");
         }
         else if (id == R.id.nav_priority_data) {
             cancelListSelection();
             actionBar.setTitle(R.string.sample_list_title_priority_data);
-            list.load(this, false, Sample.CATEGORY_PRIORITY_DATA);
-            listAdapter.notifyDataSetChanged();
+            openProgressDialog();
+            list.load(false, Sample.CATEGORY_PRIORITY_DATA, listener);
             Log.d(TAG, "load category: priority data");
         }
         else if (id == R.id.nav_important) {
             cancelListSelection();
             actionBar.setTitle(R.string.sample_list_title_important);
-            list.load(this, false, Sample.CATEGORY_IMPORTANT);
-            listAdapter.notifyDataSetChanged();
+            openProgressDialog();
+            list.load(false, Sample.CATEGORY_IMPORTANT, listener);
             Log.d(TAG, "load category: important");
         }
         else if (id == R.id.nav_sent) {
             cancelListSelection();
             actionBar.setTitle(R.string.sample_list_title_sent);
-            list.load(this, false, Sample.CATEGORY_SENT);
-            listAdapter.notifyDataSetChanged();
+            openProgressDialog();
+            list.load(false, Sample.CATEGORY_SENT, listener);
             Log.d(TAG, "load category: sent");
         }
         else if (id == R.id.nav_draft) {
             cancelListSelection();
             actionBar.setTitle(R.string.sample_list_title_draft);
-            list.load(this, false, Sample.CATEGORY_DRAFTS);
-            listAdapter.notifyDataSetChanged();
+            openProgressDialog();
+            list.load(false, Sample.CATEGORY_DRAFTS, listener);
             Log.d(TAG, "load category: draft");
         }
         else if (id == R.id.nav_archived) {
             cancelListSelection();
             actionBar.setTitle(R.string.sample_list_title_archived);
-            list.load(this, false, Sample.CATEGORY_ARCHIVED);
-            listAdapter.notifyDataSetChanged();
+            openProgressDialog();
+            list.load(false, Sample.CATEGORY_ARCHIVED, listener);
             Log.d(TAG, "load category: archived");
         }
         else if (id == R.id.nav_all) {
             cancelListSelection();
             actionBar.setTitle(R.string.sample_list_title_all);
-            list.load(this, false, null);
-            listAdapter.notifyDataSetChanged();
+            openProgressDialog();
+            list.load(false, null, listener);
             Log.d(TAG, "load all categories");
         }
         else if (id == R.id.nav_trash) {
             cancelListSelection();
             actionBar.setTitle(R.string.sample_list_title_trash);
-            list.load(this, true, null);
-            listAdapter.notifyDataSetChanged();
+            openProgressDialog();
+            list.load(true, null, listener);
             Log.d(TAG, "load on trash");
         }
 
@@ -363,15 +397,8 @@ public class SampleServerListActivity extends AppCompatActivity implements Navig
         switch (requestCode) {
             case REQUEST_ADD:
                 if (resultCode == Activity.RESULT_OK) {
-                    list.reload(this);
-                    listAdapter.notifyDataSetChanged();
-                    cancelListSelection();
-                    long id = resultIntent.getLongExtra("data.id", 0);
-                    if (id != 0) {
-                        Intent intent = new Intent(SampleServerListActivity.this, SampleViewActivity.class);
-                        intent.putExtra("data.id", id);
-                        startActivityForResult(intent, REQUEST_VIEW);
-                    }
+                    openProgressDialog();
+                    list.reload(listenerCancel);
                 }
                 break;
 
@@ -380,9 +407,8 @@ public class SampleServerListActivity extends AppCompatActivity implements Navig
                     boolean changed = resultIntent.getBooleanExtra("data.changed", false);
                     boolean deleted = resultIntent.getBooleanExtra("data.deleted", false);
                     if (changed || deleted) {
-                        list.reload(this);
-                        listAdapter.notifyDataSetChanged();
-                        cancelListSelection();
+                        openProgressDialog();
+                        list.reload(listenerCancel);
                     }
                 }
                 break;
@@ -420,7 +446,7 @@ public class SampleServerListActivity extends AppCompatActivity implements Navig
         int sortBy = savedInstanceState.getInt("data.sortBy");
         boolean sortReverse = savedInstanceState.getBoolean("data.sortReverse");
         actionBar.setTitle(title);
-        list.load(deleted, category, query, sortBy, sortReverse);
+        list.load(deleted, category, query, sortBy, sortReverse, listener);
     }
 
     @Override
@@ -442,13 +468,13 @@ public class SampleServerListActivity extends AppCompatActivity implements Navig
         if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
             String query = intent.getStringExtra(SearchManager.QUERY).trim();
             Log.d(TAG, "search type: " + query);
-            list.search(SampleServerListActivity.this, query);
-            listAdapter.notifyDataSetChanged();
+            list.search(query, listener);
         }
     }
 
     private void deleteSelected() {
         if (listAdapter.getSelectedItemCount() > 0) {
+            /*
             final List<Long> idList = listAdapter.getSelectedIdList();
             if (idList.size() > 0) {
                 SampleDataSource source = new SampleDataSource(this);
@@ -458,32 +484,37 @@ public class SampleServerListActivity extends AppCompatActivity implements Navig
                 for (int i = 0; i < idList.size(); i++)
                     Log.d(TAG, "deleted item: " + idList.get(i));
                 source.close();
-                list.reload(this);
-                listAdapter.notifyDataSetChanged();
-                Snackbar snackbar = Snackbar
-                        .make(listView, R.string.sample_deleted_snackbar_message, Snackbar.LENGTH_LONG)
-                        .setAction(R.string.sample_deleted_snackbar_action, new View.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
-                                SampleDataSource source = new SampleDataSource(SampleServerListActivity.this);
-                                source.open();
-                                source.restoreList(idList);
-                                Log.d(TAG, "undo: restore item(s): " + idList.size());
-                                for (int i = 0; i < idList.size(); i++)
-                                    Log.d(TAG, "undo: restore item: " + idList.get(i));
-                                source.close();
-                                list.reload(SampleServerListActivity.this);
-                                listAdapter.notifyDataSetChanged();
-                            }
-                        });
-                snackbar.show();
+                list.reload(new SampleServerIndirectList.ResultListener() {
+                    @Override
+                    public void finish(int errorCode) {
+                        listAdapter.notifyDataSetChanged();
+                        Snackbar snackbar = Snackbar
+                                .make(listView, R.string.sample_deleted_snackbar_message, Snackbar.LENGTH_LONG)
+                                .setAction(R.string.sample_deleted_snackbar_action, new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View view) {
+                                        SampleDataSource source = new SampleDataSource(SampleServerListActivity.this);
+                                        source.open();
+                                        source.restoreList(idList);
+                                        Log.d(TAG, "undo: restore item(s): " + idList.size());
+                                        for (int i = 0; i < idList.size(); i++)
+                                            Log.d(TAG, "undo: restore item: " + idList.get(i));
+                                        source.close();
+                                        list.reload(listener);
+                                    }
+                                });
+                        snackbar.show();
+                    }
+                });
             }
             cancelListSelection();
+            */
         }
     }
 
     private void restoreSelected() {
         if (listAdapter.getSelectedItemCount() > 0) {
+            /*
             final List<Long> idList = listAdapter.getSelectedIdList();
             if (idList.size() > 0) {
                 SampleDataSource source = new SampleDataSource(this);
@@ -493,10 +524,10 @@ public class SampleServerListActivity extends AppCompatActivity implements Navig
                 for (int i = 0; i < idList.size(); i++)
                     Log.d(TAG, "restore item: " + idList.get(i));
                 source.close();
-                list.reload(this);
-                listAdapter.notifyDataSetChanged();
+                list.reload(listener);
             }
             cancelListSelection();
+            */
         }
     }
 
@@ -508,6 +539,7 @@ public class SampleServerListActivity extends AppCompatActivity implements Navig
                 .setPositiveButton(R.string.sample_remove_selected_dialog_positive, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         if (listAdapter.getSelectedItemCount() > 0) {
+                            /*
                             final List<Long> idList = listAdapter.getSelectedIdList();
                             if (idList.size() > 0) {
                                 SampleDataSource source = new SampleDataSource(SampleServerListActivity.this);
@@ -517,10 +549,10 @@ public class SampleServerListActivity extends AppCompatActivity implements Navig
                                 for (int i = 0; i < idList.size(); i++)
                                     Log.d(TAG, "remove item: " + idList.get(i));
                                 source.close();
-                                list.reload(SampleServerListActivity.this);
-                                listAdapter.notifyDataSetChanged();
+                                list.reload(listener);
                             }
                             cancelListSelection();
+                            */
                         }
                     }
                 })
@@ -548,6 +580,17 @@ public class SampleServerListActivity extends AppCompatActivity implements Navig
             actionMode.finish();
             actionMode = null;
         }
+    }
+
+    private void openProgressDialog() {
+        progress = new ProgressDialog(this);
+        progress.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        progress.setMessage("Loading...");
+        progress.setIndeterminate(true);
+        progress.setCancelable(true);
+        progress.setCanceledOnTouchOutside(true);
+        progress.setOnCancelListener(progressCancel);
+        progress.show();
     }
 
 }

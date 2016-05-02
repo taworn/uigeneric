@@ -3,6 +3,7 @@ package diy.uigeneric.data;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.preference.PreferenceManager;
 import android.util.Log;
 
@@ -91,7 +92,7 @@ public class SampleServerIndirectList {
             return comparator.compare(list.get(r).getName(), list.get(l).getName());
         }
     };
-    private final Comparator<String> comparator = new AlphanumericComparator(Collator.getInstance(Locale.ENGLISH));
+    private final Comparator<String> comparator = new AlphanumericComparator(Collator.getInstance(Locale.US));
 
     private List<Sample> list;        // a list of data
     private List<Integer> indexList;  // an integer list used by indices
@@ -103,6 +104,7 @@ public class SampleServerIndirectList {
     private int sortBy;
     private boolean sortReverse;
 
+    // base server address
     private String serverAddress;
 
     /**
@@ -179,7 +181,8 @@ public class SampleServerIndirectList {
      * @param sortBy      How to sort data.
      * @param sortReverse Sort by ascending or descending.
      */
-    public HttpRestLite.Result load(Boolean deleted, Integer category, String query, int sortBy, boolean sortReverse) {
+    public HttpRestLite.Result load(@Nullable Boolean deleted, @Nullable Integer category, @Nullable String query,
+                                    int sortBy, boolean sortReverse) {
         // prepares parameters
         Map<String, String> params = new HashMap<>();
         if (deleted != null)
@@ -187,7 +190,7 @@ public class SampleServerIndirectList {
         if (category != null)
             params.put("category", category.toString());
         if (query != null)
-            params.put("query", query);
+            params.put("search", query);
 
         // saves load() parameters
         this.deleted = deleted;
@@ -213,7 +216,8 @@ public class SampleServerIndirectList {
      * @param sortReverse Sort by ascending or descending.
      * @param listener    Callback when data is done.
      */
-    public void load(Boolean deleted, Integer category, String query, final int sortBy, final boolean sortReverse, @NonNull final ResultListener listener) {
+    public HttpRestLite load(@Nullable Boolean deleted, @Nullable Integer category, @Nullable String query,
+                             final int sortBy, final boolean sortReverse, @NonNull final ResultListener listener) {
         // prepares parameters
         Map<String, String> params = new HashMap<>();
         if (deleted != null)
@@ -221,7 +225,7 @@ public class SampleServerIndirectList {
         if (category != null)
             params.put("category", category.toString());
         if (query != null)
-            params.put("query", query);
+            params.put("search", query);
 
         // saves load() parameters
         this.deleted = deleted;
@@ -239,15 +243,31 @@ public class SampleServerIndirectList {
                 listener.finish(result.errorCode);
             }
         });
+        return rest;
     }
 
-    public void load(Context context, Boolean deleted, Integer category) {
+    public HttpRestLite.Result load(@Nullable Boolean deleted, @Nullable Integer category) {
+        return load(deleted, category, query, sortBy, sortReverse);
     }
 
-    public void reload(Context context) {
+    public HttpRestLite load(@Nullable Boolean deleted, @Nullable Integer category, @NonNull ResultListener listener) {
+        return load(deleted, category, query, sortBy, sortReverse, listener);
     }
 
-    public void search(Context context, String query) {
+    public HttpRestLite.Result reload() {
+        return load(deleted, category, query, sortBy, sortReverse);
+    }
+
+    public HttpRestLite reload(@NonNull ResultListener listener) {
+        return load(deleted, category, query, sortBy, sortReverse, listener);
+    }
+
+    public HttpRestLite.Result search(@Nullable String query) {
+        return load(deleted, category, query, sortBy, sortReverse);
+    }
+
+    public HttpRestLite search(@Nullable String query, @NonNull ResultListener listener) {
+        return load(deleted, category, query, sortBy, sortReverse, listener);
     }
 
     public void sort(int sortBy, boolean sortReverse) {

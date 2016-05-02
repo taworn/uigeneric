@@ -1,6 +1,8 @@
 package diy.uigeneric.data;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import com.amjjd.alphanum.AlphanumericComparator;
 
@@ -70,7 +72,7 @@ public class SampleIndirectList {
             return comparator.compare(list.get(r).getName(), list.get(l).getName());
         }
     };
-    private final Comparator<String> comparator = new AlphanumericComparator(Collator.getInstance(Locale.ENGLISH));
+    private final Comparator<String> comparator = new AlphanumericComparator(Collator.getInstance(Locale.US));
 
     private List<Sample> list;        // a list of data
     private List<Integer> indexList;  // an integer list used by indices
@@ -120,7 +122,9 @@ public class SampleIndirectList {
      * @param sortBy      How to sort data.
      * @param sortReverse Sort by ascending or descending.
      */
-    public void load(Context context, Boolean deleted, Integer category, String query, int sortBy, boolean sortReverse) {
+    public void load(@NonNull Context context,
+                     @Nullable Boolean deleted, @Nullable Integer category, @Nullable String query,
+                     int sortBy, boolean sortReverse) {
         SampleDataSource source = new SampleDataSource(context);
         source.open();
         list = source.list(deleted, category, query, null);
@@ -138,15 +142,15 @@ public class SampleIndirectList {
         sort(sortBy, sortReverse);
     }
 
-    public void load(Context context, Boolean deleted, Integer category) {
+    public void load(@NonNull Context context, @Nullable Boolean deleted, @Nullable Integer category) {
         load(context, deleted, category, query, sortBy, sortReverse);
     }
 
-    public void reload(Context context) {
+    public void reload(@NonNull Context context) {
         load(context, deleted, category, query, sortBy, sortReverse);
     }
 
-    public void search(Context context, String query) {
+    public void search(@NonNull Context context, @Nullable String query) {
         load(context, deleted, category, query, sortBy, sortReverse);
     }
 

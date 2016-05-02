@@ -12,7 +12,7 @@ error_log('input: ' . file_get_contents('php://input'));
 $in = array (
 	'list' => isset($_DELETE['list']) ? $_DELETE['list'] : NULL,
 );
-error_log("in['list'] " . count($in['list']));;
+error_log("in['list'] " . count($in['list']));
 for ($i = 0; $i < count($in['list']); $i++)
 	error_log($in['list'][$i]);
 
