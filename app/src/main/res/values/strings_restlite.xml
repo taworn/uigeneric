@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="restlite_NOERRORS">No errors.</string>
-    <string name="restlite_EUNKNOWN">Unknown error.</string>
-    <string name="restlite_ETIMEOUT">Timeout error.</string>
-    <string name="restlite_EUNREACH">Network unreachable.</string>
+    <string name="restlite_ERROR_ALREADY_STARTED">The execute is already started.</string>
+    <string name="restlite_ERROR_UNREACH">Connection is refuse.</string>
+    <string name="restlite_ERROR_TIMEOUT">Connection timeout.</string>
+    <string name="restlite_ERROR_CANCEL">Connection is cancelled.</string>
+    <string name="restlite_ERROR_RESPONSE">The response is invalid.</string>
+    <string name="restlite_ERROR_JSON">The JSON is not valid.</string>
+    <string name="restlite_ERROR_UNKNOWN">Unknown error.</string>
 </resources>

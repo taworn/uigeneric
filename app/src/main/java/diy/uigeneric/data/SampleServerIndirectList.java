@@ -11,7 +11,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 
-import diy.restlite.HttpRestLiteIndirect;
+import diy.restlite.HttpRestLite;
 
 /**
  * A SampleIndirectList is an implementation of list with sort feature.  The functions are load,
@@ -85,7 +85,7 @@ public class SampleServerIndirectList {
     private boolean sortReverse;
 
     // HTTP REST
-    private HttpRestLiteIndirect rest = null;
+    private HttpRestLite rest = null;
 
     /**
      * Constructs an indirect list.

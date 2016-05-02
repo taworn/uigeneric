@@ -10,13 +10,14 @@ import android.support.v7.preference.PreferenceManager;
 import android.util.Log;
 
 import java.io.ByteArrayOutputStream;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
-import diy.restlite.HttpRestLiteIndirect;
+import diy.restlite.HttpRestLite;
 
 /**
  * A class to manage Sample table on server.  It's provide list, insert, update, delete and
@@ -26,15 +27,23 @@ public class SampleServerDataSource {
 
     private static final String TAG = SampleServerDataSource.class.getSimpleName();
 
-    private Context context = null;
-    private HttpRestLiteIndirect rest = null;
+    private String serverAddress = null;
+    private String cookie = null;
+    private HttpRestLite rest = null;
 
     /**
      * Constructs to manage table.
      */
     public SampleServerDataSource(@NonNull Context context) {
-        this.context = context;
-        this.rest = null;
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
+        serverAddress = pref.getString("server", "");
+        if (serverAddress.length() > 0) {
+            if (serverAddress.charAt(serverAddress.length() - 1) != '/')
+                serverAddress.concat("/");
+        }
+        Log.d(TAG, "server: " + serverAddress);
+
+        rest = new HttpRestLite();
     }
 
     /**
@@ -138,15 +147,18 @@ public class SampleServerDataSource {
      * @param orderBy  Order by string, can be null.
      * @return All data in list that matched records in table.
      */
-    public HttpRestLiteIndirect list(@Nullable Boolean deleted, @Nullable Integer category, @Nullable String search, @Nullable String orderBy, @NonNull HttpRestLiteIndirect.ResultListener listener) {
-        final ArrayList<Sample> list = new ArrayList<>();
-
-        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
-        String server = pref.getString("server", "");
-        Log.d(TAG, "server: " + server);
-
-        rest = new HttpRestLiteIndirect(server + "api/sample/list.php", "POST", listener);
-        return rest;
+    public HttpRestLite.HttpResult list(@Nullable Boolean deleted, @Nullable Integer category, @Nullable String search, @Nullable String orderBy, @Nullable HttpRestLite.ResultListener listener) {
+        Map<String, String> params = new HashMap<>();
+        if (deleted != null)
+            params.put("deleted", !deleted ? "0" : "1");
+        if (category != null)
+            params.put("category", category.toString());
+        if (search != null)
+            params.put("search", search);
+        if (orderBy != null)
+            params.put("orderBy", orderBy);
+        rest.setUrl(serverAddress + "api/sample/list.php", "POST");
+        return rest.execute(params, cookie, listener);
     }
 
     /**
