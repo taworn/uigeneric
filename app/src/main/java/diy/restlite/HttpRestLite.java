@@ -1,6 +1,5 @@
 package diy.restlite;
 
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -36,19 +35,18 @@ public class HttpRestLite {
     private String request;              // request method
     private boolean isStarted;           // started flag
     private boolean isCancelled;         // last execute is cancel
-    private ProgressDialog dialog;       // optional to display progress dialog, if set
     private int readTimeout = 10000;     // not read any data timeout
     private int connectTimeout = 15000;  // connection wait timeout
 
     // transfer data in async execute()
-    private class HttpTransfer {
+    private class Transfer {
         public Map<String, String> params;
         public String cookie;
         public ResultListener listener;
     }
 
     // result from execute()
-    public class HttpResult {
+    public class Result {
         public int errorCode;
         public JSONObject json;
         public List<String> cookie;
@@ -56,9 +54,9 @@ public class HttpRestLite {
 
     public interface ResultListener {
         /**
-         * Called when HTTP execute finished.
+         * Calls when HTTP execute finished.
          */
-        void finish(HttpResult result);
+        void finish(Result result);
     }
 
     // error codes
@@ -71,26 +69,14 @@ public class HttpRestLite {
     public static final int ERROR_UNKNOWN = -99;
 
     /**
-     * Constructs a REST passing.
-     */
-    public HttpRestLite() {
-        super();
-        this.url = "";
-        this.request = "GET";
-        this.isStarted = false;
-        this.dialog = null;
-        Log.d(TAG, "initialized REST without URL");
-    }
-
-    /**
-     * Constructs a REST passing.
+     * Constructs..
      */
     public HttpRestLite(@NonNull String url, @Nullable String request) {
         super();
         this.url = url;
         this.request = request;
         this.isStarted = false;
-        this.dialog = null;
+        this.isCancelled = false;
         if (this.request == null || this.request.equals(""))
             this.request = "GET";
         Log.d(TAG, "initialized REST with " + request + " " + url);
@@ -99,8 +85,8 @@ public class HttpRestLite {
     /**
      * Sends data directly.
      */
-    public HttpResult execute(@Nullable Map<String, String> params, @Nullable String cookie) {
-        HttpResult result = new HttpResult();
+    public Result execute(@Nullable Map<String, String> params, @Nullable String cookie) {
+        Result result = new Result();
         result.errorCode = 0;
         result.json = null;
         result.cookie = null;
@@ -200,6 +186,7 @@ public class HttpRestLite {
                     // gets cookie, too
                     Map<String, List<String>> header = connection.getHeaderFields();
                     result.cookie = header.get("Set-Cookie");
+                    return result;
                 }
                 else {
                     Log.d(TAG, "response error is " + response);
@@ -231,57 +218,54 @@ public class HttpRestLite {
             isCancelled = false;
             isStarted = false;
         }
+
         return result;
     }
 
     /**
      * Sends data async.
      */
-    public HttpResult execute(@Nullable Map<String, String> params, @Nullable String cookie, @Nullable ResultListener listener) {
+    public Result execute(@Nullable Map<String, String> params, @Nullable String cookie, @Nullable ResultListener listener) {
         if (listener == null) {
             return execute(params, cookie);
         }
         else {
-            final HttpTransfer transfer = new HttpTransfer();
+            final Transfer transfer = new Transfer();
             transfer.params = params;
             transfer.cookie = cookie;
             transfer.listener = listener;
-
             Thread thread = new Thread() {
                 @Override
                 public void run() {
-                    HttpRestLite.HttpResult result = execute(transfer.params, transfer.cookie);
+                    Result result = execute(transfer.params, transfer.cookie);
                     transfer.listener.finish(result);
-                    if (dialog != null)
-                        dialog.dismiss();
                 }
             };
-            thread.run();
+            thread.setPriority(Thread.MIN_PRIORITY);
+            thread.start();
             return null;
         }
+    }
+
+    /**
+     * Cancels when send data.
+     */
+    public boolean cancel() {
+        if (isStarted) {
+            isStarted = false;
+            isCancelled = true;
+            return true;
+        }
+        else
+            return false;
     }
 
     public String getUrl() {
         return url;
     }
 
-    public void setUrl(@NonNull String url) {
-        this.url = url;
-    }
-
-    public void setUrl(@NonNull String url, @Nullable String request) {
-        setUrl(url);
-        setRequest(request);
-    }
-
     public String getRequest() {
         return request;
-    }
-
-    public void setRequest(@Nullable String request) {
-        this.request = request;
-        if (this.request == null || this.request.equals(""))
-            this.request = "GET";
     }
 
     public boolean isStarted() {
@@ -290,22 +274,6 @@ public class HttpRestLite {
 
     public boolean isCancelled() {
         return isCancelled;
-    }
-
-    public boolean cancel() {
-        if (isStarted) {
-            isStarted = false;
-            isCancelled = true;
-            if (dialog != null)
-                dialog.dismiss();
-            return true;
-        }
-        else
-            return false;
-    }
-
-    public void setDialog(@Nullable ProgressDialog dialog) {
-        this.dialog = dialog;
     }
 
     public int getReadTimeout() {

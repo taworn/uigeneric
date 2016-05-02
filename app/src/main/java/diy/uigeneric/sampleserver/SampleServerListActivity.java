@@ -1,10 +1,15 @@
 package diy.uigeneric.sampleserver;
 
+import android.app.Activity;
+import android.app.SearchManager;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
@@ -15,17 +20,27 @@ import android.support.v7.view.ActionMode;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
+import android.text.SpannableString;
+import android.text.style.ForegroundColorSpan;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
 
+import java.util.List;
 import java.util.Locale;
 
+import diy.restlite.HttpRestLite;
 import diy.uigeneric.R;
 import diy.uigeneric.adapter.SampleServerListAdapter;
 import diy.uigeneric.data.Sample;
+import diy.uigeneric.data.SampleDataSource;
 import diy.uigeneric.data.SampleServerIndirectList;
+import diy.uigeneric.sample.SampleEditActivity;
+import diy.uigeneric.sample.SampleViewActivity;
 
 /**
  * The SampleServerListActivity is an activity to view and manage Sample(s) data.
@@ -54,10 +69,10 @@ public class SampleServerListActivity extends AppCompatActivity implements Navig
         setSupportActionBar(toolbar);
         actionBar = getSupportActionBar();
 
-        //SampleDataSource source = new SampleDataSource(SampleServerListActivity.this);
-        //source.open();
-        //source.removeTrash(3 * 24 * 60 * 60 * 1000); // three days
-        //source.close();
+        SampleDataSource source = new SampleDataSource(SampleServerListActivity.this);
+        source.open();
+        source.removeTrash(3 * 24 * 60 * 60 * 1000); // three days
+        source.close();
 
         // initializes FAB
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -65,8 +80,8 @@ public class SampleServerListActivity extends AppCompatActivity implements Navig
             fab.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    //Intent intent = new Intent(SampleServerListActivity.this, SampleEditActivity.class);
-                    //startActivityForResult(intent, REQUEST_ADD);
+                    Intent intent = new Intent(SampleServerListActivity.this, SampleEditActivity.class);
+                    startActivityForResult(intent, REQUEST_ADD);
                 }
             });
         }
@@ -81,17 +96,21 @@ public class SampleServerListActivity extends AppCompatActivity implements Navig
             navigationView.setNavigationItemSelectedListener(this);
 
         // initializes RecycledView and its data
-        list = new SampleServerIndirectList();
-        list.load(this, false, Sample.CATEGORY_DATA, null, SampleServerIndirectList.SORT_AS_IS, false);
+        list = new SampleServerIndirectList(this);
+        list.load(false, Sample.CATEGORY_DATA, null, SampleServerIndirectList.SORT_AS_IS, false, new SampleServerIndirectList.ResultListener() {
+            @Override
+            public void finish(int errorCode) {
+                if (errorCode != 0)
+                    Toast.makeText(SampleServerListActivity.this, HttpRestLite.getErrorMessage(SampleServerListActivity.this, errorCode), Toast.LENGTH_SHORT).show();
+            }
+        });
         listAdapter = new SampleServerListAdapter(this, list, new SampleServerListAdapter.OnItemClickListener() {
             @Override
             public void onClick(View view, int position) {
-                /*
                 Sample item = list.get(position);
                 Intent intent = new Intent(SampleServerListActivity.this, SampleViewActivity.class);
                 intent.putExtra("data.id", item.getId());
                 startActivityForResult(intent, REQUEST_VIEW);
-                */
             }
 
             @Override
@@ -151,6 +170,7 @@ public class SampleServerListActivity extends AppCompatActivity implements Navig
                 cancelListSelection();
             }
         };
+
         actionBar.setTitle(R.string.sample_list_title_data);
     }
 
@@ -160,20 +180,19 @@ public class SampleServerListActivity extends AppCompatActivity implements Navig
         getMenuInflater().inflate(R.menu.sample_list, menu);
 
         // initializes radio and check menu items
-        /*
         MenuItem item;
         switch (list.getSortBy()) {
             default:
-            case SampleIndirectList.SORT_AS_IS:
+            case SampleServerIndirectList.SORT_AS_IS:
                 item = menu.findItem(R.id.action_sort_as_is);
                 break;
-            case SampleIndirectList.SORT_NAME:
+            case SampleServerIndirectList.SORT_NAME:
                 item = menu.findItem(R.id.action_sort_name);
                 break;
-            case SampleIndirectList.SORT_NAME_IGNORE_CASE:
+            case SampleServerIndirectList.SORT_NAME_IGNORE_CASE:
                 item = menu.findItem(R.id.action_sort_name_ignore_case);
                 break;
-            case SampleIndirectList.SORT_NAME_NATURAL:
+            case SampleServerIndirectList.SORT_NAME_NATURAL:
                 item = menu.findItem(R.id.action_sort_name_natural);
                 break;
         }
@@ -202,7 +221,6 @@ public class SampleServerListActivity extends AppCompatActivity implements Navig
                 }
             });
         }
-        */
         return true;
     }
 
@@ -213,31 +231,30 @@ public class SampleServerListActivity extends AppCompatActivity implements Navig
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        /*
         if (id == R.id.action_sort_as_is) {
             item.setChecked(true);
-            list.setSortBy(SampleIndirectList.SORT_AS_IS);
+            list.setSortBy(SampleServerIndirectList.SORT_AS_IS);
             listAdapter.notifyDataSetChanged();
             Log.d(TAG, "sort: as is");
             return true;
         }
         else if (id == R.id.action_sort_name) {
             item.setChecked(true);
-            list.setSortBy(SampleIndirectList.SORT_NAME);
+            list.setSortBy(SampleServerIndirectList.SORT_NAME);
             listAdapter.notifyDataSetChanged();
             Log.d(TAG, "sort: name");
             return true;
         }
         else if (id == R.id.action_sort_name_ignore_case) {
             item.setChecked(true);
-            list.setSortBy(SampleIndirectList.SORT_NAME_IGNORE_CASE);
+            list.setSortBy(SampleServerIndirectList.SORT_NAME_IGNORE_CASE);
             listAdapter.notifyDataSetChanged();
             Log.d(TAG, "sort: name ignore case");
             return true;
         }
         else if (id == R.id.action_sort_name_natural) {
             item.setChecked(true);
-            list.setSortBy(SampleIndirectList.SORT_NAME_NATURAL);
+            list.setSortBy(SampleServerIndirectList.SORT_NAME_NATURAL);
             listAdapter.notifyDataSetChanged();
             Log.d(TAG, "sort: name natural");
             return true;
@@ -270,7 +287,6 @@ public class SampleServerListActivity extends AppCompatActivity implements Navig
                     .show();
             return true;
         }
-        */
 
         return super.onOptionsItemSelected(item);
     }
@@ -280,7 +296,6 @@ public class SampleServerListActivity extends AppCompatActivity implements Navig
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        /*
         if (id == R.id.nav_data) {
             cancelListSelection();
             actionBar.setTitle(R.string.sample_list_title_data);
@@ -337,7 +352,6 @@ public class SampleServerListActivity extends AppCompatActivity implements Navig
             listAdapter.notifyDataSetChanged();
             Log.d(TAG, "load on trash");
         }
-        */
 
         drawer.closeDrawer(GravityCompat.START);
         return true;
@@ -346,7 +360,6 @@ public class SampleServerListActivity extends AppCompatActivity implements Navig
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent resultIntent) {
         super.onActivityResult(requestCode, resultCode, resultIntent);
-        /*
         switch (requestCode) {
             case REQUEST_ADD:
                 if (resultCode == Activity.RESULT_OK) {
@@ -374,13 +387,11 @@ public class SampleServerListActivity extends AppCompatActivity implements Navig
                 }
                 break;
         }
-        */
     }
 
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
         super.onSaveInstanceState(savedInstanceState);
-        /*
         cancelListSelection();
         savedInstanceState.putString("ui.title", actionBar.getTitle() != null ? actionBar.getTitle().toString() : "");
         if (list.getDeleted() != null)
@@ -391,13 +402,11 @@ public class SampleServerListActivity extends AppCompatActivity implements Navig
             savedInstanceState.putString("data.query", list.getQuery());
         savedInstanceState.putInt("data.sortBy", list.getSortBy());
         savedInstanceState.putBoolean("data.sortReverse", list.getSortReverse());
-        */
     }
 
     @Override
     public void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-        /*
         String title = savedInstanceState.getString("ui.title");
         Boolean deleted = null;
         if (savedInstanceState.containsKey("data.deleted"))
@@ -411,8 +420,7 @@ public class SampleServerListActivity extends AppCompatActivity implements Navig
         int sortBy = savedInstanceState.getInt("data.sortBy");
         boolean sortReverse = savedInstanceState.getBoolean("data.sortReverse");
         actionBar.setTitle(title);
-        list.load(this, deleted, category, query, sortBy, sortReverse);
-        */
+        list.load(deleted, category, query, sortBy, sortReverse);
     }
 
     @Override
@@ -431,19 +439,16 @@ public class SampleServerListActivity extends AppCompatActivity implements Navig
     }
 
     private void handleIntent(Intent intent) {
-        /*
         if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
             String query = intent.getStringExtra(SearchManager.QUERY).trim();
             Log.d(TAG, "search type: " + query);
             list.search(SampleServerListActivity.this, query);
             listAdapter.notifyDataSetChanged();
         }
-        */
     }
 
     private void deleteSelected() {
         if (listAdapter.getSelectedItemCount() > 0) {
-            /*
             final List<Long> idList = listAdapter.getSelectedIdList();
             if (idList.size() > 0) {
                 SampleDataSource source = new SampleDataSource(this);
@@ -474,13 +479,11 @@ public class SampleServerListActivity extends AppCompatActivity implements Navig
                 snackbar.show();
             }
             cancelListSelection();
-            */
         }
     }
 
     private void restoreSelected() {
         if (listAdapter.getSelectedItemCount() > 0) {
-            /*
             final List<Long> idList = listAdapter.getSelectedIdList();
             if (idList.size() > 0) {
                 SampleDataSource source = new SampleDataSource(this);
@@ -494,7 +497,6 @@ public class SampleServerListActivity extends AppCompatActivity implements Navig
                 listAdapter.notifyDataSetChanged();
             }
             cancelListSelection();
-            */
         }
     }
 
@@ -506,7 +508,6 @@ public class SampleServerListActivity extends AppCompatActivity implements Navig
                 .setPositiveButton(R.string.sample_remove_selected_dialog_positive, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         if (listAdapter.getSelectedItemCount() > 0) {
-                            /*
                             final List<Long> idList = listAdapter.getSelectedIdList();
                             if (idList.size() > 0) {
                                 SampleDataSource source = new SampleDataSource(SampleServerListActivity.this);
@@ -520,7 +521,6 @@ public class SampleServerListActivity extends AppCompatActivity implements Navig
                                 listAdapter.notifyDataSetChanged();
                             }
                             cancelListSelection();
-                            */
                         }
                     }
                 })

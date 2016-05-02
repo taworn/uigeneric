@@ -1,23 +1,42 @@
 package diy.uigeneric.data;
 
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.support.annotation.NonNull;
+import android.support.v7.preference.PreferenceManager;
+import android.util.Log;
 
 import com.amjjd.alphanum.AlphanumericComparator;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import diy.restlite.HttpRestLite;
 
 /**
- * A SampleIndirectList is an implementation of list with sort feature.  The functions are load,
+ * A SampleServerIndirectList is an implementation of list with sort feature.  The functions are load,
  * reload, sort and search.  This class is convenient to use as list in Android UI.
  */
 public class SampleServerIndirectList {
+
+    private static final String TAG = SampleServerIndirectList.class.getSimpleName();
+
+    public interface ResultListener {
+        /**
+         * Calls when HTTP execute finished.
+         */
+        void finish(int errorCode);
+    }
 
     public static final int SORT_AS_IS = 0;
     public static final int SORT_NAME = 1;
@@ -84,13 +103,12 @@ public class SampleServerIndirectList {
     private int sortBy;
     private boolean sortReverse;
 
-    // HTTP REST
-    private HttpRestLite rest = null;
+    private String serverAddress;
 
     /**
      * Constructs an indirect list.
      */
-    public SampleServerIndirectList() {
+    public SampleServerIndirectList(@NonNull Context context) {
         super();
         this.list = new ArrayList<>();
         this.indexList = new ArrayList<>();
@@ -99,7 +117,11 @@ public class SampleServerIndirectList {
         this.query = null;
         this.sortBy = SORT_AS_IS;
         this.sortReverse = false;
-        this.rest = null;
+
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
+        serverAddress = pref.getString("server", "");
+        if (serverAddress.length() > 0 && serverAddress.charAt(serverAddress.length() - 1) != '/')
+            serverAddress = serverAddress.concat("/");
     }
 
     /**
@@ -116,44 +138,116 @@ public class SampleServerIndirectList {
         return indexList.size();
     }
 
+    private void loading(HttpRestLite.Result result, int sortBy, boolean sortReverse) {
+        list = new ArrayList<>();
+        try {
+            if (result.json.has("ok") && result.json.getBoolean("ok")) {
+                JSONArray items = result.json.getJSONArray("items");
+                //Log.d(TAG, items.toString(4));
+                int l = items.length();
+                for (int i = 0; i < l; i++) {
+                    JSONObject item = items.getJSONObject(i);
+                    Sample sample = new Sample(item.getInt("id"));
+                    sample.setName(item.getString("name"));
+                    sample.setCategory(item.getInt("category"));
+                    sample.setDeleted(item.isNull("deleted") ? null : SampleDataSource.dateFromLong(item.getLong("deleted")));
+                    list.add(sample);
+                    Log.d(TAG, "data load item: " + sample.getId() + "/" + sample.getName());
+                }
+                Log.d(TAG, "data load total: " + l);
+
+                l = list.size();
+                indexList = new ArrayList<>(l);
+                for (int i = 0; i < l; i++) {
+                    indexList.add(i);
+                }
+                sort(sortBy, sortReverse);
+            }
+        }
+        catch (JSONException e) {
+            e.printStackTrace();
+            result.errorCode = HttpRestLite.ERROR_JSON;
+        }
+    }
+
     /**
      * Loads data.
      *
-     * @param context     Context to use.
      * @param deleted     Deleted flags to use, can be null.
      * @param category    Category to load, can be null.
      * @param query       Query to search, can be null.
      * @param sortBy      How to sort data.
      * @param sortReverse Sort by ascending or descending.
      */
-    public void load(Context context, Boolean deleted, Integer category, String query, int sortBy, boolean sortReverse) {
-        SampleDataSource source = new SampleDataSource(context);
-        source.open();
-        list = source.list(deleted, category, query, null);
-        source.close();
+    public HttpRestLite.Result load(Boolean deleted, Integer category, String query, int sortBy, boolean sortReverse) {
+        // prepares parameters
+        Map<String, String> params = new HashMap<>();
+        if (deleted != null)
+            params.put("deleted", !deleted ? "0" : "1");
+        if (category != null)
+            params.put("category", category.toString());
+        if (query != null)
+            params.put("query", query);
+
+        // saves load() parameters
         this.deleted = deleted;
         this.category = category;
         this.query = query;
 
-        int l = list.size();
-        indexList = new ArrayList<>(l);
-        for (int i = 0; i < l; i++) {
-            indexList.add(i);
+        // calls REST
+        HttpRestLite rest = new HttpRestLite(serverAddress + "/api/sample/list.php", "POST");
+        HttpRestLite.Result result = rest.execute(params, null);
+        if (result.errorCode == 0) {
+            loading(result, sortBy, sortReverse);
         }
+        return result;
+    }
 
-        sort(sortBy, sortReverse);
+    /**
+     * Loads data async.
+     *
+     * @param deleted     Deleted flags to use, can be null.
+     * @param category    Category to load, can be null.
+     * @param query       Query to search, can be null.
+     * @param sortBy      How to sort data.
+     * @param sortReverse Sort by ascending or descending.
+     * @param listener    Callback when data is done.
+     */
+    public void load(Boolean deleted, Integer category, String query, final int sortBy, final boolean sortReverse, @NonNull final ResultListener listener) {
+        // prepares parameters
+        Map<String, String> params = new HashMap<>();
+        if (deleted != null)
+            params.put("deleted", !deleted ? "0" : "1");
+        if (category != null)
+            params.put("category", category.toString());
+        if (query != null)
+            params.put("query", query);
+
+        // saves load() parameters
+        this.deleted = deleted;
+        this.category = category;
+        this.query = query;
+
+        // calls REST
+        final HttpRestLite rest = new HttpRestLite(serverAddress + "/api/sample/list.php", "POST");
+        rest.execute(params, null, new HttpRestLite.ResultListener() {
+            @Override
+            public void finish(HttpRestLite.Result result) {
+                if (result.errorCode == 0) {
+                    loading(result, sortBy, sortReverse);
+                }
+                listener.finish(result.errorCode);
+            }
+        });
     }
 
     public void load(Context context, Boolean deleted, Integer category) {
-        load(context, deleted, category, query, sortBy, sortReverse);
     }
 
     public void reload(Context context) {
-        load(context, deleted, category, query, sortBy, sortReverse);
     }
 
     public void search(Context context, String query) {
-        load(context, deleted, category, query, sortBy, sortReverse);
     }
 
     public void sort(int sortBy, boolean sortReverse) {
