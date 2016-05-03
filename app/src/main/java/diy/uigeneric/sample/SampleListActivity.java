@@ -204,7 +204,7 @@ public class SampleListActivity extends AppCompatActivity implements NavigationV
             searchView.setOnCloseListener(new SearchView.OnCloseListener() {
                 @Override
                 public boolean onClose() {
-                    list.search(SampleListActivity.this, "");
+                    list.search(SampleListActivity.this, null);
                     listAdapter.notifyDataSetChanged();
                     Log.d(TAG, "search stop");
                     return false;
