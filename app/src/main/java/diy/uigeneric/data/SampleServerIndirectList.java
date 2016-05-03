@@ -140,46 +140,8 @@ public class SampleServerIndirectList {
         return indexList.size();
     }
 
-    private void loading(HttpRestLite.Result result, int sortBy, boolean sortReverse) {
-        list = new ArrayList<>();
-        try {
-            if (result.json.has("ok") && result.json.getBoolean("ok")) {
-                JSONArray items = result.json.getJSONArray("items");
-                //Log.d(TAG, items.toString(4));
-                int l = items.length();
-                for (int i = 0; i < l; i++) {
-                    JSONObject item = items.getJSONObject(i);
-                    Sample sample = new Sample(item.getInt("id"));
-                    sample.setName(item.getString("name"));
-                    sample.setCategory(item.getInt("category"));
-                    sample.setDeleted(item.isNull("deleted") ? null : SampleDataSource.dateFromLong(item.getLong("deleted")));
-                    list.add(sample);
-                    Log.d(TAG, "data load item: " + sample.getId() + "/" + sample.getName());
-                }
-                Log.d(TAG, "data load total: " + l);
-
-                l = list.size();
-                indexList = new ArrayList<>(l);
-                for (int i = 0; i < l; i++) {
-                    indexList.add(i);
-                }
-                sort(sortBy, sortReverse);
-            }
-        }
-        catch (JSONException e) {
-            e.printStackTrace();
-            result.errorCode = HttpRestLite.ERROR_JSON;
-        }
-    }
-
     /**
      * Loads data.
-     *
-     * @param deleted     Deleted flags to use, can be null.
-     * @param category    Category to load, can be null.
-     * @param query       Query to search, can be null.
-     * @param sortBy      How to sort data.
-     * @param sortReverse Sort by ascending or descending.
      */
     public HttpRestLite.Result load(@Nullable Boolean deleted, @Nullable Integer category, @Nullable String query,
                                     int sortBy, boolean sortReverse) {
@@ -208,13 +170,6 @@ public class SampleServerIndirectList {
 
     /**
      * Loads data async.
-     *
-     * @param deleted     Deleted flags to use, can be null.
-     * @param category    Category to load, can be null.
-     * @param query       Query to search, can be null.
-     * @param sortBy      How to sort data.
-     * @param sortReverse Sort by ascending or descending.
-     * @param listener    Callback when data is done.
      */
     public HttpRestLite load(@Nullable Boolean deleted, @Nullable Integer category, @Nullable String query,
                              final int sortBy, final boolean sortReverse, @NonNull final ResultListener listener) {
@@ -438,6 +393,87 @@ public class SampleServerIndirectList {
             }
         });
         return rest;
+    }
+
+    public HttpRestLite.Result remove(@NonNull List<Long> idList) {
+        // prepares parameters
+        Map<String, String> params = new HashMap<>();
+        for (int i = 0; i < idList.size(); i++) {
+            params.put("list[" + i + "]", idList.get(i).toString());
+        }
+        if (deleted != null)
+            params.put("deleted", !deleted ? "0" : "1");
+        if (category != null)
+            params.put("category", category.toString());
+        if (query != null)
+            params.put("query", query);
+
+        // calls REST
+        HttpRestLite rest = new HttpRestLite(serverAddress + "api/sample/remove.php", "DELETE");
+        HttpRestLite.Result result = rest.execute(params, null);
+        if (result.errorCode == 0) {
+            loading(result, sortBy, sortReverse);
+        }
+        return result;
+    }
+
+    public HttpRestLite remove(@NonNull List<Long> idList, @NonNull final ResultListener listener) {
+        // prepares parameters
+        Map<String, String> params = new HashMap<>();
+        for (int i = 0; i < idList.size(); i++) {
+            params.put("list[" + i + "]", idList.get(i).toString());
+        }
+        if (deleted != null)
+            params.put("deleted", !deleted ? "0" : "1");
+        if (category != null)
+            params.put("category", category.toString());
+        if (query != null)
+            params.put("query", query);
+
+        // calls REST
+        HttpRestLite rest = new HttpRestLite(serverAddress + "api/sample/remove.php", "DELETE");
+        rest.execute(params, null, new HttpRestLite.ResultListener() {
+            @Override
+            public void finish(HttpRestLite.Result result) {
+                if (result.errorCode == 0) {
+                    loading(result, sortBy, sortReverse);
+                }
+                listener.finish(result.errorCode);
+            }
+        });
+        return rest;
+    }
+
+    private void loading(HttpRestLite.Result result, int sortBy, boolean sortReverse) {
+        list = new ArrayList<>();
+        try {
+            if (result.json.has("ok") && result.json.getBoolean("ok")) {
+                JSONArray items = result.json.getJSONArray("items");
+                //Log.d(TAG, items.toString(4));
+                int l = items.length();
+                for (int i = 0; i < l; i++) {
+                    JSONObject item = items.getJSONObject(i);
+                    Sample sample = new Sample(item.getInt("id"));
+                    sample.setName(item.getString("name"));
+                    sample.setCategory(item.getInt("category"));
+                    sample.setDeleted(item.isNull("deleted") ? null : SampleDataSource.dateFromLong(item.getLong("deleted")));
+                    list.add(sample);
+                    Log.d(TAG, "data load item: " + sample.getId() + "/" + sample.getName());
+                }
+                Log.d(TAG, "data load total: " + l);
+
+                l = list.size();
+                indexList = new ArrayList<>(l);
+                for (int i = 0; i < l; i++) {
+                    indexList.add(i);
+                }
+                sort(sortBy, sortReverse);
+            }
+        }
+        catch (JSONException e) {
+            e.printStackTrace();
+            result.errorCode = HttpRestLite.ERROR_JSON;
+        }
     }
 
 }

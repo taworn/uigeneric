@@ -142,18 +142,30 @@ public class SampleIndirectList {
         sort(sortBy, sortReverse);
     }
 
+    /**
+     * Loads data.
+     */
     public void load(@NonNull Context context, @Nullable Boolean deleted, @Nullable Integer category) {
         load(context, deleted, category, query, sortBy, sortReverse);
     }
 
+    /**
+     * Reloads data.
+     */
     public void reload(@NonNull Context context) {
         load(context, deleted, category, query, sortBy, sortReverse);
     }
 
+    /**
+     * Searches data.
+     */
     public void search(@NonNull Context context, @Nullable String query) {
         load(context, deleted, category, query, sortBy, sortReverse);
     }
 
+    /**
+     * Sorts data.
+     */
     public void sort(int sortBy, boolean sortReverse) {
         switch (sortBy) {
             default:
@@ -189,6 +201,9 @@ public class SampleIndirectList {
         this.sortReverse = sortReverse;
     }
 
+    /**
+     * Sorts data.
+     */
     public void sort() {
         sort(sortBy, sortReverse);
     }

@@ -541,20 +541,15 @@ public class SampleServerListActivity extends AppCompatActivity implements Navig
                 .setPositiveButton(R.string.sample_remove_selected_dialog_positive, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         if (listAdapter.getSelectedItemCount() > 0) {
-                            /*
                             final List<Long> idList = listAdapter.getSelectedIdList();
                             if (idList.size() > 0) {
-                                SampleDataSource source = new SampleDataSource(SampleServerListActivity.this);
-                                source.open();
-                                source.removeList(idList);
+                                openProgressDialog();
+                                rest = list.remove(idList, listener);
                                 Log.d(TAG, "remove item(s): " + idList.size());
                                 for (int i = 0; i < idList.size(); i++)
                                     Log.d(TAG, "remove item: " + idList.get(i));
-                                source.close();
-                                list.reload(listener);
+                                cancelListSelection();
                             }
-                            cancelListSelection();
-                            */
                         }
                     }
                 })
