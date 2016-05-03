@@ -467,8 +467,8 @@ public class SampleListActivity extends AppCompatActivity implements NavigationV
                             }
                         });
                 snackbar.show();
+                cancelListSelection();
             }
-            cancelListSelection();
         }
     }
 
@@ -485,8 +485,8 @@ public class SampleListActivity extends AppCompatActivity implements NavigationV
                 source.close();
                 list.reload(this);
                 listAdapter.notifyDataSetChanged();
+                cancelListSelection();
             }
-            cancelListSelection();
         }
     }
 
@@ -509,8 +509,8 @@ public class SampleListActivity extends AppCompatActivity implements NavigationV
                                 source.close();
                                 list.reload(SampleListActivity.this);
                                 listAdapter.notifyDataSetChanged();
+                                cancelListSelection();
                             }
-                            cancelListSelection();
                         }
                     }
                 })

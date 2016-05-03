@@ -92,10 +92,7 @@ public class Sample implements Comparator<Sample> {
     }
 
     public void setCategory(int value) {
-        if (value >= CATEGORY_MIN && value <= CATEGORY_MAX)
-            category = value;
-        else
-            throw new IllegalArgumentException("Item category must in range.");
+        category = value;
     }
 
     public Calendar getDeleted() {

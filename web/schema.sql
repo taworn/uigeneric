@@ -5,6 +5,6 @@ CREATE TABLE sample (
 	name VARCHAR(255) NOT NULL,
 	detail TEXT,
 	category INT DEFAULT 0,
-	deleted INT,
+	deleted DATETIME,
 	PRIMARY KEY (id)
 );

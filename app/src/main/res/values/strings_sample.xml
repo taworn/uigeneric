@@ -70,4 +70,6 @@
     <string name="sample_trash">Trash</string>
     <string name="sample_deleted">deleted</string>
 
+    <string name="sample_waiting">Loading&#8230;</string>
+
 </resources>

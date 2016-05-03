@@ -190,7 +190,7 @@ public class SampleServerIndirectList {
         if (category != null)
             params.put("category", category.toString());
         if (query != null)
-            params.put("search", query);
+            params.put("query", query);
 
         // saves load() parameters
         this.deleted = deleted;
@@ -198,7 +198,7 @@ public class SampleServerIndirectList {
         this.query = query;
 
         // calls REST
-        HttpRestLite rest = new HttpRestLite(serverAddress + "/api/sample/list.php", "POST");
+        HttpRestLite rest = new HttpRestLite(serverAddress + "api/sample/list.php", "POST");
         HttpRestLite.Result result = rest.execute(params, null);
         if (result.errorCode == 0) {
             loading(result, sortBy, sortReverse);
@@ -340,6 +340,104 @@ public class SampleServerIndirectList {
             Collections.reverse(indexList);
             sortReverse = value;
         }
+    }
+
+    public HttpRestLite.Result delete(@NonNull List<Long> idList) {
+        // prepares parameters
+        Map<String, String> params = new HashMap<>();
+        for (int i = 0; i < idList.size(); i++) {
+            params.put("list[" + i + "]", idList.get(i).toString());
+        }
+        if (deleted != null)
+            params.put("deleted", !deleted ? "0" : "1");
+        if (category != null)
+            params.put("category", category.toString());
+        if (query != null)
+            params.put("query", query);
+
+        // calls REST
+        HttpRestLite rest = new HttpRestLite(serverAddress + "api/sample/delete.php", "POST");
+        HttpRestLite.Result result = rest.execute(params, null);
+        if (result.errorCode == 0) {
+            loading(result, sortBy, sortReverse);
+        }
+        return result;
+    }
+
+    public HttpRestLite delete(@NonNull List<Long> idList, @NonNull final ResultListener listener) {
+        // prepares parameters
+        Map<String, String> params = new HashMap<>();
+        for (int i = 0; i < idList.size(); i++) {
+            params.put("list[" + i + "]", idList.get(i).toString());
+        }
+        if (deleted != null)
+            params.put("deleted", !deleted ? "0" : "1");
+        if (category != null)
+            params.put("category", category.toString());
+        if (query != null)
+            params.put("query", query);
+
+        // calls REST
+        HttpRestLite rest = new HttpRestLite(serverAddress + "api/sample/delete.php", "POST");
+        rest.execute(params, null, new HttpRestLite.ResultListener() {
+            @Override
+            public void finish(HttpRestLite.Result result) {
+                if (result.errorCode == 0) {
+                    loading(result, sortBy, sortReverse);
+                }
+                listener.finish(result.errorCode);
+            }
+        });
+        return rest;
+    }
+
+    public HttpRestLite.Result restore(@NonNull List<Long> idList) {
+        // prepares parameters
+        Map<String, String> params = new HashMap<>();
+        for (int i = 0; i < idList.size(); i++) {
+            params.put("list[" + i + "]", idList.get(i).toString());
+        }
+        if (deleted != null)
+            params.put("deleted", !deleted ? "0" : "1");
+        if (category != null)
+            params.put("category", category.toString());
+        if (query != null)
+            params.put("query", query);
+
+        // calls REST
+        HttpRestLite rest = new HttpRestLite(serverAddress + "api/sample/restore.php", "POST");
+        HttpRestLite.Result result = rest.execute(params, null);
+        if (result.errorCode == 0) {
+            loading(result, sortBy, sortReverse);
+        }
+        return result;
+    }
+
+    public HttpRestLite restore(@NonNull List<Long> idList, @NonNull final ResultListener listener) {
+        // prepares parameters
+        Map<String, String> params = new HashMap<>();
+        for (int i = 0; i < idList.size(); i++) {
+            params.put("list[" + i + "]", idList.get(i).toString());
+        }
+        if (deleted != null)
+            params.put("deleted", !deleted ? "0" : "1");
+        if (category != null)
+            params.put("category", category.toString());
+        if (query != null)
+            params.put("query", query);
+
+        // calls REST
+        HttpRestLite rest = new HttpRestLite(serverAddress + "api/sample/restore.php", "POST");
+        rest.execute(params, null, new HttpRestLite.ResultListener() {
+            @Override
+            public void finish(HttpRestLite.Result result) {
+                if (result.errorCode == 0) {
+                    loading(result, sortBy, sortReverse);
+                }
+                listener.finish(result.errorCode);
+            }
+        });
+        return rest;
     }
 
 }

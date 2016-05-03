@@ -23,11 +23,11 @@ for ($i = 0; $i < count($in['list']); $i++)
 // checks input
 $errors = array ();
 if (!is_array($in['list']))
-	$errors[] = "Delete list is not parsed.";
+	$errors[] = "Restore list is not parsed.";
 
 if (count($errors) <= 0) {
-	// moves data to trash
-	$query = "UPDATE sample SET deleted = NOW() WHERE id = :id";
+	// moves data out of trash
+	$query = "UPDATE sample SET deleted = NULL WHERE id = :id";
 	$stmt = $pdo->prepare($query);
 	$list = $in['list'];
 	for ($i = 0; $i < count($list); $i++) {

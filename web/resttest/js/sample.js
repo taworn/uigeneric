@@ -58,7 +58,7 @@ $(function() {
 		}
 		if (checked.length > 0) {
 			$.ajax({
-				url: "./api/sample/delete.php",
+				url: "./api/sample/remove.php",
 				type: 'DELETE',
 				data: { list: checked }
 			}).done(function(data) {
@@ -157,7 +157,10 @@ $(function() {
 		tr.append(td);
 
 		td = $(document.createElement('td'));
-		td.text(item.deleted);
+		if (item.deleted == null)
+			td.text(item.deleted);
+		else 
+			td.text(item.deleted.toString());
 		td.on('click', {id: item.id}, click);
 		tr.append(td);
 
