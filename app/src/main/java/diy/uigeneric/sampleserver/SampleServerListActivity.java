@@ -53,8 +53,12 @@ public class SampleServerListActivity extends AppCompatActivity implements Navig
     private static final int REQUEST_ADD = 100;
     private static final int REQUEST_VIEW = 101;
 
-    private DrawerLayout drawer = null;
+    private ProgressDialog progress = null;
+    private DialogInterface.OnCancelListener progressCancel = null;
+    private HttpRestLite rest = null;
     private HttpRestLite.ResultListener listener = null;
+
+    private DrawerLayout drawer = null;
     private SampleServerIndirectList list = null;
     private SampleServerListAdapter listAdapter = null;
     private RecyclerView listView = null;
@@ -63,10 +67,6 @@ public class SampleServerListActivity extends AppCompatActivity implements Navig
     private ActionMode.Callback actionModeCallback = null;
     private ActionBar actionBar = null;
 
-    private ProgressDialog progress = null;
-    private DialogInterface.OnCancelListener progressCancel = null;
-    private HttpRestLite rest = null;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -74,27 +74,6 @@ public class SampleServerListActivity extends AppCompatActivity implements Navig
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         actionBar = getSupportActionBar();
-
-        // initializes FAB
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        if (fab != null) {
-            fab.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    //Intent intent = new Intent(SampleServerListActivity.this, SampleEditActivity.class);
-                    //startActivityForResult(intent, REQUEST_ADD);
-                }
-            });
-        }
-
-        // initializes navigation drawer
-        drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.setDrawerListener(toggle);
-        toggle.syncState();
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-        if (navigationView != null)
-            navigationView.setNavigationItemSelectedListener(this);
 
         // initializes callback
         listener = new HttpRestLite.ResultListener() {
@@ -117,6 +96,27 @@ public class SampleServerListActivity extends AppCompatActivity implements Navig
             }
         };
 
+        // initializes FAB
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        if (fab != null) {
+            fab.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent intent = new Intent(SampleServerListActivity.this, SampleServerEditActivity.class);
+                    startActivityForResult(intent, REQUEST_ADD);
+                }
+            });
+        }
+
+        // initializes navigation drawer
+        drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawer.setDrawerListener(toggle);
+        toggle.syncState();
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        if (navigationView != null)
+            navigationView.setNavigationItemSelectedListener(this);
+
         // initializes RecycledView and its data
         list = new SampleServerIndirectList(this);
         if (savedInstanceState == null) {
@@ -127,11 +127,9 @@ public class SampleServerListActivity extends AppCompatActivity implements Navig
             @Override
             public void onClick(View view, int position) {
                 Sample item = list.get(position);
-                /*
-                Intent intent = new Intent(SampleServerListActivity.this, SampleViewActivity.class);
+                Intent intent = new Intent(SampleServerListActivity.this, SampleServerEditActivity.class);
                 intent.putExtra("data.id", item.getId());
                 startActivityForResult(intent, REQUEST_VIEW);
-                */
             }
 
             @Override

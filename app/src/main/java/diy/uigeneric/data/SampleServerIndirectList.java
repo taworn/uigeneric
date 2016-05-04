@@ -249,33 +249,6 @@ public class SampleServerIndirectList {
     }
 
     /**
-     * Adds data.
-     */
-    public HttpRestLite.Result add(@NonNull Sample sample) {
-        Map<String, String> params = new HashMap<>();
-        params.put("name", sample.getName());
-        params.put("detail", sample.getDetail());
-        params.put("category", String.valueOf(sample.getCategory()));
-        HttpRestLite rest = new HttpRestLite(serverAddress + "api/sample/add.php", "POST");
-        HttpRestLite.Result result = rest.execute(params, null);
-        if (result.errorCode == 0) {
-
-        }
-        else {
-
-        }
-        return result;
-    }
-
-    /**
-     * Adds data async.
-     */
-    public HttpRestLite add(@NonNull List<Long> idList, @NonNull HttpRestLite.ResultListener listener) {
-        Map<String, String> params = collectParameters(deleted, category, query, idList);
-        return call(serverAddress + "api/sample/add.php", "POST", params, listener);
-    }
-
-    /**
      * Deletes, moves to trash, data.
      */
     public HttpRestLite.Result delete(@NonNull List<Long> idList) {
