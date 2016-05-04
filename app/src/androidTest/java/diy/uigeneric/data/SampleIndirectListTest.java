@@ -9,6 +9,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static junit.framework.Assert.assertTrue;
 
 @RunWith(AndroidJUnit4.class)
@@ -41,6 +44,34 @@ public class SampleIndirectListTest {
         source.insert(sample);
 
         source.close();
+    }
+
+    @Test
+    public void testFind() {
+        Context context = InstrumentationRegistry.getTargetContext();
+        SampleIndirectList list = new SampleIndirectList();
+        list.load(context, null, null, null, SampleIndirectList.SORT_AS_IS, false);
+
+        // gets ids for every elements
+        List<Long> idList = new ArrayList<>();
+        for (int i = 0; i < list.size(); i++)
+            idList.add(list.get(i).getId());
+        assertTrue(list.size() == 5);
+
+        // finds and found
+        Log.d(TAG, "find and found");
+        assertTrue(list.find(idList.get(0)) == 0);
+        assertTrue(list.find(idList.get(1)) == 1);
+        assertTrue(list.find(idList.get(2)) == 2);
+        assertTrue(list.find(idList.get(3)) == 3);
+        assertTrue(list.find(idList.get(4)) == 4);
+
+        // finds and not found
+        Log.d(TAG, "find and not found");
+        assertTrue(list.find(1000) < 0);
+        assertTrue(list.find(5000) < 0);
+        assertTrue(list.find(10000) < 0);
+        assertTrue(list.find(50000) < 0);
     }
 
     @Test

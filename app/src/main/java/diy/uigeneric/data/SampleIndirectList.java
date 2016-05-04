@@ -113,6 +113,59 @@ public class SampleIndirectList {
     }
 
     /**
+     * Finds elements by id.
+     *
+     * @return Returns position if found, otherwise, it is -1.
+     */
+    public int find(long id) {
+        int i = 0;
+        int l = indexList.size();
+        while (i < l) {
+            Sample item = list.get(indexList.get(i));
+            if (item.getId() != id)
+                i++;
+            else
+                return i;
+        }
+        return -1;
+    }
+
+    /**
+     * Checks a sample is visible or not.
+     */
+    public boolean isVisible(Sample sample) {
+        boolean b = true;
+        if (deleted != null)
+            b = sample.getDeleted() == null == !deleted;
+        if (category != null)
+            b = sample.getCategory() == category;
+        if (query != null)
+            b = sample.getName().contains(query);
+        return b;
+    }
+
+    /**
+     * Adds a sample, if need.
+     */
+    public void add(Sample sample) {
+        if (isVisible(sample)) {
+            list.add(sample);
+            indexList.add(list.size() - 1);
+            sort(sortBy, sortReverse);
+        }
+    }
+
+    /**
+     * Edits a sample.
+     */
+    public void edit(int i, Sample sample) {
+        if (isVisible(sample)) {
+            list.set(indexList.get(i), sample);
+            sort(sortBy, sortReverse);
+        }
+    }
+
+    /**
      * Loads data.
      *
      * @param context     Context to use.

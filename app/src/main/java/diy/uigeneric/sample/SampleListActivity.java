@@ -353,11 +353,16 @@ public class SampleListActivity extends AppCompatActivity implements NavigationV
         switch (requestCode) {
             case REQUEST_ADD:
                 if (resultCode == Activity.RESULT_OK) {
-                    list.reload(this);
-                    listAdapter.notifyDataSetChanged();
-                    cancelListSelection();
                     long id = resultIntent.getLongExtra("data.id", 0);
                     if (id != 0) {
+                        if (list.find(id) < 0) {
+                            SampleDataSource source = new SampleDataSource(this);
+                            source.open();
+                            list.add(source.get(id));
+                            source.close();
+                            listAdapter.notifyDataSetChanged();
+                        }
+                        cancelListSelection();
                         Intent intent = new Intent(SampleListActivity.this, SampleViewActivity.class);
                         intent.putExtra("data.id", id);
                         startActivityForResult(intent, REQUEST_VIEW);
@@ -367,10 +372,22 @@ public class SampleListActivity extends AppCompatActivity implements NavigationV
 
             case REQUEST_VIEW:
                 if (resultCode == Activity.RESULT_OK) {
+                    long id = resultIntent.getLongExtra("data.id", 0);
                     boolean changed = resultIntent.getBooleanExtra("data.changed", false);
                     boolean deleted = resultIntent.getBooleanExtra("data.deleted", false);
                     if (changed || deleted) {
-                        list.reload(this);
+                        if (deleted) {
+                            list.reload(this);
+                        }
+                        else {
+                            int i = list.find(id);
+                            if (i >= 0) {
+                                SampleDataSource source = new SampleDataSource(this);
+                                source.open();
+                                list.edit(i, source.get(id));
+                                source.close();
+                            }
+                        }
                         listAdapter.notifyDataSetChanged();
                         cancelListSelection();
                     }
