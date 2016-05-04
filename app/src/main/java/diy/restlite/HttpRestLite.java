@@ -60,13 +60,14 @@ public class HttpRestLite {
     }
 
     // error codes
-    public static final int ERROR_ALREADY_STARTED = -1;
-    public static final int ERROR_UNREACH = -2;
-    public static final int ERROR_TIMEOUT = -3;
-    public static final int ERROR_CANCEL = -4;
-    public static final int ERROR_RESPONSE = -5;
-    public static final int ERROR_JSON = -6;
-    public static final int ERROR_UNKNOWN = -99;
+    public static final int ERROR_ALREADY_STARTED = 1;
+    public static final int ERROR_UNREACH = 2;
+    public static final int ERROR_TIMEOUT = 3;
+    public static final int ERROR_CANCEL = 4;
+    public static final int ERROR_RESPONSE = 5;
+    public static final int ERROR_JSON = 6;
+    public static final int ERROR_UNKNOWN = 99;
+    public static final int ERROR_CUSTOM = -1;
 
     /**
      * Constructs..

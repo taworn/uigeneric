@@ -32,13 +32,6 @@ public class SampleServerIndirectList {
 
     private static final String TAG = SampleServerIndirectList.class.getSimpleName();
 
-    public interface ResultListener {
-        /**
-         * Calls when HTTP execute finished.
-         */
-        void finish(int errorCode);
-    }
-
     public static final int SORT_AS_IS = 0;
     public static final int SORT_NAME = 1;
     public static final int SORT_NAME_IGNORE_CASE = 2;
@@ -158,7 +151,7 @@ public class SampleServerIndirectList {
      * Loads data async.
      */
     public HttpRestLite load(@Nullable Boolean deleted, @Nullable Integer category, @Nullable String query,
-                             int sortBy, boolean sortReverse, @NonNull ResultListener listener) {
+                             int sortBy, boolean sortReverse, @NonNull HttpRestLite.ResultListener listener) {
         Map<String, String> params = collectParameters(deleted, category, query, null);
         this.deleted = deleted;
         this.category = category;
@@ -178,7 +171,7 @@ public class SampleServerIndirectList {
     /**
      * Loads data async.
      */
-    public HttpRestLite load(@Nullable Boolean deleted, @Nullable Integer category, @NonNull ResultListener listener) {
+    public HttpRestLite load(@Nullable Boolean deleted, @Nullable Integer category, @NonNull HttpRestLite.ResultListener listener) {
         return load(deleted, category, query, sortBy, sortReverse, listener);
     }
 
@@ -192,7 +185,7 @@ public class SampleServerIndirectList {
     /**
      * Reloads data async.
      */
-    public HttpRestLite reload(@NonNull ResultListener listener) {
+    public HttpRestLite reload(@NonNull HttpRestLite.ResultListener listener) {
         return load(deleted, category, query, sortBy, sortReverse, listener);
     }
 
@@ -206,7 +199,7 @@ public class SampleServerIndirectList {
     /**
      * Searches data async.
      */
-    public HttpRestLite search(@Nullable String query, @NonNull ResultListener listener) {
+    public HttpRestLite search(@Nullable String query, @NonNull HttpRestLite.ResultListener listener) {
         return load(deleted, category, query, sortBy, sortReverse, listener);
     }
 
@@ -256,6 +249,33 @@ public class SampleServerIndirectList {
     }
 
     /**
+     * Adds data.
+     */
+    public HttpRestLite.Result add(@NonNull Sample sample) {
+        Map<String, String> params = new HashMap<>();
+        params.put("name", sample.getName());
+        params.put("detail", sample.getDetail());
+        params.put("category", String.valueOf(sample.getCategory()));
+        HttpRestLite rest = new HttpRestLite(serverAddress + "api/sample/add.php", "POST");
+        HttpRestLite.Result result = rest.execute(params, null);
+        if (result.errorCode == 0) {
+
+        }
+        else {
+
+        }
+        return result;
+    }
+
+    /**
+     * Adds data async.
+     */
+    public HttpRestLite add(@NonNull List<Long> idList, @NonNull HttpRestLite.ResultListener listener) {
+        Map<String, String> params = collectParameters(deleted, category, query, idList);
+        return call(serverAddress + "api/sample/add.php", "POST", params, listener);
+    }
+
+    /**
      * Deletes, moves to trash, data.
      */
     public HttpRestLite.Result delete(@NonNull List<Long> idList) {
@@ -266,7 +286,7 @@ public class SampleServerIndirectList {
     /**
      * Deletes, moves to trash, data async.
      */
-    public HttpRestLite delete(@NonNull List<Long> idList, @NonNull ResultListener listener) {
+    public HttpRestLite delete(@NonNull List<Long> idList, @NonNull HttpRestLite.ResultListener listener) {
         Map<String, String> params = collectParameters(deleted, category, query, idList);
         return call(serverAddress + "api/sample/delete.php", "POST", params, listener);
     }
@@ -282,7 +302,7 @@ public class SampleServerIndirectList {
     /**
      * Restores, moves out of trash, data async.
      */
-    public HttpRestLite restore(@NonNull List<Long> idList, @NonNull ResultListener listener) {
+    public HttpRestLite restore(@NonNull List<Long> idList, @NonNull HttpRestLite.ResultListener listener) {
         Map<String, String> params = collectParameters(deleted, category, query, idList);
         return call(serverAddress + "api/sample/restore.php", "POST", params, listener);
     }
@@ -298,7 +318,7 @@ public class SampleServerIndirectList {
     /**
      * Removes data async.
      */
-    public HttpRestLite remove(@NonNull List<Long> idList, @NonNull ResultListener listener) {
+    public HttpRestLite remove(@NonNull List<Long> idList, @NonNull HttpRestLite.ResultListener listener) {
         Map<String, String> params = collectParameters(deleted, category, query, idList);
         return call(serverAddress + "api/sample/remove.php", "DELETE", params, listener);
     }
@@ -314,7 +334,7 @@ public class SampleServerIndirectList {
     /**
      * Removes ALL data async.
      */
-    public HttpRestLite removeAll(@NonNull ResultListener listener) {
+    public HttpRestLite removeAll(@NonNull HttpRestLite.ResultListener listener) {
         Map<String, String> params = collectParameters(deleted, category, query, null);
         return call(serverAddress + "api/sample/remove-all.php", "DELETE", params, listener);
     }
@@ -376,7 +396,7 @@ public class SampleServerIndirectList {
         return result;
     }
 
-    private HttpRestLite call(@NonNull String url, @NonNull String request, @NonNull Map<String, String> params, @NonNull final ResultListener listener) {
+    private HttpRestLite call(@NonNull String url, @NonNull String request, @NonNull Map<String, String> params, @NonNull final HttpRestLite.ResultListener listener) {
         HttpRestLite rest = new HttpRestLite(url, request);
         rest.execute(params, null, new HttpRestLite.ResultListener() {
             @Override
@@ -384,14 +404,14 @@ public class SampleServerIndirectList {
                 if (result.errorCode == 0) {
                     loading(result, sortBy, sortReverse);
                 }
-                listener.finish(result.errorCode);
+                listener.finish(result);
             }
         });
         return rest;
     }
 
     private void loading(HttpRestLite.Result result, int sortBy, boolean sortReverse) {
-        list = new ArrayList<>();
+        List<Sample> list = new ArrayList<>();
         try {
             if (result.json.has("ok") && result.json.getBoolean("ok")) {
                 JSONArray items = result.json.getJSONArray("items");
@@ -407,6 +427,7 @@ public class SampleServerIndirectList {
                     Log.d(TAG, "data load item: " + sample.getId() + "/" + sample.getName());
                 }
                 Log.d(TAG, "data load total: " + l);
+                this.list = list;
 
                 l = list.size();
                 indexList = new ArrayList<>(l);
@@ -414,6 +435,9 @@ public class SampleServerIndirectList {
                     indexList.add(i);
                 }
                 sort(sortBy, sortReverse);
+            }
+            else {
+                result.errorCode = HttpRestLite.ERROR_CUSTOM;
             }
         }
         catch (JSONException e) {

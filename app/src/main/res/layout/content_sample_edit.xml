@@ -58,6 +58,7 @@
                 android:id="@+id/edit_name"
                 style="@style/AppTheme.material_2nd_edit"
                 android:hint="@string/sample_edit_hint_name"
+                android:maxLength="255"
                 android:singleLine="true"/>
 
         </RelativeLayout>

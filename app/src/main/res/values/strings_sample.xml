@@ -72,4 +72,8 @@
 
     <string name="sample_waiting">Loading&#8230;</string>
 
+    <string name="sample_error_title">Warning</string>
+    <string name="sample_error_unknown_json">Unknown messages.</string>
+    <string name="sample_error_neutral_button">Close</string>
+
 </resources>

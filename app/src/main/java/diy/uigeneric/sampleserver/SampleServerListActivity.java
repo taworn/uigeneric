@@ -31,6 +31,9 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+
 import java.util.List;
 import java.util.Locale;
 
@@ -51,7 +54,7 @@ public class SampleServerListActivity extends AppCompatActivity implements Navig
     private static final int REQUEST_VIEW = 101;
 
     private DrawerLayout drawer = null;
-    private SampleServerIndirectList.ResultListener listener = null;
+    private HttpRestLite.ResultListener listener = null;
     private SampleServerIndirectList list = null;
     private SampleServerListAdapter listAdapter = null;
     private RecyclerView listView = null;
@@ -94,19 +97,13 @@ public class SampleServerListActivity extends AppCompatActivity implements Navig
             navigationView.setNavigationItemSelectedListener(this);
 
         // initializes callback
-        listener = new SampleServerIndirectList.ResultListener() {
+        listener = new HttpRestLite.ResultListener() {
             @Override
-            public void finish(final int errorCode) {
+            public void finish(final HttpRestLite.Result result) {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        progress.dismiss();
-                        if (errorCode == 0) {
-                            listAdapter.notifyDataSetChanged();
-                            cancelListSelection();
-                        }
-                        else
-                            Toast.makeText(SampleServerListActivity.this, HttpRestLite.getErrorMessage(SampleServerListActivity.this, errorCode), Toast.LENGTH_SHORT).show();
+                        commonResultTask(result);
                     }
                 });
             }
@@ -308,14 +305,15 @@ public class SampleServerListActivity extends AppCompatActivity implements Navig
                     .setPositiveButton(R.string.sample_remove_all_dialog_positive, new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int id) {
                             openProgressDialog();
-                            rest = list.removeAll(new SampleServerIndirectList.ResultListener() {
+                            rest = list.removeAll(new HttpRestLite.ResultListener() {
                                 @Override
-                                public void finish(final int errorCode) {
+                                public void finish(final HttpRestLite.Result result) {
                                     runOnUiThread(new Runnable() {
                                         @Override
                                         public void run() {
-                                            commonResultTask(errorCode);
-                                            Log.d(TAG, "removed ALL data");
+                                            commonResultTask(result);
+                                            if (result.errorCode == 0)
+                                                Log.d(TAG, "removed ALL data");
                                         }
                                     });
                                 }
@@ -483,15 +481,14 @@ public class SampleServerListActivity extends AppCompatActivity implements Navig
             final List<Long> idList = listAdapter.getSelectedIdList();
             if (idList.size() > 0) {
                 openProgressDialog();
-                rest = list.delete(idList, new SampleServerIndirectList.ResultListener() {
+                rest = list.delete(idList, new HttpRestLite.ResultListener() {
                     @Override
-                    public void finish(final int errorCode) {
+                    public void finish(final HttpRestLite.Result result) {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                progress.dismiss();
-                                if (errorCode == 0) {
-                                    listAdapter.notifyDataSetChanged();
+                                commonResultTask(result);
+                                if (result.errorCode == 0) {
                                     Log.d(TAG, "deleted item(s): " + idList.size());
                                     for (int i = 0; i < idList.size(); i++)
                                         Log.d(TAG, "deleted item: " + idList.get(i));
@@ -501,16 +498,18 @@ public class SampleServerListActivity extends AppCompatActivity implements Navig
                                                 @Override
                                                 public void onClick(View view) {
                                                     openProgressDialog();
-                                                    rest = list.restore(idList, new SampleServerIndirectList.ResultListener() {
+                                                    rest = list.restore(idList, new HttpRestLite.ResultListener() {
                                                         @Override
-                                                        public void finish(final int errorCode) {
+                                                        public void finish(final HttpRestLite.Result result) {
                                                             runOnUiThread(new Runnable() {
                                                                 @Override
                                                                 public void run() {
-                                                                    commonResultTask(errorCode);
-                                                                    Log.d(TAG, "undo: restore item(s): " + idList.size());
-                                                                    for (int i = 0; i < idList.size(); i++)
-                                                                        Log.d(TAG, "undo: restore item: " + idList.get(i));
+                                                                    commonResultTask(result);
+                                                                    if (result.errorCode == 0) {
+                                                                        Log.d(TAG, "undo: restore item(s): " + idList.size());
+                                                                        for (int i = 0; i < idList.size(); i++)
+                                                                            Log.d(TAG, "undo: restore item: " + idList.get(i));
+                                                                    }
                                                                 }
                                                             });
                                                         }
@@ -519,8 +518,6 @@ public class SampleServerListActivity extends AppCompatActivity implements Navig
                                             });
                                     snackbar.show();
                                 }
-                                else
-                                    Toast.makeText(SampleServerListActivity.this, HttpRestLite.getErrorMessage(SampleServerListActivity.this, errorCode), Toast.LENGTH_SHORT).show();
                             }
                         });
                     }
@@ -535,16 +532,18 @@ public class SampleServerListActivity extends AppCompatActivity implements Navig
             final List<Long> idList = listAdapter.getSelectedIdList();
             if (idList.size() > 0) {
                 openProgressDialog();
-                rest = list.restore(idList, new SampleServerIndirectList.ResultListener() {
+                rest = list.restore(idList, new HttpRestLite.ResultListener() {
                     @Override
-                    public void finish(final int errorCode) {
+                    public void finish(final HttpRestLite.Result result) {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                commonResultTask(errorCode);
-                                Log.d(TAG, "restore item(s): " + idList.size());
-                                for (int i = 0; i < idList.size(); i++)
-                                    Log.d(TAG, "restore item: " + idList.get(i));
+                                commonResultTask(result);
+                                if (result.errorCode == 0) {
+                                    Log.d(TAG, "restore item(s): " + idList.size());
+                                    for (int i = 0; i < idList.size(); i++)
+                                        Log.d(TAG, "restore item: " + idList.get(i));
+                                }
                             }
                         });
                     }
@@ -565,16 +564,18 @@ public class SampleServerListActivity extends AppCompatActivity implements Navig
                             final List<Long> idList = listAdapter.getSelectedIdList();
                             if (idList.size() > 0) {
                                 openProgressDialog();
-                                rest = list.remove(idList, new SampleServerIndirectList.ResultListener() {
+                                rest = list.remove(idList, new HttpRestLite.ResultListener() {
                                     @Override
-                                    public void finish(final int errorCode) {
+                                    public void finish(final HttpRestLite.Result result) {
                                         runOnUiThread(new Runnable() {
                                             @Override
                                             public void run() {
-                                                commonResultTask(errorCode);
-                                                Log.d(TAG, "remove item(s): " + idList.size());
-                                                for (int i = 0; i < idList.size(); i++)
-                                                    Log.d(TAG, "remove item: " + idList.get(i));
+                                                commonResultTask(result);
+                                                if (result.errorCode == 0) {
+                                                    Log.d(TAG, "remove item(s): " + idList.size());
+                                                    for (int i = 0; i < idList.size(); i++)
+                                                        Log.d(TAG, "remove item: " + idList.get(i));
+                                                }
                                             }
                                         });
                                     }
@@ -621,14 +622,36 @@ public class SampleServerListActivity extends AppCompatActivity implements Navig
         progress.show();
     }
 
-    private void commonResultTask(int errorCode) {
+    private void commonResultTask(HttpRestLite.Result result) {
         progress.dismiss();
-        if (errorCode == 0) {
+        if (result.errorCode == 0) {
             listAdapter.notifyDataSetChanged();
             cancelListSelection();
         }
-        else
-            Toast.makeText(SampleServerListActivity.this, HttpRestLite.getErrorMessage(SampleServerListActivity.this, errorCode), Toast.LENGTH_SHORT).show();
+        else if (result.errorCode == HttpRestLite.ERROR_CUSTOM) {
+            if (result.json.has("errors")) {
+                try {
+                    JSONArray errors = result.json.getJSONArray("errors");
+                    String message = "";
+                    for (int i = 0; i < errors.length(); i++)
+                        message += " - " + errors.get(i) + "\n";
+                    new AlertDialog.Builder(this)
+                            .setTitle(R.string.sample_error_title)
+                            .setMessage(message)
+                            .setNeutralButton(R.string.sample_error_neutral_button, null)
+                            .show();
+                }
+                catch (JSONException e) {
+                    e.printStackTrace();
+                    Toast.makeText(this, R.string.sample_error_unknown_json, Toast.LENGTH_SHORT).show();
+                }
+            }
+            else
+                Toast.makeText(this, R.string.sample_error_unknown_json, Toast.LENGTH_SHORT).show();
+        }
+        else {
+            Toast.makeText(this, HttpRestLite.getErrorMessage(SampleServerListActivity.this, result.errorCode), Toast.LENGTH_SHORT).show();
+        }
     }
 
 }
