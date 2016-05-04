@@ -12,6 +12,7 @@ import org.junit.runner.RunWith;
 import java.util.ArrayList;
 import java.util.List;
 
+import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
 @RunWith(AndroidJUnit4.class)
@@ -72,6 +73,72 @@ public class SampleIndirectListTest {
         assertTrue(list.find(5000) < 0);
         assertTrue(list.find(10000) < 0);
         assertTrue(list.find(50000) < 0);
+    }
+
+    @Test
+    public void testAdd() {
+        Context context = InstrumentationRegistry.getTargetContext();
+        SampleIndirectList list = new SampleIndirectList();
+        list.load(context, null, null, null, SampleIndirectList.SORT_AS_IS, false);
+
+        SampleDataSource source = new SampleDataSource(context);
+        source.open();
+
+        // adds
+        Log.d(TAG, "adds without orientation switch");
+        Sample item = new Sample();
+        item.setName("XYZ");
+        long id = source.insert(item);
+        assertTrue(list.find(id) < 0);
+        list.add(source.get(id));
+        assertTrue(list.size() == 6);
+        assertTrue(list.get(5).getName().equals("XYZ"));
+
+        // adds and refreshes
+        Log.d(TAG, "adds with emulation orientation switch (refresh)");
+        item = new Sample();
+        item.setName("UVW");
+        id = source.insert(item);
+        list.reload(context);
+        assertFalse(list.find(id) < 0);
+        assertTrue(list.size() == 7);
+        assertTrue(list.get(6).getName().equals("UVW"));
+
+        source.close();
+    }
+
+    @Test
+    public void testEdit() {
+        Context context = InstrumentationRegistry.getTargetContext();
+        SampleIndirectList list = new SampleIndirectList();
+        list.load(context, null, null, null, SampleIndirectList.SORT_AS_IS, false);
+
+        SampleDataSource source = new SampleDataSource(context);
+        source.open();
+
+        // edits
+        Log.d(TAG, "edits without orientation switch");
+        assertTrue(list.get(4).getName().equals("zzz"));
+        Sample item = new Sample(list.get(4).getId());
+        item.setName("XYZ");
+        source.update(item);
+        int i = list.find(item.getId());
+        assertTrue(i >= 0);
+        list.edit(i, source.get(item.getId()));
+        assertTrue(list.size() == 5);
+        assertTrue(list.get(4).getName().equals("XYZ"));
+
+        // edits and refreshes
+        Log.d(TAG, "edits with emulation orientation switch (refresh)");
+        assertTrue(list.get(3).getName().equals("ZZZ"));
+        item = new Sample(list.get(3).getId());
+        item.setName("UVW");
+        source.update(item);
+        list.reload(context);
+        assertTrue(list.size() == 5);
+        assertTrue(list.get(3).getName().equals("UVW"));
+
+        source.close();
     }
 
     @Test
