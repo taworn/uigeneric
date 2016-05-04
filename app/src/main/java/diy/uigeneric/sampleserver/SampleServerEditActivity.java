@@ -210,7 +210,6 @@ public class SampleServerEditActivity extends AppCompatActivity {
         iconDefault = item.getIcon() == null;
         iconTempUrl = null;
         uiFromData();
-        Log.d(TAG, "onCreate() item: " + item.getId() + "/" + item.getName());
     }
 
     @Override
@@ -329,39 +328,54 @@ public class SampleServerEditActivity extends AppCompatActivity {
         if (!empty() && changed()) {
             uiToData();
 
-            /*
             if (item.getId() > 0) {
-                source.update(item);
-                Log.d(TAG, "saved item: " + item.getId() + "/" + item.getName());
+                openProgressDialog();
+                source.edit(item, new SampleServerDataSource.ResultListener() {
+                    @Override
+                    public void finish(final HttpRestLite.Result result, @NonNull final SampleServerDataSource.SampleHolder holder) {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                commonResultTask(result);
+                                if (result.errorCode == 0) {
+                                    Log.d(TAG, "saved item: " + item.getId() + "/" + item.getName());
+                                    iconChanged = false;
+                                    item = holder.sample;
+
+                                    Intent resultIntent = new Intent();
+                                    resultIntent.putExtra("data.id", item.getId());
+                                    setResult(Activity.RESULT_OK, resultIntent);
+                                    SampleServerEditActivity.this.finish();
+                                }
+                            }
+                        });
+                    }
+                });
             }
             else {
-                long id = source.insert(item);
-                item = source.get(id);
-                Log.d(TAG, "added item: " + item.getId() + "/" + item.getName());
-            }
-            */
-            openProgressDialog();
-            source.add(item, new SampleServerDataSource.ResultListener() {
-                @Override
-                public void finish(final HttpRestLite.Result result, @NonNull final SampleServerDataSource.SampleHolder holder) {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            commonResultTask(result);
-                            if (result.errorCode == 0) {
-                                Log.d(TAG, "added item: " + item.getId() + "/" + item.getName());
-                                iconChanged = false;
-                                item = holder.sample;
+                openProgressDialog();
+                source.add(item, new SampleServerDataSource.ResultListener() {
+                    @Override
+                    public void finish(final HttpRestLite.Result result, @NonNull final SampleServerDataSource.SampleHolder holder) {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                commonResultTask(result);
+                                if (result.errorCode == 0) {
+                                    Log.d(TAG, "added item: " + item.getId() + "/" + item.getName());
+                                    iconChanged = false;
+                                    item = holder.sample;
 
-                                Intent resultIntent = new Intent();
-                                resultIntent.putExtra("data.id", item.getId());
-                                setResult(Activity.RESULT_OK, resultIntent);
-                                SampleServerEditActivity.this.finish();
+                                    Intent resultIntent = new Intent();
+                                    resultIntent.putExtra("data.id", item.getId());
+                                    setResult(Activity.RESULT_OK, resultIntent);
+                                    SampleServerEditActivity.this.finish();
+                                }
                             }
-                        }
-                    });
-                }
-            });
+                        });
+                    }
+                });
+            }
         }
     }
 

@@ -50,10 +50,8 @@ public class SampleServerDataSource {
      * Gets data.
      */
     public HttpRestLite.Result get(long id, @NonNull SampleHolder holder) {
-        Map<String, String> params = new HashMap<>();
-        params.put("id", String.valueOf(id));
-        HttpRestLite rest = new HttpRestLite(serverAddress + "api/sample/get.php", "GET");
-        HttpRestLite.Result result = rest.execute(params, null);
+        HttpRestLite rest = new HttpRestLite(serverAddress + "api/sample/get.php/" + id, "GET");
+        HttpRestLite.Result result = rest.execute(null, null);
         if (result.errorCode == 0) {
             holder.sample = loading(result);
         }
@@ -64,10 +62,8 @@ public class SampleServerDataSource {
      * Gets data async.
      */
     public HttpRestLite get(long id, @NonNull final ResultListener listener) {
-        Map<String, String> params = new HashMap<>();
-        params.put("id", String.valueOf(id));
-        HttpRestLite rest = new HttpRestLite(serverAddress + "api/sample/get.php", "GET");
-        rest.execute(params, null, new HttpRestLite.ResultListener() {
+        HttpRestLite rest = new HttpRestLite(serverAddress + "api/sample/get.php/" + id, "GET");
+        rest.execute(null, null, new HttpRestLite.ResultListener() {
             @Override
             public void finish(HttpRestLite.Result result) {
                 SampleHolder holder = new SampleHolder();
@@ -101,6 +97,40 @@ public class SampleServerDataSource {
         params.put("detail", sample.getDetail());
         params.put("category", String.valueOf(sample.getCategory()));
         HttpRestLite rest = new HttpRestLite(serverAddress + "api/sample/add.php", "POST");
+        rest.execute(params, null, new HttpRestLite.ResultListener() {
+            @Override
+            public void finish(HttpRestLite.Result result) {
+                SampleHolder holder = new SampleHolder();
+                if (result.errorCode == 0) {
+                    holder.sample = loading(result);
+                }
+                listener.finish(result, holder);
+            }
+        });
+        return rest;
+    }
+
+    /**
+     * Edits data.
+     */
+    public HttpRestLite.Result edit(@NonNull Sample sample) {
+        Map<String, String> params = new HashMap<>();
+        params.put("name", sample.getName());
+        params.put("detail", sample.getDetail());
+        params.put("category", String.valueOf(sample.getCategory()));
+        HttpRestLite rest = new HttpRestLite(serverAddress + "api/sample/edit.php/" + sample.getId(), "PUT");
+        return rest.execute(params, null);
+    }
+
+    /**
+     * Edits data async.
+     */
+    public HttpRestLite edit(@NonNull Sample sample, @NonNull final ResultListener listener) {
+        Map<String, String> params = new HashMap<>();
+        params.put("name", sample.getName());
+        params.put("detail", sample.getDetail());
+        params.put("category", String.valueOf(sample.getCategory()));
+        HttpRestLite rest = new HttpRestLite(serverAddress + "api/sample/edit.php/" + sample.getId(), "PUT");
         rest.execute(params, null, new HttpRestLite.ResultListener() {
             @Override
             public void finish(HttpRestLite.Result result) {

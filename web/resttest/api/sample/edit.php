@@ -1,5 +1,6 @@
 <?php
 header("Content-Type: application/json; charset=UTF-8");
+require_once "./lib/get.php";
 require_once "../db.php";
 
 // checks login
@@ -14,6 +15,7 @@ $in = array (
 	'name' => isset($_PUT['name']) ? trim($_PUT['name']) : "",
 	'category' => isset($_PUT['category']) ? intval($_PUT['category']) : 0,
 );
+error_log("id: " . $in['id']);
 
 // checks input
 $errors = array ();
@@ -25,6 +27,8 @@ if ($count <= 0)
 	$errors[] = "Id is invalid.";
 if ($in['name'] == "")
 	$errors[] = "Name is empty.";
+if (strlen($in['name']) > 255)
+	$errors[] = "Name is too long.";
 
 if (count($errors) <= 0) {
 	// updates data
@@ -37,19 +41,14 @@ if (count($errors) <= 0) {
 	));
 
 	// reloads data
-	$query = "SELECT id, icon, name, category, deleted FROM sample WHERE id = :id";
-	$stmt = $pdo->prepare($query);
-	$stmt->execute(array (
-		':id' => $in['id'],
-	));
-	$row = $stmt->fetch(PDO::FETCH_ASSOC);
+	$item = sample_get($pdo, $in['id']);
 }
 
 // writes output
 $out = array (
 	'ok' => count($errors) <= 0,
 	'errors' => $errors,
-	'item' => isset($row) ? $row : NULL,
+	'item' => $item,
 );
 echo json_encode($out);
 ?>

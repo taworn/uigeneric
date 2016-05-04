@@ -406,11 +406,13 @@ public class SampleServerListActivity extends AppCompatActivity implements Navig
 
             case REQUEST_VIEW:
                 if (resultCode == Activity.RESULT_OK) {
-                    boolean changed = resultIntent.getBooleanExtra("data.changed", false);
-                    boolean deleted = resultIntent.getBooleanExtra("data.deleted", false);
-                    if (changed || deleted) {
-                        openProgressDialog();
-                        rest = list.reload(listener);
+                    if (!loading) {
+                        boolean changed = resultIntent.getBooleanExtra("data.changed", false);
+                        boolean deleted = resultIntent.getBooleanExtra("data.deleted", false);
+                        if (changed || deleted) {
+                            openProgressDialog();
+                            rest = list.reload(listener);
+                        }
                     }
                 }
                 break;

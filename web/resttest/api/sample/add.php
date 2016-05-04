@@ -1,5 +1,6 @@
 <?php
 header("Content-Type: application/json; charset=UTF-8");
+require_once "./lib/get.php";
 require_once "../db.php";
 
 // checks login
@@ -32,19 +33,13 @@ if (count($errors) <= 0) {
 	$last_id = $pdo->lastInsertId();
 
 	// reloads data
-	$query = "SELECT id, icon, name, category, deleted FROM sample WHERE id = :id";
-	$stmt = $pdo->prepare($query);
-	$stmt->execute(array (
-		':id' => $last_id,
-	));
-	$row = $stmt->fetch(PDO::FETCH_ASSOC);
+	$item = sample_get($pdo, $last_id);
 }
 
 // writes output
 $out = array (
 	'ok' => count($errors) <= 0,
 	'errors' => $errors,
-	'item' => isset($row) ? $row : NULL,
+	'item' => $item,
 );
 echo json_encode($out);
-?>

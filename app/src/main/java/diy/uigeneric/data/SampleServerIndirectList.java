@@ -144,7 +144,7 @@ public class SampleServerIndirectList {
         this.query = query;
         this.sortBy = sortBy;
         this.sortReverse = sortReverse;
-        return call(serverAddress + "/api/sample/list.php", "POST", params);
+        return call(serverAddress + "api/sample/list.php", "POST", params);
     }
 
     /**
@@ -158,7 +158,7 @@ public class SampleServerIndirectList {
         this.query = query;
         this.sortBy = sortBy;
         this.sortReverse = sortReverse;
-        return call(serverAddress + "/api/sample/list.php", "POST", params, listener);
+        return call(serverAddress + "api/sample/list.php", "POST", params, listener);
     }
 
     /**

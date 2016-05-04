@@ -1,5 +1,6 @@
 <?php
 header("Content-Type: application/json; charset=UTF-8");
+require_once "./lib/get.php";
 require_once "../db.php";
 
 // checks login
@@ -12,15 +13,12 @@ $in = array (
 );
 
 // gets data
-$query = "SELECT id, icon, name, detail, category, deleted FROM sample WHERE id = :id";
-$stmt = $pdo->prepare($query);
-$stmt->execute(array (':id' => $in['id']));
-$row = $stmt->fetch(PDO::FETCH_ASSOC);
+$item = sample_get($pdo, $in['id']);
 
 // writes output
 $out = array (
 	'ok' => TRUE,
-	'item' => $row,
+	'item' => $item,
 );
 echo json_encode($out);
 ?>
