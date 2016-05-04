@@ -122,8 +122,10 @@ public class SampleServerListActivity extends AppCompatActivity implements Navig
 
         // initializes RecycledView and its data
         list = new SampleServerIndirectList(this);
-        openProgressDialog();
-        rest = list.load(false, Sample.CATEGORY_DATA, null, SampleServerIndirectList.SORT_AS_IS, false, listener);
+        if (savedInstanceState == null) {
+            openProgressDialog();
+            rest = list.load(false, Sample.CATEGORY_DATA, null, SampleServerIndirectList.SORT_AS_IS, false, listener);
+        }
         listAdapter = new SampleServerListAdapter(this, list, new SampleServerListAdapter.OnItemClickListener() {
             @Override
             public void onClick(View view, int position) {
@@ -194,6 +196,15 @@ public class SampleServerListActivity extends AppCompatActivity implements Navig
         };
 
         actionBar.setTitle(R.string.sample_list_title_data);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (rest != null)
+            rest.cancel();
+        if (progress != null)
+            progress.cancel();
     }
 
     @Override
