@@ -29,7 +29,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -57,6 +56,7 @@ public class SampleServerListActivity extends AppCompatActivity implements Navig
     private DialogInterface.OnCancelListener progressCancel = null;
     private HttpRestLite rest = null;
     private HttpRestLite.ResultListener listener = null;
+    private boolean loading = false;
 
     private DrawerLayout drawer = null;
     private SampleServerIndirectList list = null;
@@ -397,8 +397,10 @@ public class SampleServerListActivity extends AppCompatActivity implements Navig
         switch (requestCode) {
             case REQUEST_ADD:
                 if (resultCode == Activity.RESULT_OK) {
-                    openProgressDialog();
-                    rest = list.reload(listener);
+                    if (!loading) {
+                        openProgressDialog();
+                        rest = list.reload(listener);
+                    }
                 }
                 break;
 
@@ -610,6 +612,7 @@ public class SampleServerListActivity extends AppCompatActivity implements Navig
     }
 
     private void openProgressDialog() {
+        loading = true;
         progress = new ProgressDialog(this);
         progress.setProgressStyle(ProgressDialog.STYLE_SPINNER);
         progress.setMessage(getResources().getString(R.string.sample_waiting));
@@ -622,33 +625,36 @@ public class SampleServerListActivity extends AppCompatActivity implements Navig
 
     private void commonResultTask(HttpRestLite.Result result) {
         progress.dismiss();
+        loading = false;
+        if (result.errorCode != 0) {
+            String errorMessage = null;
+            if (result.errorCode == HttpRestLite.ERROR_CUSTOM) {
+                if (result.json.has("errors")) {
+                    try {
+                        JSONArray errors = result.json.getJSONArray("errors");
+                        errorMessage = "";
+                        for (int i = 0; i < errors.length(); i++)
+                            errorMessage += " - " + errors.get(i) + "\n";
+                    }
+                    catch (JSONException e) {
+                        e.printStackTrace();
+                        errorMessage = getResources().getString(R.string.sample_error_unknown_json);
+                    }
+                }
+                else
+                    errorMessage = getResources().getString(R.string.sample_error_unknown_json);
+            }
+            else
+                errorMessage = HttpRestLite.getErrorMessage(this, result.errorCode);
+            new AlertDialog.Builder(this)
+                    .setTitle(R.string.sample_error_title)
+                    .setMessage(errorMessage)
+                    .setNeutralButton(R.string.sample_error_neutral_button, null)
+                    .show();
+        }
         if (result.errorCode == 0) {
             listAdapter.notifyDataSetChanged();
             cancelListSelection();
-        }
-        else if (result.errorCode == HttpRestLite.ERROR_CUSTOM) {
-            if (result.json.has("errors")) {
-                try {
-                    JSONArray errors = result.json.getJSONArray("errors");
-                    String message = "";
-                    for (int i = 0; i < errors.length(); i++)
-                        message += " - " + errors.get(i) + "\n";
-                    new AlertDialog.Builder(this)
-                            .setTitle(R.string.sample_error_title)
-                            .setMessage(message)
-                            .setNeutralButton(R.string.sample_error_neutral_button, null)
-                            .show();
-                }
-                catch (JSONException e) {
-                    e.printStackTrace();
-                    Toast.makeText(this, R.string.sample_error_unknown_json, Toast.LENGTH_SHORT).show();
-                }
-            }
-            else
-                Toast.makeText(this, R.string.sample_error_unknown_json, Toast.LENGTH_SHORT).show();
-        }
-        else {
-            Toast.makeText(this, HttpRestLite.getErrorMessage(SampleServerListActivity.this, result.errorCode), Toast.LENGTH_SHORT).show();
         }
     }
 

@@ -193,8 +193,6 @@ public class SampleServerEditActivity extends AppCompatActivity {
                                 uiFromData();
                                 Log.d(TAG, "load item: " + item.getId() + "/" + item.getName());
                             }
-                            else
-                                SampleServerEditActivity.this.finish();
                         }
                     });
                 }
@@ -412,29 +410,31 @@ public class SampleServerEditActivity extends AppCompatActivity {
 
     private void commonResultTask(HttpRestLite.Result result) {
         progress.dismiss();
-        if (result.errorCode == HttpRestLite.ERROR_CUSTOM) {
-            if (result.json.has("errors")) {
-                try {
-                    JSONArray errors = result.json.getJSONArray("errors");
-                    String message = "";
-                    for (int i = 0; i < errors.length(); i++)
-                        message += " - " + errors.get(i) + "\n";
-                    new AlertDialog.Builder(this)
-                            .setTitle(R.string.sample_error_title)
-                            .setMessage(message)
-                            .setNeutralButton(R.string.sample_error_neutral_button, null)
-                            .show();
+        if (result.errorCode != 0) {
+            String errorMessage = null;
+            if (result.errorCode == HttpRestLite.ERROR_CUSTOM) {
+                if (result.json.has("errors")) {
+                    try {
+                        JSONArray errors = result.json.getJSONArray("errors");
+                        errorMessage = "";
+                        for (int i = 0; i < errors.length(); i++)
+                            errorMessage += " - " + errors.get(i) + "\n";
+                    }
+                    catch (JSONException e) {
+                        e.printStackTrace();
+                        errorMessage = getResources().getString(R.string.sample_error_unknown_json);
+                    }
                 }
-                catch (JSONException e) {
-                    e.printStackTrace();
-                    Toast.makeText(this, R.string.sample_error_unknown_json, Toast.LENGTH_SHORT).show();
-                }
+                else
+                    errorMessage = getResources().getString(R.string.sample_error_unknown_json);
             }
             else
-                Toast.makeText(this, R.string.sample_error_unknown_json, Toast.LENGTH_SHORT).show();
-        }
-        else if (result.errorCode != 0) {
-            Toast.makeText(this, HttpRestLite.getErrorMessage(this, result.errorCode), Toast.LENGTH_SHORT).show();
+                errorMessage = HttpRestLite.getErrorMessage(this, result.errorCode);
+            new AlertDialog.Builder(this)
+                    .setTitle(R.string.sample_error_title)
+                    .setMessage(errorMessage)
+                    .setNeutralButton(R.string.sample_error_neutral_button, null)
+                    .show();
         }
     }
 
