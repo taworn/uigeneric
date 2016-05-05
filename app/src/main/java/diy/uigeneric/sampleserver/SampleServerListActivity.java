@@ -127,7 +127,7 @@ public class SampleServerListActivity extends AppCompatActivity implements Navig
             @Override
             public void onClick(View view, int position) {
                 Sample item = list.get(position);
-                Intent intent = new Intent(SampleServerListActivity.this, SampleServerEditActivity.class);
+                Intent intent = new Intent(SampleServerListActivity.this, SampleServerViewActivity.class);
                 intent.putExtra("data.id", item.getId());
                 startActivityForResult(intent, REQUEST_VIEW);
             }
@@ -189,7 +189,6 @@ public class SampleServerListActivity extends AppCompatActivity implements Navig
                 cancelListSelection();
             }
         };
-
         actionBar.setTitle(R.string.sample_list_title_data);
     }
 

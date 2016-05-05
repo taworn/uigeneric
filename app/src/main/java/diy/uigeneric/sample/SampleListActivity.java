@@ -48,6 +48,8 @@ public class SampleListActivity extends AppCompatActivity implements NavigationV
     private static final int REQUEST_ADD = 100;
     private static final int REQUEST_VIEW = 101;
 
+    private ActionBar actionBar = null;
+
     private DrawerLayout drawer = null;
     private SampleIndirectList list = null;
     private SampleListAdapter listAdapter = null;
@@ -55,7 +57,6 @@ public class SampleListActivity extends AppCompatActivity implements NavigationV
 
     private ActionMode actionMode = null;
     private ActionMode.Callback actionModeCallback = null;
-    private ActionBar actionBar = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,6 +65,8 @@ public class SampleListActivity extends AppCompatActivity implements NavigationV
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         actionBar = getSupportActionBar();
+        if (actionBar != null)
+            actionBar.setTitle(R.string.sample_list_title_data);
 
         SampleDataSource source = new SampleDataSource(SampleListActivity.this);
         source.open();
@@ -160,8 +163,6 @@ public class SampleListActivity extends AppCompatActivity implements NavigationV
                 cancelListSelection();
             }
         };
-
-        actionBar.setTitle(R.string.sample_list_title_data);
     }
 
     @Override

@@ -9,10 +9,6 @@ import android.support.v7.preference.PreferenceManager;
 
 public class SettingsFragment extends PreferenceFragmentCompat implements SharedPreferences.OnSharedPreferenceChangeListener {
 
-    private static final String TAG = SettingsFragment.class.getSimpleName();
-
-    private SharedPreferences sharedPref;
-
     public SettingsFragment() {
         // Required empty public constructor
     }
@@ -33,7 +29,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Shared
     @Override
     public void onCreatePreferences(Bundle bundle, String s) {
         addPreferencesFromResource(R.xml.preferences);
-        sharedPref = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getActivity());
         onSharedPreferenceChanged(sharedPref, "database");
         onSharedPreferenceChanged(sharedPref, "server");
         onSharedPreferenceChanged(sharedPref, "username");

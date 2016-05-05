@@ -70,7 +70,7 @@ public class HttpRestLite {
     public static final int ERROR_CUSTOM = -1;
 
     /**
-     * Constructs..
+     * Constructs.
      */
     public HttpRestLite(@NonNull String url, @Nullable String request) {
         super();
@@ -249,7 +249,7 @@ public class HttpRestLite {
     }
 
     /**
-     * Cancels when send data.
+     * Cancels when sending.
      */
     public boolean cancel() {
         if (isStarted) {

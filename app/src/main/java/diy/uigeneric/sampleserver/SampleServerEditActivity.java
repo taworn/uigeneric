@@ -27,7 +27,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
-import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -42,7 +41,7 @@ import diy.uigeneric.data.Sample;
 import diy.uigeneric.data.SampleServerDataSource;
 
 /**
- * The SampleEditActivity is an activity to edit a Sample data.
+ * The SampleServerEditActivity is an activity to edit a Sample data.
  */
 public class SampleServerEditActivity extends AppCompatActivity {
 
@@ -80,7 +79,6 @@ public class SampleServerEditActivity extends AppCompatActivity {
         if (actionBar != null)
             actionBar.setDisplayHomeAsUpEnabled(true);
 
-        // initializes callback
         listener = new HttpRestLite.ResultListener() {
             @Override
             public void finish(final HttpRestLite.Result result) {
@@ -327,7 +325,6 @@ public class SampleServerEditActivity extends AppCompatActivity {
     private void save() {
         if (!empty() && changed()) {
             uiToData();
-
             if (item.getId() > 0) {
                 openProgressDialog();
                 source.edit(item, new SampleServerDataSource.ResultListener() {
@@ -341,7 +338,6 @@ public class SampleServerEditActivity extends AppCompatActivity {
                                     Log.d(TAG, "saved item: " + item.getId() + "/" + item.getName());
                                     iconChanged = false;
                                     item = holder.sample;
-
                                     Intent resultIntent = new Intent();
                                     resultIntent.putExtra("data.id", item.getId());
                                     setResult(Activity.RESULT_OK, resultIntent);
@@ -365,7 +361,6 @@ public class SampleServerEditActivity extends AppCompatActivity {
                                     Log.d(TAG, "added item: " + item.getId() + "/" + item.getName());
                                     iconChanged = false;
                                     item = holder.sample;
-
                                     Intent resultIntent = new Intent();
                                     resultIntent.putExtra("data.id", item.getId());
                                     setResult(Activity.RESULT_OK, resultIntent);

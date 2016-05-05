@@ -45,7 +45,7 @@ public class Sample implements Comparator<Sample> {
     }
 
     /**
-     * Constructs a data with primary key.  The primary key cannot be change.
+     * Constructs a data with primary key.  The primary key cannot be changed.
      */
     public Sample(long id) {
         this.id = id;
