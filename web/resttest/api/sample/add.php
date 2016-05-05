@@ -43,3 +43,4 @@ $out = array (
 	'item' => $item,
 );
 echo json_encode($out);
+?>

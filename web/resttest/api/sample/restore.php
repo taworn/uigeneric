@@ -16,7 +16,7 @@ $in = array (
 	'category' => isset($_POST['category']) ? $_POST['category'] : null,
 	'query' => isset($_POST['query']) ? $_POST['query'] : null,
 );
-error_log("in['list'] " . count($in['list']));
+error_log("in['list']: " . count($in['list']));
 for ($i = 0; $i < count($in['list']); $i++)
 	error_log($in['list'][$i]);
 

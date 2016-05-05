@@ -12,10 +12,11 @@ $_PUT = array ();
 parse_str(file_get_contents('php://input'), $_PUT);
 $in = array (
 	'id' => $path_info[1],
+	'icon' => isset($_PUT['icon']) ? trim($_PUT['icon']) : "",
 	'name' => isset($_PUT['name']) ? trim($_PUT['name']) : "",
+	'detail' => isset($_PUT['detail']) ? trim($_PUT['detail']) : "",
 	'category' => isset($_PUT['category']) ? intval($_PUT['category']) : 0,
 );
-error_log("id: " . $in['id']);
 
 // checks input
 $errors = array ();

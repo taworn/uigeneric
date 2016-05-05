@@ -53,7 +53,6 @@ public class SampleServerEditActivity extends AppCompatActivity {
     private ProgressDialog progress = null;
     private DialogInterface.OnCancelListener progressCancel = null;
     private HttpRestLite.ResultListener listener = null;
-    private HttpRestLite rest = null;
 
     private ImageView imageIcon = null;
     private EditText editName = null;
@@ -70,7 +69,7 @@ public class SampleServerEditActivity extends AppCompatActivity {
     private int categorySelected = 0;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sample_edit);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -82,27 +81,15 @@ public class SampleServerEditActivity extends AppCompatActivity {
         progressCancel = new DialogInterface.OnCancelListener() {
             @Override
             public void onCancel(DialogInterface dialogInterface) {
-                if (rest != null) {
-                    Log.d(TAG, "REST is ok");
-                    rest.cancel();
-                }
-                else {
-                    Log.d(TAG, "REST is null!");
-                }
+                source.cancel();
             }
         };
         listener = new HttpRestLite.ResultListener() {
             @Override
-            public void finish(final HttpRestLite.Result result) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        commonResultTask(result);
-                    }
-                });
+            public void finish(HttpRestLite.Result result) {
+                commonResultTask(result);
             }
         };
-        rest = new HttpRestLite();
 
         imageIcon = (ImageView) findViewById(R.id.image_icon);
         editName = (EditText) findViewById(R.id.edit_name);
@@ -182,22 +169,17 @@ public class SampleServerEditActivity extends AppCompatActivity {
             openProgressDialog();
             source.get(id, new SampleServerDataSource.ResultListener() {
                 @Override
-                public void finish(final HttpRestLite.Result result, @NonNull final SampleServerDataSource.SampleHolder holder) {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            commonResultTask(result);
-                            if (result.errorCode == 0) {
-                                item = holder.sample;
-                                categorySelected = item.getCategory();
-                                iconChanged = false;
-                                iconDefault = item.getIcon() == null;
-                                iconTempUrl = null;
-                                uiFromData();
-                                Log.d(TAG, "load item: " + item.getId() + "/" + item.getName());
-                            }
+                public void finish(HttpRestLite.Result result, @NonNull SampleServerDataSource.SampleHolder holder) {
+                    commonResultTask(result);
+                    if (result.errorCode == 0) {
+                        item = holder.sample;
+                        if (savedInstanceState == null) {
+                            categorySelected = item.getCategory();
+                            iconDefault = item.getIcon() == null;
+                            uiFromData();
                         }
-                    });
+                        Log.d(TAG, "load item: " + item.getId() + "/" + item.getName());
+                    }
                 }
             });
             if (actionBar != null)
@@ -218,11 +200,11 @@ public class SampleServerEditActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        if (rest != null)
-            rest.cancel();
+        source.cancel();
         if (progress != null)
             progress.cancel();
     }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -334,22 +316,17 @@ public class SampleServerEditActivity extends AppCompatActivity {
                 openProgressDialog();
                 source.edit(item, new SampleServerDataSource.ResultListener() {
                     @Override
-                    public void finish(final HttpRestLite.Result result, @NonNull final SampleServerDataSource.SampleHolder holder) {
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                commonResultTask(result);
-                                if (result.errorCode == 0) {
-                                    Log.d(TAG, "saved item: " + item.getId() + "/" + item.getName());
-                                    iconChanged = false;
-                                    item = holder.sample;
-                                    Intent resultIntent = new Intent();
-                                    resultIntent.putExtra("data.id", item.getId());
-                                    setResult(Activity.RESULT_OK, resultIntent);
-                                    SampleServerEditActivity.this.finish();
-                                }
-                            }
-                        });
+                    public void finish(HttpRestLite.Result result, @NonNull SampleServerDataSource.SampleHolder holder) {
+                        commonResultTask(result);
+                        if (result.errorCode == 0) {
+                            Log.d(TAG, "saved item: " + item.getId() + "/" + item.getName());
+                            iconChanged = false;
+                            item = holder.sample;
+                            Intent resultIntent = new Intent();
+                            resultIntent.putExtra("data.id", item.getId());
+                            setResult(Activity.RESULT_OK, resultIntent);
+                            SampleServerEditActivity.this.finish();
+                        }
                     }
                 });
             }
@@ -357,22 +334,16 @@ public class SampleServerEditActivity extends AppCompatActivity {
                 openProgressDialog();
                 source.add(item, new SampleServerDataSource.ResultListener() {
                     @Override
-                    public void finish(final HttpRestLite.Result result, @NonNull final SampleServerDataSource.SampleHolder holder) {
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                commonResultTask(result);
-                                if (result.errorCode == 0) {
-                                    Log.d(TAG, "added item: " + item.getId() + "/" + item.getName());
-                                    iconChanged = false;
-                                    item = holder.sample;
-                                    Intent resultIntent = new Intent();
-                                    resultIntent.putExtra("data.id", item.getId());
-                                    setResult(Activity.RESULT_OK, resultIntent);
-                                    SampleServerEditActivity.this.finish();
-                                }
-                            }
-                        });
+                    public void finish(HttpRestLite.Result result, @NonNull SampleServerDataSource.SampleHolder holder) {
+                        if (result.errorCode == 0) {
+                            Log.d(TAG, "added item: " + item.getId() + "/" + item.getName());
+                            iconChanged = false;
+                            item = holder.sample;
+                            Intent resultIntent = new Intent();
+                            resultIntent.putExtra("data.id", item.getId());
+                            setResult(Activity.RESULT_OK, resultIntent);
+                            SampleServerEditActivity.this.finish();
+                        }
                     }
                 });
             }
@@ -424,8 +395,11 @@ public class SampleServerEditActivity extends AppCompatActivity {
 
     private void commonResultTask(HttpRestLite.Result result) {
         progress.dismiss();
-        if (result.errorCode != 0) {
-            String errorMessage = null;
+        if (result.errorCode == HttpRestLite.ERROR_CANCEL) {
+            Log.d(TAG, "user cancelled HTTP REST");
+        }
+        else if (result.errorCode != 0) {
+            String errorMessage;
             if (result.errorCode == HttpRestLite.ERROR_CUSTOM) {
                 if (result.json.has("errors")) {
                     try {

@@ -8,6 +8,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
@@ -40,6 +41,7 @@ import diy.restlite.HttpRestLite;
 import diy.uigeneric.R;
 import diy.uigeneric.adapter.SampleServerListAdapter;
 import diy.uigeneric.data.Sample;
+import diy.uigeneric.data.SampleServerDataSource;
 import diy.uigeneric.data.SampleServerIndirectList;
 
 /**
@@ -86,13 +88,8 @@ public class SampleServerListActivity extends AppCompatActivity implements Navig
         };
         listener = new HttpRestLite.ResultListener() {
             @Override
-            public void finish(final HttpRestLite.Result result) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        commonResultTask(result);
-                    }
-                });
+            public void finish(HttpRestLite.Result result) {
+                commonResultTask(result);
             }
         };
 
@@ -302,15 +299,10 @@ public class SampleServerListActivity extends AppCompatActivity implements Navig
                             openProgressDialog();
                             list.removeAll(new HttpRestLite.ResultListener() {
                                 @Override
-                                public void finish(final HttpRestLite.Result result) {
-                                    runOnUiThread(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            commonResultTask(result);
-                                            if (result.errorCode == 0)
-                                                Log.d(TAG, "removed ALL data");
-                                        }
-                                    });
+                                public void finish(HttpRestLite.Result result) {
+                                    commonResultTask(result);
+                                    if (result.errorCode == 0)
+                                        Log.d(TAG, "removed ALL data");
                                 }
                             });
                         }
@@ -396,14 +388,15 @@ public class SampleServerListActivity extends AppCompatActivity implements Navig
                 if (resultCode == Activity.RESULT_OK) {
                     long id = resultIntent.getLongExtra("data.id", 0);
                     if (id != 0) {
-                        if (list.find(id) < 0) {
-                            /*
-                            SampleDataSource source = new SampleDataSource(this);
-                            source.open();
-                            list.add(source.get(id));
-                            source.close();
-                            listAdapter.notifyDataSetChanged();
-                            */
+                        if (list.find(id) < 0 && !loading) {
+                            SampleServerDataSource source = new SampleServerDataSource(this);
+                            source.get(id, new SampleServerDataSource.ResultListener() {
+                                @Override
+                                public void finish(HttpRestLite.Result result, @NonNull SampleServerDataSource.SampleHolder holder) {
+                                    list.add(holder.sample);
+                                    listAdapter.notifyDataSetChanged();
+                                }
+                            });
                         }
                         cancelListSelection();
                     }
@@ -416,19 +409,21 @@ public class SampleServerListActivity extends AppCompatActivity implements Navig
                     boolean changed = resultIntent.getBooleanExtra("data.changed", false);
                     boolean deleted = resultIntent.getBooleanExtra("data.deleted", false);
                     if (changed || deleted) {
-                        if (deleted) {
+                        if (deleted && !loading) {
                             openProgressDialog();
                             list.reload(listener);
                         }
                         else {
-                            int i = list.find(id);
-                            if (i >= 0) {
-                                /*
-                                SampleDataSource source = new SampleDataSource(this);
-                                source.open();
-                                list.edit(i, source.get(id));
-                                source.close();
-                                */
+                            final int i = list.find(id);
+                            if (i >= 0 && !loading) {
+                                SampleServerDataSource source = new SampleServerDataSource(this);
+                                source.get(id, new SampleServerDataSource.ResultListener() {
+                                    @Override
+                                    public void finish(HttpRestLite.Result result, @NonNull SampleServerDataSource.SampleHolder holder) {
+                                        list.edit(i, holder.sample);
+                                        listAdapter.notifyDataSetChanged();
+                                    }
+                                });
                             }
                         }
                         cancelListSelection();
@@ -504,43 +499,33 @@ public class SampleServerListActivity extends AppCompatActivity implements Navig
                 openProgressDialog();
                 list.delete(idList, new HttpRestLite.ResultListener() {
                     @Override
-                    public void finish(final HttpRestLite.Result result) {
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                commonResultTask(result);
-                                if (result.errorCode == 0) {
-                                    Log.d(TAG, "deleted item(s): " + idList.size());
-                                    for (int i = 0; i < idList.size(); i++)
-                                        Log.d(TAG, "deleted item: " + idList.get(i));
-                                    Snackbar snackbar = Snackbar
-                                            .make(listView, R.string.sample_deleted_snackbar_message, Snackbar.LENGTH_LONG)
-                                            .setAction(R.string.sample_deleted_snackbar_action, new View.OnClickListener() {
+                    public void finish(HttpRestLite.Result result) {
+                        commonResultTask(result);
+                        if (result.errorCode == 0) {
+                            Log.d(TAG, "deleted item(s): " + idList.size());
+                            for (int i = 0; i < idList.size(); i++)
+                                Log.d(TAG, "deleted item: " + idList.get(i));
+                            Snackbar snackbar = Snackbar
+                                    .make(listView, R.string.sample_deleted_snackbar_message, Snackbar.LENGTH_LONG)
+                                    .setAction(R.string.sample_deleted_snackbar_action, new View.OnClickListener() {
+                                        @Override
+                                        public void onClick(View view) {
+                                            openProgressDialog();
+                                            list.restore(idList, new HttpRestLite.ResultListener() {
                                                 @Override
-                                                public void onClick(View view) {
-                                                    openProgressDialog();
-                                                    list.restore(idList, new HttpRestLite.ResultListener() {
-                                                        @Override
-                                                        public void finish(final HttpRestLite.Result result) {
-                                                            runOnUiThread(new Runnable() {
-                                                                @Override
-                                                                public void run() {
-                                                                    commonResultTask(result);
-                                                                    if (result.errorCode == 0) {
-                                                                        Log.d(TAG, "undo: restore item(s): " + idList.size());
-                                                                        for (int i = 0; i < idList.size(); i++)
-                                                                            Log.d(TAG, "undo: restore item: " + idList.get(i));
-                                                                    }
-                                                                }
-                                                            });
-                                                        }
-                                                    });
+                                                public void finish(HttpRestLite.Result result) {
+                                                    commonResultTask(result);
+                                                    if (result.errorCode == 0) {
+                                                        Log.d(TAG, "undo: restore item(s): " + idList.size());
+                                                        for (int i = 0; i < idList.size(); i++)
+                                                            Log.d(TAG, "undo: restore item: " + idList.get(i));
+                                                    }
                                                 }
                                             });
-                                    snackbar.show();
-                                }
-                            }
-                        });
+                                        }
+                                    });
+                            snackbar.show();
+                        }
                     }
                 });
                 cancelListSelection();
@@ -555,18 +540,13 @@ public class SampleServerListActivity extends AppCompatActivity implements Navig
                 openProgressDialog();
                 list.restore(idList, new HttpRestLite.ResultListener() {
                     @Override
-                    public void finish(final HttpRestLite.Result result) {
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                commonResultTask(result);
-                                if (result.errorCode == 0) {
-                                    Log.d(TAG, "restore item(s): " + idList.size());
-                                    for (int i = 0; i < idList.size(); i++)
-                                        Log.d(TAG, "restore item: " + idList.get(i));
-                                }
-                            }
-                        });
+                    public void finish(HttpRestLite.Result result) {
+                        commonResultTask(result);
+                        if (result.errorCode == 0) {
+                            Log.d(TAG, "restore item(s): " + idList.size());
+                            for (int i = 0; i < idList.size(); i++)
+                                Log.d(TAG, "restore item: " + idList.get(i));
+                        }
                     }
                 });
                 cancelListSelection();
@@ -587,18 +567,13 @@ public class SampleServerListActivity extends AppCompatActivity implements Navig
                                 openProgressDialog();
                                 list.remove(idList, new HttpRestLite.ResultListener() {
                                     @Override
-                                    public void finish(final HttpRestLite.Result result) {
-                                        runOnUiThread(new Runnable() {
-                                            @Override
-                                            public void run() {
-                                                commonResultTask(result);
-                                                if (result.errorCode == 0) {
-                                                    Log.d(TAG, "remove item(s): " + idList.size());
-                                                    for (int i = 0; i < idList.size(); i++)
-                                                        Log.d(TAG, "remove item: " + idList.get(i));
-                                                }
-                                            }
-                                        });
+                                    public void finish(HttpRestLite.Result result) {
+                                        commonResultTask(result);
+                                        if (result.errorCode == 0) {
+                                            Log.d(TAG, "remove item(s): " + idList.size());
+                                            for (int i = 0; i < idList.size(); i++)
+                                                Log.d(TAG, "remove item: " + idList.get(i));
+                                        }
                                     }
                                 });
                                 cancelListSelection();

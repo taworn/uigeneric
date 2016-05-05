@@ -16,7 +16,7 @@ $in = array (
 	'category' => isset($_DELETE['category']) ? $_DELETE['category'] : null,
 	'query' => isset($_DELETE['query']) ? $_DELETE['query'] : null,
 );
-error_log("in['list'] " . count($in['list']));
+error_log("in['list']: " . count($in['list']));
 for ($i = 0; $i < count($in['list']); $i++)
 	error_log($in['list'][$i]);
 

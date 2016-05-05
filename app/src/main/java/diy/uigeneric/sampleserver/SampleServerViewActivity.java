@@ -22,10 +22,14 @@ import android.widget.TextView;
 import org.json.JSONArray;
 import org.json.JSONException;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import diy.restlite.HttpRestLite;
 import diy.uigeneric.R;
 import diy.uigeneric.data.Sample;
 import diy.uigeneric.data.SampleServerDataSource;
+import diy.uigeneric.data.SampleServerIndirectList;
 
 /**
  * The SampleServerViewActivity is an activity to view a Sample data.
@@ -39,7 +43,6 @@ public class SampleServerViewActivity extends AppCompatActivity {
     private ProgressDialog progress = null;
     private DialogInterface.OnCancelListener progressCancel = null;
     private HttpRestLite.ResultListener listener = null;
-    private HttpRestLite rest = null;
     private boolean loading = false;
 
     private ImageView imageIcon = null;
@@ -64,27 +67,15 @@ public class SampleServerViewActivity extends AppCompatActivity {
         progressCancel = new DialogInterface.OnCancelListener() {
             @Override
             public void onCancel(DialogInterface dialogInterface) {
-                if (rest != null) {
-                    Log.d(TAG, "REST is ok");
-                    rest.cancel();
-                }
-                else {
-                    Log.d(TAG, "REST is null!");
-                }
+                source.cancel();
             }
         };
         listener = new HttpRestLite.ResultListener() {
             @Override
-            public void finish(final HttpRestLite.Result result) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        commonResultTask(result);
-                    }
-                });
+            public void finish(HttpRestLite.Result result) {
+                commonResultTask(result);
             }
         };
-        rest = new HttpRestLite();
 
         imageIcon = (ImageView) findViewById(R.id.image_icon);
         textName = (TextView) findViewById(R.id.text_name);
@@ -99,18 +90,14 @@ public class SampleServerViewActivity extends AppCompatActivity {
             openProgressDialog();
             source.get(id, new SampleServerDataSource.ResultListener() {
                 @Override
-                public void finish(final HttpRestLite.Result result, @NonNull final SampleServerDataSource.SampleHolder holder) {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            commonResultTask(result);
-                            if (result.errorCode == 0) {
-                                item = holder.sample;
-                                uiFromData();
-                                Log.d(TAG, "onCreate() item: " + item.getId() + "/" + item.getName());
-                            }
-                        }
-                    });
+                public void finish(HttpRestLite.Result result, @NonNull SampleServerDataSource.SampleHolder holder) {
+                    commonResultTask(result);
+                    if (result.errorCode == 0) {
+                        item = holder.sample;
+                        uiFromData();
+                        invalidateOptionsMenu();
+                        Log.d(TAG, "onCreate() item: " + item.getId() + "/" + item.getName());
+                    }
                 }
             });
             if (actionBar != null)
@@ -125,8 +112,7 @@ public class SampleServerViewActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        if (rest != null)
-            rest.cancel();
+        source.cancel();
         if (progress != null)
             progress.cancel();
     }
@@ -176,24 +162,17 @@ public class SampleServerViewActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, resultIntent);
         if (requestCode == REQUEST_EDIT && resultCode == RESULT_OK) {
             Log.d(TAG, "onActivityResult(), return from SampleServerEditActivity");
-            if (item.getId() == 0)
-                Log.i(TAG, "item.getId() == 0!");
             if (!loading) {
+                changed = true;
                 openProgressDialog();
                 source.get(item.getId(), new SampleServerDataSource.ResultListener() {
                     @Override
-                    public void finish(final HttpRestLite.Result result, @NonNull final SampleServerDataSource.SampleHolder holder) {
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                commonResultTask(result);
-                                if (result.errorCode == 0) {
-                                    item = holder.sample;
-                                    uiFromData();
-                                    changed = true;
-                                }
-                            }
-                        });
+                    public void finish(HttpRestLite.Result result, @NonNull SampleServerDataSource.SampleHolder holder) {
+                        commonResultTask(result);
+                        if (result.errorCode == 0) {
+                            item = holder.sample;
+                            uiFromData();
+                        }
                     }
                 });
             }
@@ -236,33 +215,45 @@ public class SampleServerViewActivity extends AppCompatActivity {
     }
 
     private void restore() {
-        /*
-        SampleDataSource source = new SampleDataSource(this);
-        source.open();
-        source.restore(item.getId());
-        source.close();
-        Log.d(TAG, "restored item: " + item.getId() + "/" + item.getName());
-        Intent resultIntent = new Intent();
-        setResult(Activity.RESULT_OK, resultIntent);
-        resultIntent.putExtra("data.id", item.getId());
-        resultIntent.putExtra("data.changed", true);
-        finish();
-        */
+        final List<Long> idList = new ArrayList<>();
+        idList.add(item.getId());
+        openProgressDialog();
+        SampleServerIndirectList list = new SampleServerIndirectList(this);
+        list.restore(idList, new HttpRestLite.ResultListener() {
+            @Override
+            public void finish(HttpRestLite.Result result) {
+                commonResultTask(result);
+                if (result.errorCode == 0) {
+                    Log.d(TAG, "restored item: " + item.getId() + "/" + item.getName());
+                    Intent resultIntent = new Intent();
+                    resultIntent.putExtra("data.id", item.getId());
+                    resultIntent.putExtra("data.deleted", true);
+                    setResult(Activity.RESULT_OK, resultIntent);
+                    SampleServerViewActivity.this.finish();
+                }
+            }
+        });
     }
 
     private void delete() {
-        /*
-        SampleDataSource source = new SampleDataSource(this);
-        source.open();
-        source.delete(item.getId());
-        source.close();
-        Log.d(TAG, "deleted item: " + item.getId() + "/" + item.getName());
-        Intent resultIntent = new Intent();
-        setResult(Activity.RESULT_OK, resultIntent);
-        resultIntent.putExtra("data.id", item.getId());
-        resultIntent.putExtra("data.deleted", true);
-        finish();
-        */
+        final List<Long> idList = new ArrayList<>();
+        idList.add(item.getId());
+        openProgressDialog();
+        SampleServerIndirectList list = new SampleServerIndirectList(this);
+        list.delete(idList, new HttpRestLite.ResultListener() {
+            @Override
+            public void finish(HttpRestLite.Result result) {
+                commonResultTask(result);
+                if (result.errorCode == 0) {
+                    Log.d(TAG, "deleted item: " + item.getId() + "/" + item.getName());
+                    Intent resultIntent = new Intent();
+                    resultIntent.putExtra("data.id", item.getId());
+                    resultIntent.putExtra("data.deleted", true);
+                    setResult(Activity.RESULT_OK, resultIntent);
+                    SampleServerViewActivity.this.finish();
+                }
+            }
+        });
     }
 
     private void remove() {
@@ -272,18 +263,24 @@ public class SampleServerViewActivity extends AppCompatActivity {
                 .setNegativeButton(R.string.sample_remove_dialog_negative, null)
                 .setPositiveButton(R.string.sample_remove_dialog_positive, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        /*
-                        SampleDataSource source = new SampleDataSource(SampleServerViewActivity.this);
-                        source.open();
-                        source.remove(item.getId());
-                        source.close();
-                        Log.d(TAG, "removed item: " + item.getId() + "/" + item.getName());
-                        Intent resultIntent = new Intent();
-                        setResult(Activity.RESULT_OK, resultIntent);
-                        resultIntent.putExtra("data.id", item.getId());
-                        resultIntent.putExtra("data.deleted", true);
-                        finish();
-                        */
+                        final List<Long> idList = new ArrayList<>();
+                        idList.add(item.getId());
+                        openProgressDialog();
+                        SampleServerIndirectList list = new SampleServerIndirectList(SampleServerViewActivity.this);
+                        list.remove(idList, new HttpRestLite.ResultListener() {
+                            @Override
+                            public void finish(HttpRestLite.Result result) {
+                                commonResultTask(result);
+                                if (result.errorCode == 0) {
+                                    Log.d(TAG, "removed item: " + item.getId() + "/" + item.getName());
+                                    Intent resultIntent = new Intent();
+                                    resultIntent.putExtra("data.id", item.getId());
+                                    resultIntent.putExtra("data.deleted", true);
+                                    setResult(Activity.RESULT_OK, resultIntent);
+                                    SampleServerViewActivity.this.finish();
+                                }
+                            }
+                        });
                     }
                 })
                 .show();
@@ -333,8 +330,11 @@ public class SampleServerViewActivity extends AppCompatActivity {
     private void commonResultTask(HttpRestLite.Result result) {
         progress.dismiss();
         loading = false;
-        if (result.errorCode != 0) {
-            String errorMessage = null;
+        if (result.errorCode == HttpRestLite.ERROR_CANCEL) {
+            Log.d(TAG, "user cancelled HTTP REST");
+        }
+        else if (result.errorCode != 0) {
+            String errorMessage;
             if (result.errorCode == HttpRestLite.ERROR_CUSTOM) {
                 if (result.json.has("errors")) {
                     try {

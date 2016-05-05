@@ -26,7 +26,7 @@ import diy.restlite.HttpRestLite;
 
 /**
  * A SampleServerIndirectList is an implementation of list with sort feature.  The functions are load,
- * reload, sort and search.  This class is convenient to use as list in Android UI.
+ * reload, sort, search and delete.  This class is convenient to use as list in Android UI.
  */
 public class SampleServerIndirectList {
 

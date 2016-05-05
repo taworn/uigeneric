@@ -32,7 +32,6 @@ public class SampleServerDataSource {
         void finish(HttpRestLite.Result result, @NonNull SampleHolder holder);
     }
 
-
     // base server address
     private String serverAddress;
     private HttpRestLite rest;
@@ -137,10 +136,17 @@ public class SampleServerDataSource {
         });
     }
 
+    /**
+     * Cancels the HTTP operation.
+     */
+    public void cancel() {
+        rest.cancel();
+    }
+
     private Sample loading(HttpRestLite.Result result) {
         try {
             if (result.json.has("ok") && result.json.getBoolean("ok")) {
-                Log.d(TAG, result.json.toString(4));
+                //Log.d(TAG, result.json.toString(4));
                 JSONObject item = result.json.getJSONObject("item");
                 Sample sample;
                 if (item.has("id"))
