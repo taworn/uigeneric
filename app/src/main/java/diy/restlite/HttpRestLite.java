@@ -1,6 +1,7 @@
 package diy.restlite;
 
 import android.content.Context;
+import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -31,15 +32,14 @@ public class HttpRestLite {
 
     private static final String TAG = HttpRestLite.class.getSimpleName();
 
-    private String url;                  // URL to send REST
-    private String request;              // request method
-    private boolean isStarted;           // started flag
-    private boolean isCancelled;         // last execute is cancel
-    private int readTimeout = 10000;     // not read any data timeout
-    private int connectTimeout = 15000;  // connection wait timeout
+    private int connectTimeout = 15000;      // connection wait timeout
+    private int readTimeout = 10000;         // no read data timeout
+    private HttpAsyncTask asyncTask = null;  // HTTP async task
 
     // transfer data in async execute()
     private class Transfer {
+        public String uri;
+        public String request;
         public Map<String, String> params;
         public String cookie;
         public ResultListener listener;
@@ -52,6 +52,7 @@ public class HttpRestLite {
         public List<String> cookie;
     }
 
+    // result listener
     public interface ResultListener {
         /**
          * Calls when HTTP execute finished.
@@ -63,48 +64,69 @@ public class HttpRestLite {
     public static final int ERROR_ALREADY_STARTED = 1;
     public static final int ERROR_UNREACH = 2;
     public static final int ERROR_TIMEOUT = 3;
-    public static final int ERROR_CANCEL = 4;
-    public static final int ERROR_RESPONSE = 5;
-    public static final int ERROR_JSON = 6;
+    public static final int ERROR_RESPONSE = 4;
+    public static final int ERROR_JSON = 5;
     public static final int ERROR_UNKNOWN = 99;
-    public static final int ERROR_CUSTOM = -1;
+    public static final int ERROR_CANCEL = -1;
+    public static final int ERROR_CUSTOM = -99;
 
     /**
      * Constructs.
      */
-    public HttpRestLite(@NonNull String url, @Nullable String request) {
+    public HttpRestLite() {
         super();
-        this.url = url;
-        this.request = request;
-        this.isStarted = false;
-        this.isCancelled = false;
-        if (this.request == null || this.request.equals(""))
-            this.request = "GET";
-        Log.d(TAG, "initialized REST with " + request + " " + url);
+    }
+
+    public int getConnectTimeout() {
+        return connectTimeout;
+    }
+
+    public void setConnectTimeout(int connectTimeout) {
+        this.connectTimeout = connectTimeout;
+    }
+
+    public int getReadTimeout() {
+        return readTimeout;
+    }
+
+    public void setReadTimeout(int readTimeout) {
+        this.readTimeout = readTimeout;
+    }
+
+    public boolean isStarted() {
+        return asyncTask != null;
+    }
+
+    public boolean isCancelled() {
+        return asyncTask != null && asyncTask.isCancelled();
     }
 
     /**
-     * Sends data directly.
+     * Cancels the HTTP operation.
      */
-    public Result execute(@Nullable Map<String, String> params, @Nullable String cookie) {
+    public void cancel() {
+        if (asyncTask != null) {
+            asyncTask.cancel();
+            asyncTask = null;
+        }
+    }
+
+    /**
+     * Calls HTTP data.
+     */
+    public Result execute(@NonNull String uri, @Nullable String request,
+                          @Nullable Map<String, String> params, @Nullable String cookie) {
+        // prepares result
         Result result = new Result();
         result.errorCode = 0;
         result.json = null;
         result.cookie = null;
 
-        // checks if no pending execute()
-        if (isStarted) {
-            result.errorCode = ERROR_ALREADY_STARTED;
-            return result;
-        }
-
-        // sets initial flags
-        isStarted = true;
-        isCancelled = false;
-
         try {
             // executes HTTP tasks
-            Log.d(TAG, "executes " + request + " " + url);
+            if (request == null || request.equals(""))
+                request = "GET";
+            Log.d(TAG, "executes " + request + " " + uri);
             if (params != null)
                 for (String name : params.keySet())
                     Log.d(TAG, "param: " + name + "=" + params.get(name));
@@ -117,19 +139,17 @@ public class HttpRestLite {
                     parameters += name + "=" + URLEncoder.encode(params.get(name), "UTF-8");
                 }
             }
-            String target = url;
             if (request.equals("GET") && !parameters.equals("")) {
-                if (target.contains("?"))
-                    target += "&" + parameters;
+                if (uri.contains("?"))
+                    uri += "&" + parameters;
                 else
-                    target += "?" + parameters;
+                    uri += "?" + parameters;
             }
-            Log.d(TAG, "starting " + target);
+            Log.d(TAG, "starting " + uri);
 
-            URL url = new URL(target);
+            URL url = new URL(uri);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             try {
-                // prepares
                 connection.setRequestMethod(request);
                 connection.setReadTimeout(readTimeout);
                 connection.setConnectTimeout(connectTimeout);
@@ -146,12 +166,9 @@ public class HttpRestLite {
                 }
                 if (cookie != null)
                     connection.setRequestProperty("Cookie", cookie);
-                if (isCancelled) {
-                    result.errorCode = ERROR_CANCEL;
-                    return result;
-                }
 
                 // sends
+                Log.d(TAG, "sends HTTP request");
                 if (!request.equals("GET") && parameters.getBytes().length > 0) {
                     OutputStream output = connection.getOutputStream();
                     DataOutputStream writer = new DataOutputStream(connection.getOutputStream());
@@ -160,12 +177,9 @@ public class HttpRestLite {
                     writer.close();
                     output.close();
                 }
-                if (isCancelled) {
-                    result.errorCode = ERROR_CANCEL;
-                    return result;
-                }
 
                 // receives
+                Log.d(TAG, "receives HTTP response");
                 int response = connection.getResponseCode();
                 if (response == 200) {
                     Log.d(TAG, "response is " + response);
@@ -175,13 +189,10 @@ public class HttpRestLite {
                     String line;
                     while ((line = reader.readLine()) != null) {
                         builder.append(line);
-                        if (isCancelled) {
-                            result.errorCode = ERROR_CANCEL;
-                            return result;
-                        }
                     }
 
                     // gets result as JSON
+                    Log.d(TAG, "parses result as JSON");
                     result.json = new JSONObject(builder.toString());
 
                     // gets cookie, too
@@ -190,8 +201,8 @@ public class HttpRestLite {
                     return result;
                 }
                 else {
-                    Log.d(TAG, "response error is " + response);
                     result.errorCode = ERROR_RESPONSE;
+                    Log.d(TAG, "response error is " + response);
                     return result;
                 }
             }
@@ -215,82 +226,191 @@ public class HttpRestLite {
             e.printStackTrace();
             result.errorCode = ERROR_TIMEOUT;
         }
-        finally {
-            isCancelled = false;
-            isStarted = false;
-        }
-
         return result;
     }
 
     /**
-     * Sends data async.
+     * Calls HTTP data async.
      */
-    public Result execute(@Nullable Map<String, String> params, @Nullable String cookie, @Nullable ResultListener listener) {
-        if (listener == null) {
-            return execute(params, cookie);
+    public void execute(@NonNull String uri, @Nullable String request,
+                        @Nullable Map<String, String> params, @Nullable String cookie,
+                        @Nullable ResultListener listener) {
+        Transfer transfer = new Transfer();
+        transfer.uri = uri;
+        transfer.request = request;
+        transfer.params = params;
+        transfer.cookie = cookie;
+        transfer.listener = listener;
+        asyncTask = new HttpAsyncTask();
+        asyncTask.execute(transfer);
+    }
+
+    private class HttpAsyncTask extends AsyncTask<Transfer, Void, Result> {
+
+        private ResultListener listener = null;
+
+        public void cancel() {
+            super.cancel(true);
+            listener = null;
         }
-        else {
-            final Transfer transfer = new Transfer();
-            transfer.params = params;
-            transfer.cookie = cookie;
-            transfer.listener = listener;
-            Thread thread = new Thread() {
-                @Override
-                public void run() {
-                    Result result = execute(transfer.params, transfer.cookie);
-                    transfer.listener.finish(result);
+
+        @Override
+        protected Result doInBackground(Transfer... transfers) {
+            if (transfers.length <= 0)
+                return null;
+
+            // unpacks transfer object
+            Transfer transfer = transfers[0];
+            String uri = transfer.uri;
+            String request = transfer.request;
+            Map<String, String> params = transfer.params;
+            String cookie = transfer.cookie;
+            listener = transfer.listener;
+
+            // prepares result
+            Result result = new Result();
+            result.errorCode = 0;
+            result.json = null;
+            result.cookie = null;
+
+            try {
+                // executes HTTP tasks
+                if (request == null || request.equals(""))
+                    request = "GET";
+                Log.d(TAG, "executes " + request + " " + uri);
+                if (params != null)
+                    for (String name : params.keySet())
+                        Log.d(TAG, "param: " + name + "=" + params.get(name));
+                if (cookie != null)
+                    Log.d(TAG, "cookie: " + cookie);
+                String parameters = "";
+                if (params != null) {
+                    for (String name : params.keySet()) {
+                        if (parameters.length() > 0) parameters += "&";
+                        parameters += name + "=" + URLEncoder.encode(params.get(name), "UTF-8");
+                    }
                 }
-            };
-            thread.setPriority(Thread.MIN_PRIORITY);
-            thread.start();
-            return null;
+                if (request.equals("GET") && !parameters.equals("")) {
+                    if (uri.contains("?"))
+                        uri += "&" + parameters;
+                    else
+                        uri += "?" + parameters;
+                }
+                Log.d(TAG, "starting " + uri);
+
+                URL url = new URL(uri);
+                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                try {
+                    connection.setRequestMethod(request);
+                    connection.setReadTimeout(readTimeout);
+                    connection.setConnectTimeout(connectTimeout);
+                    connection.setDoInput(true);
+                    connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+                    if (request.equals("GET")) {
+                        connection.setUseCaches(true);
+                    }
+                    else {
+                        connection.setUseCaches(false);
+                        connection.setRequestProperty("Content-Length", "" + parameters.getBytes().length);
+                        if (parameters.getBytes().length > 0)
+                            connection.setDoOutput(true);
+                    }
+                    if (cookie != null)
+                        connection.setRequestProperty("Cookie", cookie);
+                    if (isCancelled()) {
+                        result.errorCode = ERROR_CANCEL;
+                        return result;
+                    }
+
+                    // sends
+                    Log.d(TAG, "sends HTTP request");
+                    if (!request.equals("GET") && parameters.getBytes().length > 0) {
+                        OutputStream output = connection.getOutputStream();
+                        DataOutputStream writer = new DataOutputStream(connection.getOutputStream());
+                        writer.writeBytes(parameters);
+                        writer.flush();
+                        writer.close();
+                        output.close();
+                    }
+                    if (isCancelled()) {
+                        result.errorCode = ERROR_CANCEL;
+                        return result;
+                    }
+
+                    // receives
+                    Log.d(TAG, "receives HTTP response");
+                    int response = connection.getResponseCode();
+                    if (response == 200) {
+                        Log.d(TAG, "response is " + response);
+                        InputStream stream = connection.getInputStream();
+                        BufferedReader reader = new BufferedReader(new InputStreamReader(stream, "UTF-8"));
+                        StringBuilder builder = new StringBuilder();
+                        String line;
+                        while ((line = reader.readLine()) != null) {
+                            builder.append(line);
+                            if (isCancelled()) {
+                                result.errorCode = ERROR_CANCEL;
+                                return result;
+                            }
+                        }
+
+                        // gets result as JSON
+                        Log.d(TAG, "parses result as JSON");
+                        result.json = new JSONObject(builder.toString());
+
+                        // gets cookie, too
+                        Map<String, List<String>> header = connection.getHeaderFields();
+                        result.cookie = header.get("Set-Cookie");
+                        return result;
+                    }
+                    else {
+                        result.errorCode = ERROR_RESPONSE;
+                        Log.d(TAG, "response error is " + response);
+                        return result;
+                    }
+                }
+                catch (ProtocolException e) {
+                    e.printStackTrace();
+                    result.errorCode = ERROR_UNREACH;
+                }
+                finally {
+                    connection.disconnect();
+                }
+            }
+            catch (JSONException e) {
+                e.printStackTrace();
+                result.errorCode = ERROR_JSON;
+            }
+            catch (ConnectException e) {
+                e.printStackTrace();
+                result.errorCode = ERROR_UNREACH;
+            }
+            catch (IOException e) {
+                e.printStackTrace();
+                result.errorCode = ERROR_TIMEOUT;
+            }
+            if (isCancelled()) {
+                result.errorCode = ERROR_CANCEL;
+            }
+            return result;
         }
-    }
 
-    /**
-     * Cancels when sending.
-     */
-    public boolean cancel() {
-        if (isStarted) {
-            isStarted = false;
-            isCancelled = true;
-            return true;
+        @Override
+        protected void onPostExecute(Result result) {
+            Log.d(TAG, "HTTP return the result errorCode: " + result.errorCode);
+            asyncTask = null;
+            if (listener != null)
+                listener.finish(result);
         }
-        else
-            return false;
-    }
 
-    public String getUrl() {
-        return url;
-    }
+        @Override
+        protected void onCancelled(Result result) {
+            Log.d(TAG, "HTTP has been cancelled");
+            asyncTask = null;
+            if (listener != null)
+                listener.finish(result);
+        }
 
-    public String getRequest() {
-        return request;
-    }
-
-    public boolean isStarted() {
-        return isStarted;
-    }
-
-    public boolean isCancelled() {
-        return isCancelled;
-    }
-
-    public int getReadTimeout() {
-        return readTimeout;
-    }
-
-    public void setReadTimeout(int readTimeout) {
-        this.readTimeout = readTimeout;
-    }
-
-    public int getConnectTimeout() {
-        return connectTimeout;
-    }
-
-    public void setConnectTimeout(int connectTimeout) {
-        this.connectTimeout = connectTimeout;
     }
 
     public static String getErrorMessage(Context context, int code) {
@@ -303,9 +423,6 @@ public class HttpRestLite {
 
             case ERROR_TIMEOUT:
                 return context.getString(R.string.restlite_ERROR_TIMEOUT);
-
-            case ERROR_CANCEL:
-                return context.getString(R.string.restlite_ERROR_CANCEL);
 
             case ERROR_RESPONSE:
                 return context.getString(R.string.restlite_ERROR_RESPONSE);

@@ -52,8 +52,8 @@ public class SampleServerEditActivity extends AppCompatActivity {
 
     private ProgressDialog progress = null;
     private DialogInterface.OnCancelListener progressCancel = null;
-    private HttpRestLite rest = null;
     private HttpRestLite.ResultListener listener = null;
+    private HttpRestLite rest = null;
 
     private ImageView imageIcon = null;
     private EditText editName = null;
@@ -79,6 +79,18 @@ public class SampleServerEditActivity extends AppCompatActivity {
         if (actionBar != null)
             actionBar.setDisplayHomeAsUpEnabled(true);
 
+        progressCancel = new DialogInterface.OnCancelListener() {
+            @Override
+            public void onCancel(DialogInterface dialogInterface) {
+                if (rest != null) {
+                    Log.d(TAG, "REST is ok");
+                    rest.cancel();
+                }
+                else {
+                    Log.d(TAG, "REST is null!");
+                }
+            }
+        };
         listener = new HttpRestLite.ResultListener() {
             @Override
             public void finish(final HttpRestLite.Result result) {
@@ -90,14 +102,7 @@ public class SampleServerEditActivity extends AppCompatActivity {
                 });
             }
         };
-        progressCancel = new DialogInterface.OnCancelListener() {
-            @Override
-            public void onCancel(DialogInterface dialogInterface) {
-                if (rest != null) {
-                    rest.cancel();
-                }
-            }
-        };
+        rest = new HttpRestLite();
 
         imageIcon = (ImageView) findViewById(R.id.image_icon);
         editName = (EditText) findViewById(R.id.edit_name);

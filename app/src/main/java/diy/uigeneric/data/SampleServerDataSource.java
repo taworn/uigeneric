@@ -35,6 +35,7 @@ public class SampleServerDataSource {
 
     // base server address
     private String serverAddress;
+    private HttpRestLite rest;
 
     /**
      * Constructs to manage table.
@@ -44,14 +45,14 @@ public class SampleServerDataSource {
         serverAddress = pref.getString("server", "");
         if (serverAddress.length() > 0 && serverAddress.charAt(serverAddress.length() - 1) != '/')
             serverAddress = serverAddress.concat("/");
+        rest = new HttpRestLite();
     }
 
     /**
      * Gets data.
      */
     public HttpRestLite.Result get(long id, @NonNull SampleHolder holder) {
-        HttpRestLite rest = new HttpRestLite(serverAddress + "api/sample/get.php/" + id, "GET");
-        HttpRestLite.Result result = rest.execute(null, null);
+        HttpRestLite.Result result = rest.execute(serverAddress + "api/sample/get.php/" + id, "GET", null, null);
         if (result.errorCode == 0) {
             holder.sample = loading(result);
         }
@@ -61,9 +62,8 @@ public class SampleServerDataSource {
     /**
      * Gets data async.
      */
-    public HttpRestLite get(long id, @NonNull final ResultListener listener) {
-        HttpRestLite rest = new HttpRestLite(serverAddress + "api/sample/get.php/" + id, "GET");
-        rest.execute(null, null, new HttpRestLite.ResultListener() {
+    public void get(long id, @NonNull final ResultListener listener) {
+        rest.execute(serverAddress + "api/sample/get.php/" + id, "GET", null, null, new HttpRestLite.ResultListener() {
             @Override
             public void finish(HttpRestLite.Result result) {
                 SampleHolder holder = new SampleHolder();
@@ -73,7 +73,6 @@ public class SampleServerDataSource {
                 listener.finish(result, holder);
             }
         });
-        return rest;
     }
 
     /**
@@ -84,20 +83,18 @@ public class SampleServerDataSource {
         params.put("name", sample.getName());
         params.put("detail", sample.getDetail());
         params.put("category", String.valueOf(sample.getCategory()));
-        HttpRestLite rest = new HttpRestLite(serverAddress + "api/sample/add.php", "POST");
-        return rest.execute(params, null);
+        return rest.execute(serverAddress + "api/sample/add.php", "POST", params, null);
     }
 
     /**
      * Adds data async.
      */
-    public HttpRestLite add(@NonNull Sample sample, @NonNull final ResultListener listener) {
+    public void add(@NonNull Sample sample, @NonNull final ResultListener listener) {
         Map<String, String> params = new HashMap<>();
         params.put("name", sample.getName());
         params.put("detail", sample.getDetail());
         params.put("category", String.valueOf(sample.getCategory()));
-        HttpRestLite rest = new HttpRestLite(serverAddress + "api/sample/add.php", "POST");
-        rest.execute(params, null, new HttpRestLite.ResultListener() {
+        rest.execute(serverAddress + "api/sample/add.php", "POST", params, null, new HttpRestLite.ResultListener() {
             @Override
             public void finish(HttpRestLite.Result result) {
                 SampleHolder holder = new SampleHolder();
@@ -107,7 +104,6 @@ public class SampleServerDataSource {
                 listener.finish(result, holder);
             }
         });
-        return rest;
     }
 
     /**
@@ -118,20 +114,18 @@ public class SampleServerDataSource {
         params.put("name", sample.getName());
         params.put("detail", sample.getDetail());
         params.put("category", String.valueOf(sample.getCategory()));
-        HttpRestLite rest = new HttpRestLite(serverAddress + "api/sample/edit.php/" + sample.getId(), "PUT");
-        return rest.execute(params, null);
+        return rest.execute(serverAddress + "api/sample/edit.php/" + sample.getId(), "PUT", params, null);
     }
 
     /**
      * Edits data async.
      */
-    public HttpRestLite edit(@NonNull Sample sample, @NonNull final ResultListener listener) {
+    public void edit(@NonNull Sample sample, @NonNull final ResultListener listener) {
         Map<String, String> params = new HashMap<>();
         params.put("name", sample.getName());
         params.put("detail", sample.getDetail());
         params.put("category", String.valueOf(sample.getCategory()));
-        HttpRestLite rest = new HttpRestLite(serverAddress + "api/sample/edit.php/" + sample.getId(), "PUT");
-        rest.execute(params, null, new HttpRestLite.ResultListener() {
+        rest.execute(serverAddress + "api/sample/edit.php/" + sample.getId(), "PUT", params, null, new HttpRestLite.ResultListener() {
             @Override
             public void finish(HttpRestLite.Result result) {
                 SampleHolder holder = new SampleHolder();
@@ -141,7 +135,6 @@ public class SampleServerDataSource {
                 listener.finish(result, holder);
             }
         });
-        return rest;
     }
 
     private Sample loading(HttpRestLite.Result result) {

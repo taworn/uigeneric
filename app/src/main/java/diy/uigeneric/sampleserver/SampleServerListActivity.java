@@ -52,9 +52,10 @@ public class SampleServerListActivity extends AppCompatActivity implements Navig
     private static final int REQUEST_ADD = 100;
     private static final int REQUEST_VIEW = 101;
 
+    private ActionBar actionBar = null;
+
     private ProgressDialog progress = null;
     private DialogInterface.OnCancelListener progressCancel = null;
-    private HttpRestLite rest = null;
     private HttpRestLite.ResultListener listener = null;
     private boolean loading = false;
 
@@ -65,7 +66,6 @@ public class SampleServerListActivity extends AppCompatActivity implements Navig
 
     private ActionMode actionMode = null;
     private ActionMode.Callback actionModeCallback = null;
-    private ActionBar actionBar = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,8 +74,16 @@ public class SampleServerListActivity extends AppCompatActivity implements Navig
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         actionBar = getSupportActionBar();
+        if (actionBar != null)
+            actionBar.setTitle(R.string.sample_list_title_data);
 
-        // initializes callback
+        // initializes callbacks
+        progressCancel = new DialogInterface.OnCancelListener() {
+            @Override
+            public void onCancel(DialogInterface dialogInterface) {
+                list.cancel();
+            }
+        };
         listener = new HttpRestLite.ResultListener() {
             @Override
             public void finish(final HttpRestLite.Result result) {
@@ -85,14 +93,6 @@ public class SampleServerListActivity extends AppCompatActivity implements Navig
                         commonResultTask(result);
                     }
                 });
-            }
-        };
-        progressCancel = new DialogInterface.OnCancelListener() {
-            @Override
-            public void onCancel(DialogInterface dialogInterface) {
-                if (rest != null) {
-                    rest.cancel();
-                }
             }
         };
 
@@ -121,7 +121,7 @@ public class SampleServerListActivity extends AppCompatActivity implements Navig
         list = new SampleServerIndirectList(this);
         if (savedInstanceState == null) {
             openProgressDialog();
-            rest = list.load(false, Sample.CATEGORY_DATA, null, SampleServerIndirectList.SORT_AS_IS, false, listener);
+            list.load(false, Sample.CATEGORY_DATA, null, SampleServerIndirectList.SORT_AS_IS, false, listener);
         }
         listAdapter = new SampleServerListAdapter(this, list, new SampleServerListAdapter.OnItemClickListener() {
             @Override
@@ -189,14 +189,12 @@ public class SampleServerListActivity extends AppCompatActivity implements Navig
                 cancelListSelection();
             }
         };
-        actionBar.setTitle(R.string.sample_list_title_data);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        if (rest != null)
-            rest.cancel();
+        list.cancel();
         if (progress != null)
             progress.cancel();
     }
@@ -242,7 +240,7 @@ public class SampleServerListActivity extends AppCompatActivity implements Navig
                 @Override
                 public boolean onClose() {
                     openProgressDialog();
-                    rest = list.search(null, listener);
+                    list.search(null, listener);
                     Log.d(TAG, "search stop");
                     return false;
                 }
@@ -302,7 +300,7 @@ public class SampleServerListActivity extends AppCompatActivity implements Navig
                     .setPositiveButton(R.string.sample_remove_all_dialog_positive, new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int id) {
                             openProgressDialog();
-                            rest = list.removeAll(new HttpRestLite.ResultListener() {
+                            list.removeAll(new HttpRestLite.ResultListener() {
                                 @Override
                                 public void finish(final HttpRestLite.Result result) {
                                     runOnUiThread(new Runnable() {
@@ -333,56 +331,56 @@ public class SampleServerListActivity extends AppCompatActivity implements Navig
             cancelListSelection();
             actionBar.setTitle(R.string.sample_list_title_data);
             openProgressDialog();
-            rest = list.load(false, Sample.CATEGORY_DATA, listener);
+            list.load(false, Sample.CATEGORY_DATA, listener);
             Log.d(TAG, "load category: data");
         }
         else if (id == R.id.nav_priority_data) {
             cancelListSelection();
             actionBar.setTitle(R.string.sample_list_title_priority_data);
             openProgressDialog();
-            rest = list.load(false, Sample.CATEGORY_PRIORITY_DATA, listener);
+            list.load(false, Sample.CATEGORY_PRIORITY_DATA, listener);
             Log.d(TAG, "load category: priority data");
         }
         else if (id == R.id.nav_important) {
             cancelListSelection();
             actionBar.setTitle(R.string.sample_list_title_important);
             openProgressDialog();
-            rest = list.load(false, Sample.CATEGORY_IMPORTANT, listener);
+            list.load(false, Sample.CATEGORY_IMPORTANT, listener);
             Log.d(TAG, "load category: important");
         }
         else if (id == R.id.nav_sent) {
             cancelListSelection();
             actionBar.setTitle(R.string.sample_list_title_sent);
             openProgressDialog();
-            rest = list.load(false, Sample.CATEGORY_SENT, listener);
+            list.load(false, Sample.CATEGORY_SENT, listener);
             Log.d(TAG, "load category: sent");
         }
         else if (id == R.id.nav_draft) {
             cancelListSelection();
             actionBar.setTitle(R.string.sample_list_title_draft);
             openProgressDialog();
-            rest = list.load(false, Sample.CATEGORY_DRAFTS, listener);
+            list.load(false, Sample.CATEGORY_DRAFTS, listener);
             Log.d(TAG, "load category: draft");
         }
         else if (id == R.id.nav_archived) {
             cancelListSelection();
             actionBar.setTitle(R.string.sample_list_title_archived);
             openProgressDialog();
-            rest = list.load(false, Sample.CATEGORY_ARCHIVED, listener);
+            list.load(false, Sample.CATEGORY_ARCHIVED, listener);
             Log.d(TAG, "load category: archived");
         }
         else if (id == R.id.nav_all) {
             cancelListSelection();
             actionBar.setTitle(R.string.sample_list_title_all);
             openProgressDialog();
-            rest = list.load(false, null, listener);
+            list.load(false, null, listener);
             Log.d(TAG, "load all categories");
         }
         else if (id == R.id.nav_trash) {
             cancelListSelection();
             actionBar.setTitle(R.string.sample_list_title_trash);
             openProgressDialog();
-            rest = list.load(true, null, listener);
+            list.load(true, null, listener);
             Log.d(TAG, "load on trash");
         }
 
@@ -396,22 +394,44 @@ public class SampleServerListActivity extends AppCompatActivity implements Navig
         switch (requestCode) {
             case REQUEST_ADD:
                 if (resultCode == Activity.RESULT_OK) {
-                    if (!loading) {
-                        openProgressDialog();
-                        rest = list.reload(listener);
+                    long id = resultIntent.getLongExtra("data.id", 0);
+                    if (id != 0) {
+                        if (list.find(id) < 0) {
+                            /*
+                            SampleDataSource source = new SampleDataSource(this);
+                            source.open();
+                            list.add(source.get(id));
+                            source.close();
+                            listAdapter.notifyDataSetChanged();
+                            */
+                        }
+                        cancelListSelection();
                     }
                 }
                 break;
 
             case REQUEST_VIEW:
                 if (resultCode == Activity.RESULT_OK) {
-                    if (!loading) {
-                        boolean changed = resultIntent.getBooleanExtra("data.changed", false);
-                        boolean deleted = resultIntent.getBooleanExtra("data.deleted", false);
-                        if (changed || deleted) {
+                    long id = resultIntent.getLongExtra("data.id", 0);
+                    boolean changed = resultIntent.getBooleanExtra("data.changed", false);
+                    boolean deleted = resultIntent.getBooleanExtra("data.deleted", false);
+                    if (changed || deleted) {
+                        if (deleted) {
                             openProgressDialog();
-                            rest = list.reload(listener);
+                            list.reload(listener);
                         }
+                        else {
+                            int i = list.find(id);
+                            if (i >= 0) {
+                                /*
+                                SampleDataSource source = new SampleDataSource(this);
+                                source.open();
+                                list.edit(i, source.get(id));
+                                source.close();
+                                */
+                            }
+                        }
+                        cancelListSelection();
                     }
                 }
                 break;
@@ -450,7 +470,7 @@ public class SampleServerListActivity extends AppCompatActivity implements Navig
         boolean sortReverse = savedInstanceState.getBoolean("data.sortReverse");
         actionBar.setTitle(title);
         openProgressDialog();
-        rest = list.load(deleted, category, query, sortBy, sortReverse, listener);
+        list.load(deleted, category, query, sortBy, sortReverse, listener);
     }
 
     @Override
@@ -473,7 +493,7 @@ public class SampleServerListActivity extends AppCompatActivity implements Navig
             String query = intent.getStringExtra(SearchManager.QUERY).trim();
             Log.d(TAG, "search type: " + query);
             openProgressDialog();
-            rest = list.search(query, listener);
+            list.search(query, listener);
         }
     }
 
@@ -482,7 +502,7 @@ public class SampleServerListActivity extends AppCompatActivity implements Navig
             final List<Long> idList = listAdapter.getSelectedIdList();
             if (idList.size() > 0) {
                 openProgressDialog();
-                rest = list.delete(idList, new HttpRestLite.ResultListener() {
+                list.delete(idList, new HttpRestLite.ResultListener() {
                     @Override
                     public void finish(final HttpRestLite.Result result) {
                         runOnUiThread(new Runnable() {
@@ -499,7 +519,7 @@ public class SampleServerListActivity extends AppCompatActivity implements Navig
                                                 @Override
                                                 public void onClick(View view) {
                                                     openProgressDialog();
-                                                    rest = list.restore(idList, new HttpRestLite.ResultListener() {
+                                                    list.restore(idList, new HttpRestLite.ResultListener() {
                                                         @Override
                                                         public void finish(final HttpRestLite.Result result) {
                                                             runOnUiThread(new Runnable() {
@@ -533,7 +553,7 @@ public class SampleServerListActivity extends AppCompatActivity implements Navig
             final List<Long> idList = listAdapter.getSelectedIdList();
             if (idList.size() > 0) {
                 openProgressDialog();
-                rest = list.restore(idList, new HttpRestLite.ResultListener() {
+                list.restore(idList, new HttpRestLite.ResultListener() {
                     @Override
                     public void finish(final HttpRestLite.Result result) {
                         runOnUiThread(new Runnable() {
@@ -565,7 +585,7 @@ public class SampleServerListActivity extends AppCompatActivity implements Navig
                             final List<Long> idList = listAdapter.getSelectedIdList();
                             if (idList.size() > 0) {
                                 openProgressDialog();
-                                rest = list.remove(idList, new HttpRestLite.ResultListener() {
+                                list.remove(idList, new HttpRestLite.ResultListener() {
                                     @Override
                                     public void finish(final HttpRestLite.Result result) {
                                         runOnUiThread(new Runnable() {
@@ -627,8 +647,11 @@ public class SampleServerListActivity extends AppCompatActivity implements Navig
     private void commonResultTask(HttpRestLite.Result result) {
         progress.dismiss();
         loading = false;
-        if (result.errorCode != 0) {
-            String errorMessage = null;
+        if (result.errorCode == HttpRestLite.ERROR_CANCEL) {
+            Log.d(TAG, "user cancelled HTTP REST");
+        }
+        else if (result.errorCode != 0) {
+            String errorMessage;
             if (result.errorCode == HttpRestLite.ERROR_CUSTOM) {
                 if (result.json.has("errors")) {
                     try {
