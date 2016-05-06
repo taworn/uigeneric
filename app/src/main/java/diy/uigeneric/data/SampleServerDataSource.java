@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.preference.PreferenceManager;
 import android.util.Base64;
 import android.util.Log;
@@ -23,7 +24,7 @@ public class SampleServerDataSource {
 
     private static final String TAG = SampleServerDataSource.class.getSimpleName();
 
-    public class SampleHolder {
+    public static class SampleHolder {
         public Sample sample = null;
     }
 
@@ -53,93 +54,46 @@ public class SampleServerDataSource {
      * Gets data.
      */
     public HttpRestLite.Result get(long id, @NonNull SampleHolder holder) {
-        HttpRestLite.Result result = rest.execute(serverAddress + "api/sample/get.php/" + id, "GET", null, null);
-        if (result.errorCode == 0) {
-            holder.sample = loading(result);
-        }
-        return result;
+        return call(serverAddress + "api/sample/get.php/" + id, "GET", null, holder);
     }
 
     /**
      * Gets data async.
      */
-    public void get(long id, @NonNull final ResultListener listener) {
-        rest.execute(serverAddress + "api/sample/get.php/" + id, "GET", null, null, new HttpRestLite.ResultListener() {
-            @Override
-            public void finish(HttpRestLite.Result result) {
-                SampleHolder holder = new SampleHolder();
-                if (result.errorCode == 0) {
-                    holder.sample = loading(result);
-                }
-                listener.finish(result, holder);
-            }
-        });
+    public void get(long id, @NonNull ResultListener listener) {
+        call(serverAddress + "api/sample/get.php/" + id, "GET", null, listener);
     }
 
     /**
      * Adds data.
      */
-    public HttpRestLite.Result add(@NonNull Sample sample) {
-        Map<String, String> params = new HashMap<>();
-        params.put("icon", iconToString(sample.getIcon()));
-        params.put("name", sample.getName());
-        params.put("detail", sample.getDetail());
-        params.put("category", String.valueOf(sample.getCategory()));
-        return rest.execute(serverAddress + "api/sample/add.php", "POST", params, null);
+    public HttpRestLite.Result add(@NonNull Sample sample, @NonNull SampleHolder holder) {
+        Map<String, String> params = collectParameters(sample);
+        return call(serverAddress + "api/sample/add.php", "POST", params, holder);
     }
 
     /**
      * Adds data async.
      */
     public void add(@NonNull Sample sample, @NonNull final ResultListener listener) {
-        Map<String, String> params = new HashMap<>();
-        params.put("icon", iconToString(sample.getIcon()));
-        params.put("name", sample.getName());
-        params.put("detail", sample.getDetail());
-        params.put("category", String.valueOf(sample.getCategory()));
-        rest.execute(serverAddress + "api/sample/add.php", "POST", params, null, new HttpRestLite.ResultListener() {
-            @Override
-            public void finish(HttpRestLite.Result result) {
-                SampleHolder holder = new SampleHolder();
-                if (result.errorCode == 0) {
-                    holder.sample = loading(result);
-                }
-                listener.finish(result, holder);
-            }
-        });
+        Map<String, String> params = collectParameters(sample);
+        call(serverAddress + "api/sample/add.php", "POST", params, listener);
     }
 
     /**
      * Edits data.
      */
-    public HttpRestLite.Result edit(@NonNull Sample sample) {
-        Map<String, String> params = new HashMap<>();
-        params.put("icon", iconToString(sample.getIcon()));
-        params.put("name", sample.getName());
-        params.put("detail", sample.getDetail());
-        params.put("category", String.valueOf(sample.getCategory()));
-        return rest.execute(serverAddress + "api/sample/edit.php/" + sample.getId(), "PUT", params, null);
+    public HttpRestLite.Result edit(@NonNull Sample sample, @NonNull SampleHolder holder) {
+        Map<String, String> params = collectParameters(sample);
+        return call(serverAddress + "api/sample/edit.php/" + sample.getId(), "PUT", params, holder);
     }
 
     /**
      * Edits data async.
      */
-    public void edit(@NonNull Sample sample, @NonNull final ResultListener listener) {
-        Map<String, String> params = new HashMap<>();
-        params.put("icon", iconToString(sample.getIcon()));
-        params.put("name", sample.getName());
-        params.put("detail", sample.getDetail());
-        params.put("category", String.valueOf(sample.getCategory()));
-        rest.execute(serverAddress + "api/sample/edit.php/" + sample.getId(), "PUT", params, null, new HttpRestLite.ResultListener() {
-            @Override
-            public void finish(HttpRestLite.Result result) {
-                SampleHolder holder = new SampleHolder();
-                if (result.errorCode == 0) {
-                    holder.sample = loading(result);
-                }
-                listener.finish(result, holder);
-            }
-        });
+    public void edit(@NonNull Sample sample, @NonNull ResultListener listener) {
+        Map<String, String> params = collectParameters(sample);
+        call(serverAddress + "api/sample/edit.php/" + sample.getId(), "PUT", params, listener);
     }
 
     /**
@@ -156,7 +110,39 @@ public class SampleServerDataSource {
 
     public static String iconToString(Bitmap icon) {
         byte[] byteArray = SampleDataSource.blobFromIcon(icon);
-        return Base64.encodeToString(byteArray, Base64.DEFAULT);
+        return byteArray != null ? Base64.encodeToString(byteArray, Base64.DEFAULT) : "";
+    }
+
+    private Map<String, String> collectParameters(@Nullable Sample sample) {
+        Map<String, String> params = new HashMap<>();
+        if (sample != null) {
+            params.put("icon", iconToString(sample.getIcon()));
+            params.put("name", sample.getName());
+            params.put("detail", sample.getDetail());
+            params.put("category", String.valueOf(sample.getCategory()));
+        }
+        return params;
+    }
+
+    private HttpRestLite.Result call(@NonNull String url, @NonNull String request, @Nullable Map<String, String> params, @NonNull SampleHolder holder) {
+        HttpRestLite.Result result = rest.execute(url, request, params, null);
+        if (result.errorCode == 0) {
+            holder.sample = loading(result);
+        }
+        return result;
+    }
+
+    private void call(@NonNull String url, @NonNull String request, @Nullable Map<String, String> params, @NonNull final ResultListener listener) {
+        rest.execute(url, request, params, null, new HttpRestLite.ResultListener() {
+            @Override
+            public void finish(HttpRestLite.Result result) {
+                SampleHolder holder = new SampleHolder();
+                if (result.errorCode == 0) {
+                    holder.sample = loading(result);
+                }
+                listener.finish(result, holder);
+            }
+        });
     }
 
     private Sample loading(HttpRestLite.Result result) {
