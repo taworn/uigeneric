@@ -5,6 +5,7 @@ import android.app.SearchManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -16,6 +17,7 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.preference.PreferenceManager;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
@@ -28,6 +30,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.TextView;
 
 import java.util.List;
 import java.util.Locale;
@@ -93,6 +96,7 @@ public class SampleListActivity extends AppCompatActivity implements NavigationV
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         if (navigationView != null)
             navigationView.setNavigationItemSelectedListener(this);
+        setNavigationHeader(navigationView);
 
         // initializes RecycledView and its data
         list = new SampleIndirectList();
@@ -555,6 +559,23 @@ public class SampleListActivity extends AppCompatActivity implements NavigationV
             listAdapter.clearSelections();
             actionMode.finish();
             actionMode = null;
+        }
+    }
+
+    private void setNavigationHeader(NavigationView navigationView) {
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+        View headerLayout = navigationView.getHeaderView(0);
+
+        TextView textNavHeader = (TextView) headerLayout.findViewById(R.id.text_nav_header);
+        if (textNavHeader != null) {
+            String username = sharedPref.getString("username", "");
+            textNavHeader.setText(username);
+        }
+
+        TextView textNavSubHeader = (TextView) headerLayout.findViewById(R.id.text_nav_sub_header);
+        if (textNavSubHeader != null) {
+            String email = sharedPref.getString("email", "");
+            textNavSubHeader.setText(email);
         }
     }
 

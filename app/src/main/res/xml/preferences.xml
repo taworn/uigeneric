@@ -17,7 +17,7 @@
         android:title="Server address or IP"/>
 
     <EditTextPreference
-        android:defaultValue="Oo"
+        android:defaultValue="UI Generic"
         android:key="username"
         android:summary="Please provide your profile name."
         android:title="Profile name"/>

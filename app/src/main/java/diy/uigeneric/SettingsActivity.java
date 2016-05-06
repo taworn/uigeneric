@@ -27,15 +27,15 @@ public class SettingsActivity extends AppCompatActivity {
                 .replace(R.id.content, new SettingsFragment())
                 .commit();
 
-        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
-        String database = sharedPref.getString("database", "0");
-        String server = sharedPref.getString("server", "");
-        String username = sharedPref.getString("username", "");
-        String email = sharedPref.getString("email", "");
-        Log.d(TAG, "database: " + database);
-        Log.d(TAG, "server: " + server);
-        Log.d(TAG, "username: " + username);
-        Log.d(TAG, "email: " + email);
+        Log.d(TAG, "onCreate settings");
+        writeLog();
+    }
+
+    @Override
+    protected void onDestroy() {
+        Log.d(TAG, "onDestroy settings");
+        writeLog();
+        super.onDestroy();
     }
 
     @Override
@@ -46,6 +46,18 @@ public class SettingsActivity extends AppCompatActivity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void writeLog() {
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+        String database = sharedPref.getString("database", "0");
+        String server = sharedPref.getString("server", "");
+        String username = sharedPref.getString("username", "");
+        String email = sharedPref.getString("email", "");
+        Log.d(TAG, "database: " + database);
+        Log.d(TAG, "server: " + server);
+        Log.d(TAG, "username: " + username);
+        Log.d(TAG, "email: " + email);
     }
 
 }
