@@ -611,6 +611,23 @@ public class SampleServerListActivity extends AppCompatActivity implements Navig
         }
     }
 
+    private void setNavigationHeader(NavigationView navigationView) {
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+        View headerLayout = navigationView.getHeaderView(0);
+
+        TextView textNavHeader = (TextView) headerLayout.findViewById(R.id.text_nav_header);
+        if (textNavHeader != null) {
+            String username = sharedPref.getString("username", "");
+            textNavHeader.setText(username);
+        }
+
+        TextView textNavSubHeader = (TextView) headerLayout.findViewById(R.id.text_nav_sub_header);
+        if (textNavSubHeader != null) {
+            String email = sharedPref.getString("email", "");
+            textNavSubHeader.setText(email);
+        }
+    }
+
     private void openProgressDialog() {
         loading = true;
         progress = new ProgressDialog(this);
@@ -658,23 +675,6 @@ public class SampleServerListActivity extends AppCompatActivity implements Navig
         if (result.errorCode == 0) {
             listAdapter.notifyDataSetChanged();
             cancelListSelection();
-        }
-    }
-
-    private void setNavigationHeader(NavigationView navigationView) {
-        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
-        View headerLayout = navigationView.getHeaderView(0);
-
-        TextView textNavHeader = (TextView) headerLayout.findViewById(R.id.text_nav_header);
-        if (textNavHeader != null) {
-            String username = sharedPref.getString("username", "");
-            textNavHeader.setText(username);
-        }
-
-        TextView textNavSubHeader = (TextView) headerLayout.findViewById(R.id.text_nav_sub_header);
-        if (textNavSubHeader != null) {
-            String email = sharedPref.getString("email", "");
-            textNavSubHeader.setText(email);
         }
     }
 
