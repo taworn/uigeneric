@@ -2,7 +2,7 @@
 }
 
 .breadcrumb a {
-	color: #00c;
+	color: #0000cc;
 }
 
 .breadcrumb a:link {
@@ -12,6 +12,6 @@
 .breadcrumb .here {
 	font-size: 150%;
 	font-weight: bold;
-	color: #000;
+	color: #000000;
 }
 

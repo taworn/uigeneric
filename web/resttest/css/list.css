@@ -1,11 +1,11 @@
 table.list {
 	border-collapse: collapse;
-	margin: 20px 0 10px;
+	margin: 20px 0 15px;
 }
 
 table.list > thead th {
-	background: #369;
-	color: #fff;
+	background: #336699;
+	color: #ffffff;
 	padding: 8px 10px;
 }
 
@@ -23,5 +23,9 @@ table.list > tbody td:nth-child(3) {
 
 table.list > tbody td:nth-child(4) {
 	text-align: center;
+}
+
+table.list .summary {
+	color: #999999;
 }
 

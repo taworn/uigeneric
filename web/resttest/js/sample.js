@@ -36,6 +36,7 @@ $(function() {
 							var tr = $(document.createElement('tr'));
 							loadData(item, tr);
 							tbody.append(tr);
+							summary();
 							console.log("add data is ok");
 						}
 						else {
@@ -82,6 +83,7 @@ $(function() {
 						tbody.append(tr);
 						i++;
 					}
+					summary();
 					console.log("delete data is ok");
 				}
 				else {
@@ -113,6 +115,7 @@ $(function() {
 									var item = data.item;
 									tr.empty();
 									loadData(item, tr);
+									summary();
 									console.log("edit data is ok");
 								}
 								else {
@@ -193,12 +196,19 @@ $(function() {
 					tbody.append(tr);
 					i++;
 				}
+				summary();
 				console.log("refresh data ok");
 			}
 			else {
 				handleError(data);
 			}
 		});
+	}
+
+	function summary() {
+		var list = $('#list tbody tr');
+		var count = list.length;
+		$('#list .summary').html(count + " record(s)");
 	}
 
 	refresh();

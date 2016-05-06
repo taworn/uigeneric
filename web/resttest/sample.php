@@ -42,6 +42,9 @@ session_start();
 				</thead>
 				<tbody>
 				</tbody>
+				<tfoot>
+					<td colspan="4" class="summary"></td>
+				</tfoot>
 			</table>
 
 			<button type="submit" id="add">Add</button>
