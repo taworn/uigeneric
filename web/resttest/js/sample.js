@@ -8,6 +8,14 @@ $(function() {
 			alert("Server Error");
 	}
 
+	$('[name=toggle]').change(function () {
+		var checked = $(this).prop('checked');
+		var list = $('#list tbody tr input[type=checkbox]');
+		for (var i = 0; i < list.length; i++) {
+			$(list[i]).prop('checked', checked);
+		}
+	});
+
 	// adds
 	$('#add').click(function() {
 		var form = $('#form');
@@ -159,7 +167,7 @@ $(function() {
 		td = $(document.createElement('td'));
 		if (item.deleted == null)
 			td.text(item.deleted);
-		else 
+		else
 			td.text(item.deleted.toString());
 		td.on('click', {id: item.id}, click);
 		tr.append(td);

@@ -35,7 +35,7 @@ session_start();
 		<form id="form-list" class="form">
 			<table id="list" class="list">
 				<thead>
-					<th>&nbsp;</th>
+					<th><input type="checkbox" name="toggle" value="1"/></th>
 					<th>Name</th>
 					<th>Category</th>
 					<th>Deleted</th>
