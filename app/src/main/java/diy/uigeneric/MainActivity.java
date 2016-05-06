@@ -33,9 +33,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onAboutClick(View view) {
+        String message = getResources().getString(R.string.about_dialog_message) + " " + getResources().getString(R.string.version);
         new AlertDialog.Builder(this)
+                .setIcon(R.drawable.ic_android_black_24dp)
                 .setTitle(R.string.about_dialog_title)
-                .setMessage(R.string.about_dialog_message)
+                .setMessage(message)
                 .setPositiveButton(R.string.about_dialog_positive, null)
                 .show();
     }
