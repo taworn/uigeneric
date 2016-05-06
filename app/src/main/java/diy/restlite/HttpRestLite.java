@@ -33,7 +33,7 @@ public class HttpRestLite {
     private static final String TAG = HttpRestLite.class.getSimpleName();
 
     private int connectTimeout = 15000;      // connection wait timeout
-    private int readTimeout = 10000;         // no read data timeout
+    private int readTimeout = 15000;         // no read data timeout
     private HttpAsyncTask asyncTask = null;  // HTTP async task
 
     // transfer data in async execute()
@@ -348,10 +348,10 @@ public class HttpRestLite {
                         String line;
                         while ((line = reader.readLine()) != null) {
                             builder.append(line);
-                            if (isCancelled()) {
-                                result.errorCode = ERROR_CANCEL;
-                                return result;
-                            }
+                        }
+                        if (isCancelled()) {
+                            result.errorCode = ERROR_CANCEL;
+                            return result;
                         }
 
                         // gets result as JSON

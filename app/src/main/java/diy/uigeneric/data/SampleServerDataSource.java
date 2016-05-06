@@ -2,8 +2,10 @@ package diy.uigeneric.data;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
 import android.support.annotation.NonNull;
 import android.support.v7.preference.PreferenceManager;
+import android.util.Base64;
 import android.util.Log;
 
 import org.json.JSONException;
@@ -79,6 +81,7 @@ public class SampleServerDataSource {
      */
     public HttpRestLite.Result add(@NonNull Sample sample) {
         Map<String, String> params = new HashMap<>();
+        params.put("icon", iconToString(sample.getIcon()));
         params.put("name", sample.getName());
         params.put("detail", sample.getDetail());
         params.put("category", String.valueOf(sample.getCategory()));
@@ -90,6 +93,7 @@ public class SampleServerDataSource {
      */
     public void add(@NonNull Sample sample, @NonNull final ResultListener listener) {
         Map<String, String> params = new HashMap<>();
+        params.put("icon", iconToString(sample.getIcon()));
         params.put("name", sample.getName());
         params.put("detail", sample.getDetail());
         params.put("category", String.valueOf(sample.getCategory()));
@@ -110,6 +114,7 @@ public class SampleServerDataSource {
      */
     public HttpRestLite.Result edit(@NonNull Sample sample) {
         Map<String, String> params = new HashMap<>();
+        params.put("icon", iconToString(sample.getIcon()));
         params.put("name", sample.getName());
         params.put("detail", sample.getDetail());
         params.put("category", String.valueOf(sample.getCategory()));
@@ -121,6 +126,7 @@ public class SampleServerDataSource {
      */
     public void edit(@NonNull Sample sample, @NonNull final ResultListener listener) {
         Map<String, String> params = new HashMap<>();
+        params.put("icon", iconToString(sample.getIcon()));
         params.put("name", sample.getName());
         params.put("detail", sample.getDetail());
         params.put("category", String.valueOf(sample.getCategory()));
@@ -143,6 +149,16 @@ public class SampleServerDataSource {
         rest.cancel();
     }
 
+    public static Bitmap iconFromString(String string) {
+        byte[] byteArray = Base64.decode(string, Base64.DEFAULT);
+        return SampleDataSource.iconFromBlob(byteArray);
+    }
+
+    public static String iconToString(Bitmap icon) {
+        byte[] byteArray = SampleDataSource.blobFromIcon(icon);
+        return Base64.encodeToString(byteArray, Base64.DEFAULT);
+    }
+
     private Sample loading(HttpRestLite.Result result) {
         try {
             if (result.json.has("ok") && result.json.getBoolean("ok")) {
@@ -153,7 +169,9 @@ public class SampleServerDataSource {
                     sample = new Sample(item.getInt("id"));
                 else
                     sample = new Sample();
+                sample.setIcon(iconFromString(item.getString("icon")));
                 sample.setName(item.getString("name"));
+                sample.setDetail(item.getString("detail"));
                 sample.setCategory(item.getInt("category"));
                 sample.setDeleted(item.isNull("deleted") ? null : SampleDataSource.dateFromLong(item.getLong("deleted")));
                 Log.d(TAG, "data load item: " + sample.getId() + "/" + sample.getName());

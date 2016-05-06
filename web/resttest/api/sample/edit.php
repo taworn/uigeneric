@@ -33,10 +33,17 @@ if (strlen($in['name']) > 255)
 
 if (count($errors) <= 0) {
 	// updates data
-	$query = "UPDATE sample SET name = :name, category = :category WHERE id = :id";
+	$query = "UPDATE sample SET 
+		icon = :icon, 
+		name = :name, 
+		detail = :detail,
+		category = :category 
+		WHERE id = :id";
 	$stmt = $pdo->prepare($query);
 	$stmt->execute(array (
+		':icon' => $in['icon'],
 		':name' => $in['name'],
+		':detail' => $in['detail'],
 		':category' => $in['category'],
 		':id' =>$in['id'],
 	));

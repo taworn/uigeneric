@@ -310,7 +310,7 @@ public class SampleServerEditActivity extends AppCompatActivity {
     }
 
     private void save() {
-        if (!empty() && changed()) {
+        if (!empty()/* && changed()*/) {
             uiToData();
             if (item.getId() > 0) {
                 openProgressDialog();
@@ -335,6 +335,7 @@ public class SampleServerEditActivity extends AppCompatActivity {
                 source.add(item, new SampleServerDataSource.ResultListener() {
                     @Override
                     public void finish(HttpRestLite.Result result, @NonNull SampleServerDataSource.SampleHolder holder) {
+                        commonResultTask(result);
                         if (result.errorCode == 0) {
                             Log.d(TAG, "added item: " + item.getId() + "/" + item.getName());
                             iconChanged = false;

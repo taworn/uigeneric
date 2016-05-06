@@ -453,6 +453,7 @@ public class SampleServerIndirectList {
                 for (int i = 0; i < l; i++) {
                     JSONObject item = items.getJSONObject(i);
                     Sample sample = new Sample(item.getInt("id"));
+                    sample.setIcon(SampleServerDataSource.iconFromString(item.getString("icon")));
                     sample.setName(item.getString("name"));
                     sample.setCategory(item.getInt("category"));
                     sample.setDeleted(item.isNull("deleted") ? null : SampleDataSource.dateFromLong(item.getLong("deleted")));

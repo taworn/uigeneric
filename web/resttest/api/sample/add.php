@@ -23,9 +23,10 @@ if (strlen($in['name']) > 255)
 
 if (count($errors) <= 0) {
 	// adds data
-	$query = "INSERT INTO sample(id, name, detail, category) VALUES(NULL, :name, :detail, :category)";
+	$query = "INSERT INTO sample(id, icon, name, detail, category) VALUES(NULL, :icon, :name, :detail, :category)";
 	$stmt = $pdo->prepare($query);
 	$stmt->execute(array (
+		':icon' => $in['icon'],
 		':name' => $in['name'],
 		':detail' => $in['detail'],
 		':category' => $in['category'],
