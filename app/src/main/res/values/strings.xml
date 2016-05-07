@@ -39,6 +39,6 @@
     <string name="about_dialog_message">UI Generic, version</string>
     <string name="about_dialog_positive">Close</string>
 
-    <string name="version">2.0</string>
+    <string name="version">2.0.1a</string>
 
 </resources>

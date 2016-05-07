@@ -87,6 +87,7 @@ public class SampleServerListActivity extends AppCompatActivity implements Navig
             @Override
             public void onCancel(DialogInterface dialogInterface) {
                 list.cancel();
+                loading = false;
             }
         };
         listener = new HttpRestLite.ResultListener() {
@@ -413,22 +414,9 @@ public class SampleServerListActivity extends AppCompatActivity implements Navig
                     boolean changed = resultIntent.getBooleanExtra("data.changed", false);
                     boolean deleted = resultIntent.getBooleanExtra("data.deleted", false);
                     if (changed || deleted) {
-                        if (deleted && !loading) {
+                        if (!loading) {
                             openProgressDialog();
                             list.reload(listener);
-                        }
-                        else {
-                            final int i = list.find(id);
-                            if (i >= 0 && !loading) {
-                                SampleServerDataSource source = new SampleServerDataSource(this);
-                                source.get(id, new SampleServerDataSource.ResultListener() {
-                                    @Override
-                                    public void finish(HttpRestLite.Result result, @NonNull SampleServerDataSource.SampleHolder holder) {
-                                        list.edit(i, holder.sample);
-                                        listAdapter.notifyDataSetChanged();
-                                    }
-                                });
-                            }
                         }
                         cancelListSelection();
                     }

@@ -68,6 +68,7 @@ public class SampleServerViewActivity extends AppCompatActivity {
             @Override
             public void onCancel(DialogInterface dialogInterface) {
                 source.cancel();
+                loading = false;
             }
         };
         listener = new HttpRestLite.ResultListener() {
