@@ -134,12 +134,14 @@ public class SampleIndirectList {
      * Checks a sample is visible or not.
      */
     public boolean isVisible(Sample sample) {
-        boolean b = true;
-        if (deleted != null)
-            b = sample.getDeleted() == null == !deleted;
-        if (category != null)
+        boolean b;
+        if (deleted == null)
+            b = sample.getDeleted() == null;
+        else
+            b = sample.getDeleted() != null;
+        if (b && category != null)
             b = sample.getCategory() == category;
-        if (query != null)
+        if (b && query != null)
             b = sample.getName().contains(query);
         return b;
     }
@@ -158,11 +160,13 @@ public class SampleIndirectList {
     /**
      * Edits a sample.
      */
-    public void edit(int i, Sample sample) {
+    public void edit(@NonNull Context context, int i, Sample sample) {
         if (isVisible(sample)) {
             list.set(indexList.get(i), sample);
             sort(sortBy, sortReverse);
         }
+        else
+            reload(context);
     }
 
     /**
