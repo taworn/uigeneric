@@ -389,7 +389,8 @@ public class SampleListActivity extends AppCompatActivity implements NavigationV
                             if (i >= 0) {
                                 SampleDataSource source = new SampleDataSource(this);
                                 source.open();
-                                list.edit(this, i, source.get(id));
+                                if (!list.edit(i, source.get(id)))
+                                    list.reload(this);
                                 source.close();
                             }
                         }
