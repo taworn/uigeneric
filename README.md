@@ -24,7 +24,7 @@ This part is assembly of options, they are:
 
 This is an install programs on server.  I used XAMPP Lite (http://portableapps.com/apps/development/xampp).  After run AMP (Apache, MySQL, PHP) started up, next step:
 
- - Create database name "android", collation "utf8mb4_unicode_ci".
+ - Create database name "android", collation "utf8_unicode_ci".
  - Create table by run script in uigeneric/web/schema.sql.
  - Copy all files in uigeneric/web/resttest to web server, my settings is xampp/htdocs.
  - Open file xampp/htdocs/resttest/api/db.php to edit IP, username, password, if need.
@@ -42,6 +42,7 @@ You can open JavaDoc and build it to generate document.
 
 **Thank**
 
+The AlphanumericComparator.java is licensed Apache by Andrew Duffy, thank you. :)
 Thank you Google to create Android for me.
 Thank you for me that create this program:
 
